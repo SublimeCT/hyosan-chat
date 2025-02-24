@@ -6,13 +6,24 @@
   "scripts": {
     "dev": "vite --port 48932",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cz": "cross-env NODE_OPTIONS='--experimental-transform-types --disable-warning ExperimentalWarning' czg"
   },
   "dependencies": {
     "lit": "^3.2.1"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "cross-env": "^7.0.3",
+    "cz-git": "^1.11.0",
+    "czg": "^1.11.0",
     "typescript": "~5.7.2",
     "vite": "^6.1.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
   }
 }
