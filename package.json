@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"dev": "vite --port 48932",
+		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
 		"lint": "biome check",
@@ -12,6 +12,7 @@
 		"cz": "cross-env NODE_OPTIONS='--experimental-transform-types --disable-warning ExperimentalWarning' czg"
 	},
 	"dependencies": {
+		"@shoelace-style/shoelace": "^2.20.0",
 		"lit": "^3.2.1"
 	},
 	"devDependencies": {
@@ -22,6 +23,7 @@
 		"cz-git": "^1.11.0",
 		"czg": "^1.11.0",
 		"lint-staged": "^15.4.3",
+		"rollup-plugin-copy": "^3.5.0",
 		"simple-git-hooks": "^2.11.1",
 		"typescript": "~5.7.2",
 		"vite": "^6.1.0"
