@@ -1,30 +1,41 @@
 {
-  "name": "hyosan-chat",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --port 48932",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "cz": "cross-env NODE_OPTIONS='--experimental-transform-types --disable-warning ExperimentalWarning' czg"
-  },
-  "dependencies": {
-    "lit": "^3.2.1"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@commitlint/cli": "^19.7.1",
-    "@commitlint/config-conventional": "^19.7.1",
-    "cross-env": "^7.0.3",
-    "cz-git": "^1.11.0",
-    "czg": "^1.11.0",
-    "typescript": "~5.7.2",
-    "vite": "^6.1.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "node_modules/cz-git"
-    }
-  }
+	"name": "hyosan-chat",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite --port 48932",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"cz": "cross-env NODE_OPTIONS='--experimental-transform-types --disable-warning ExperimentalWarning' czg"
+	},
+	"dependencies": {
+		"lit": "^3.2.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@commitlint/cli": "^19.7.1",
+		"@commitlint/config-conventional": "^19.7.1",
+		"cross-env": "^7.0.3",
+		"cz-git": "^1.11.0",
+		"czg": "^1.11.0",
+		"lint-staged": "^15.4.3",
+		"simple-git-hooks": "^2.11.1",
+		"typescript": "~5.7.2",
+		"vite": "^6.1.0"
+	},
+	"config": {
+		"commitizen": {
+			"path": "node_modules/cz-git"
+		}
+	},
+	"simple-git-hooks": {
+		"pre-commit": "npx lint-staged",
+		"commit-msg": "npx commitlint --edit ${1}"
+	},
+	"lint-staged": {
+		"*.{html,css,json,md,vue,js,ts,jsx,tsx}": "pnpm run lint:fix"
+	}
 }

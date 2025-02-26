@@ -1,1 +1,1 @@
-export { HyosanChat } from './hyosan-chat'
+export { HyosanChat } from "./hyosan-chat";
