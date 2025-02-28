@@ -1,0 +1,9 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+public/*
+src/assets/*
+commitlint.config.ts
+LICENSE

@@ -1,0 +1,469 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+src/
+  components/
+    hyosan-chat.ts
+    index.ts
+  index.css
+  main.ts
+  vite-env.d.ts
+.gitignore
+.repomixignore
+biome.json
+CONTRIBUTING.md
+index.html
+package.json
+README.md
+repomix.config.json
+tsconfig.json
+vite.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/components/hyosan-chat.ts">
+import { LitElement, css, html } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
+import '@shoelace-style/shoelace/dist/components/button/button.js'
+
+@customElement('hyosan-chat')
+export class HyosanChat extends LitElement {
+	static styles? = css`
+		:host {
+			width: 100%;
+			height: 100%;
+		}	
+	`
+
+	@property({ reflect: true })
+	message = 'Hello Lit'
+
+	render() {
+		return html`
+      <h2>HyosanChat Component</h2>
+      <div>Hello Lit!</div>
+			<sl-button variant="primary">Hello Shoelace</sl-button>
+    `
+	}
+}
+
+declare global {
+	interface HTMLElementTagNameMap {
+		'hyosan-chat': HyosanChat
+	}
+}
+</file>
+
+<file path="src/components/index.ts">
+export { HyosanChat } from './hyosan-chat'
+</file>
+
+<file path="src/index.css">
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+p {
+	padding: 0;
+	margin: 0;
+}
+.demo-container {
+	width: 100wh;
+	height: 100vh;
+	display: flex;
+}
+</file>
+
+<file path="src/main.ts">
+import '@shoelace-style/shoelace/dist/themes/light.css'
+export * from './components'
+</file>
+
+<file path="src/vite-env.d.ts">
+/// <reference types="vite/client" />
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# repomix
+repomix.output.*
+</file>
+
+<file path=".repomixignore">
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+public/*
+src/assets/*
+commitlint.config.ts
+</file>
+
+<file path="biome.json">
+{
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"ignore": []
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnknownUnit": "off"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded"
+		}
+	}
+}
+</file>
+
+<file path="CONTRIBUTING.md">
+# 贡献指南
+
+## cli
+```bash
+# 安装依赖
+pnpm i
+
+# 启动开发环境
+pnpm run dev
+
+# 构建生成版本
+pnpm run build
+```
+
+## 目录结构
+```bash
+./
+├── CONTRIBUTING.md
+├── README.md
+├── biome.json
+├── commitlint.config.ts
+├── dist
+│   ├── assets
+│   │   ├── index-CMq9iakL.js
+│   │   └── index-D4VIsfOM.css
+│   ├── index.html
+│   └── vite.svg
+├── index.html
+├── package.json
+├── pnpm-lock.yaml
+├── public
+│   └── vite.svg
+├── src
+│   ├── assets
+│   │   └── lit.svg
+│   ├── components
+│   │   ├── hyosan-chat.ts
+│   │   └── index.ts
+│   ├── index.css
+│   ├── main.ts
+│   └── vite-env.d.ts
+├── tsconfig.json
+└── vite.config.ts
+```
+
+## 开发规范
+### 语言规范
+- **严格使用 `TypeScript`**: 不允许存在 `js` 文件, 所有 `js` 文件必须转换为 `ts`
+- **`ts` 配置**: 严格遵循 `tsconfig.json` 中的配置, 引入类型时使用 `import type`
+- **使用现代语法**: 优先使用 `ES2020+` 语法, 避免使用已过时的 `API`
+
+### 注释规范
+所有注释必须 **使用 [jsdoc](https://jsdoc.app/) 格式**
+
+正确示例:
+```typescript
+/**
+ * 计算两个数值相加的结果
+ * @param countA 数值 A
+ * @param countB 数值 B
+ */
+export function sum(countA: number, countB: number) {
+  return countA + countB
+}
+```
+
+错误示例:
+```typescript
+// 计算两个数值相加的结果
+export function sum(countA: number, countB: number) {
+  return countA + countB
+}
+```
+
+- 如果代码中已经声明了数据类型, 在 `jsdoc` 注释中就不必再声明类型(`@param` / `@type`)
+- 任何应该改为 `jsdoc` 注释的单行注释都要改为 `jsdoc` 注释
+- 必须为每个 变量 / `function` / `class` / `type` / `interface` / `enum` / `...` 添加 `jsdoc` 注释, 注释使用中文
+
+### 代码质量
+- `ts` 中的变量命名必须具有 **语义化**
+- **[biome](https://biomejs.dev/zh-cn/guides/getting-started/) 规范**: 必须遵守 `biome.json` 中配置的规则
+- 性能优先:
+  - 优先使用性能最好的方式实现
+- 依赖管理:
+  - 在引入新的依赖时要保持谨慎态度, 要考虑新依赖的 尺寸 / 性能 / 流行度 / 成熟度
+  - 如无必要, 不要更新或引入新的依赖或技术栈
+- 代码检查:
+  - 编码完成后务必自己做一遍 `code review`
+- 开发原则:
+  - 代码需要遵守基本的 **开发原则**
+  - 复杂的代码需要考虑使用适当的 **设计模式**
+- **避免冗余**:
+  - 在开发一个功能之前, 先检查项目中是否有可以复用的代码
+
+### 其他
+- 在 `vue` 代码中, `<script>` 必须使用 `setup` 和 `lang="ts"`, 必须使用 `Composition API`
+- 严格遵循现有技术栈进行开发, 代码必须在现有版本的技术栈下正常运行, 例如现有的 `lit` 是 `3.x`, 不能编写在 `3.x` 中已废弃或更改的 `API`
+</file>
+
+<file path="index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <div class="demo-container">
+      <hyosan-chat></hyosan-chat>
+    </div>
+  </body>
+</html>
+</file>
+
+<file path="package.json">
+{
+	"name": "hyosan-chat",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"cz": "cross-env NODE_OPTIONS='--experimental-transform-types --disable-warning ExperimentalWarning' czg"
+	},
+	"dependencies": {
+		"@shoelace-style/shoelace": "^2.20.0",
+		"lit": "^3.2.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.9.4",
+		"@commitlint/cli": "^19.7.1",
+		"@commitlint/config-conventional": "^19.7.1",
+		"cross-env": "^7.0.3",
+		"cz-git": "^1.11.0",
+		"czg": "^1.11.0",
+		"lint-staged": "^15.4.3",
+		"rollup-plugin-copy": "^3.5.0",
+		"simple-git-hooks": "^2.11.1",
+		"typescript": "~5.7.2",
+		"vite": "^6.1.0"
+	},
+	"config": {
+		"commitizen": {
+			"path": "node_modules/cz-git"
+		}
+	},
+	"simple-git-hooks": {
+		"pre-commit": "npx lint-staged",
+		"commit-msg": "npx commitlint --edit ${1}"
+	},
+	"lint-staged": {
+		"*.{html,css,json,md,vue,js,ts,jsx,tsx}": "pnpm run lint:fix"
+	}
+}
+</file>
+
+<file path="README.md">
+# hyosan-chat
+> 🚧 Work in Progress | 此项目处于早期开发阶段
+>
+> hyosan-chat is currently in active development and not usable for production yet.
+
+## 介绍
+这是一个使用 [Lit@3](https://lit.dev) & [shoelace](https://shoelace.style/) 实现的 `AI` 对话组件库, 最终实现效果类似于 [ant-design-x](https://x.ant.design/index-cn)
+
+## 技术栈
+- [Lit@^3.2.1](https://lit.dev): `Web Component` 库
+- [shoelace@^2.20.0](https://shoelace.style/): 使用 `Web Components` 实现的 `UI` 组件库
+- [vite@^6.1.0](https://github.com/vitejs/vite): 现代化的前端构建工具
+
+## 贡献指南
+参考 [CONTRIBUTING](./CONTRIBUTING.md)
+</file>
+
+<file path="repomix.config.json">
+{
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
+</file>
+
+<file path="tsconfig.json">
+{
+	"compilerOptions": {
+		"target": "ES2020",
+		"experimentalDecorators": true,
+		"useDefineForClassFields": false,
+		"module": "ESNext",
+		"lib": ["ES2020", "DOM", "DOM.Iterable"],
+		"skipLibCheck": true,
+
+		/* Bundler mode */
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
+		"isolatedModules": true,
+		"moduleDetection": "force",
+		"noEmit": true,
+
+		/* Linting */
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedSideEffectImports": true
+	},
+	"include": ["src", "/*.ts"]
+}
+</file>
+
+<file path="vite.config.ts">
+import { resolve } from 'node:path'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+	server: {
+		port: 29510,
+	},
+	preview: {
+		port: 29511,
+	},
+	resolve: {
+		alias: {
+			'@': resolve(__dirname, 'src'),
+		},
+	},
+})
+</file>
+
+</files>
