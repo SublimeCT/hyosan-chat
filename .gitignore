@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # repomix
-repomix.output.*
+repomix-output.*
