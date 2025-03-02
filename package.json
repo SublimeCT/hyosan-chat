@@ -1,11 +1,39 @@
 {
 	"name": "hyosan-chat",
-	"private": true,
-	"version": "0.0.0",
+	"version": "0.0.1",
+	"description": "A library of web components for AI conversations based on lit and shoelace",
+	"keywords": [
+		"hyosan-chat",
+		"Lit",
+		"Shoelace",
+		"AI",
+		"chat",
+		"Web Components",
+		"web chat"
+	],
+	"author": {
+		"name": "Ryan"
+	},
+	"license": "MIT",
 	"type": "module",
+	"files": [
+		"dist"
+	],
+	"main": "./dist/hyosan-chat.umd.cjs",
+	"module": "./dist/hyosan-chat.js",
+	"types": "./dist/lib.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/lib.d.ts",
+			"import": "./dist/hyosan-chat.js",
+			"require": "./dist/hyosan-chat.umd.cjs"
+		}
+	},
+	"packageManager": "pnpm@10.4.1",
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
+		"build:pack": "pnpm run build && pnpm pack",
 		"preview": "vite preview",
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
@@ -19,6 +47,7 @@
 		"@biomejs/biome": "1.9.4",
 		"@commitlint/cli": "^19.7.1",
 		"@commitlint/config-conventional": "^19.7.1",
+		"@shoelace-style/localize": "^3.2.1",
 		"cross-env": "^7.0.3",
 		"cz-git": "^1.11.0",
 		"czg": "^1.11.0",
@@ -26,7 +55,8 @@
 		"rollup-plugin-copy": "^3.5.0",
 		"simple-git-hooks": "^2.11.1",
 		"typescript": "~5.7.2",
-		"vite": "^6.1.0"
+		"vite": "^6.1.0",
+		"vite-plugin-dts": "^4.5.1"
 	},
 	"config": {
 		"commitizen": {

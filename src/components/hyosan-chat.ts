@@ -1,9 +1,11 @@
-import { LitElement, css, html } from 'lit'
+import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import '@shoelace-style/shoelace/dist/components/button/button.js'
+import ShoelaceElement from '@/internal/shoelace-element'
+import { LocalizeController } from '@/utils/localize'
 
 @customElement('hyosan-chat')
-export class HyosanChat extends LitElement {
+export class HyosanChat extends ShoelaceElement {
 	static styles? = css`
 		:host {
 			width: 100%;
@@ -11,14 +13,16 @@ export class HyosanChat extends LitElement {
 		}	
 	`
 
+	private _locailze = new LocalizeController(this)
+
 	@property({ reflect: true })
-	message = 'Hello Lit'
+	message = ''
 
 	render() {
 		return html`
-      <h2>HyosanChat Component</h2>
-      <div>Hello Lit!</div>
+			<h2>${this.message}</h2>
 			<sl-button variant="primary">Hello Shoelace</sl-button>
+			<p>${this._locailze.term('test')}</p>
     `
 	}
 }

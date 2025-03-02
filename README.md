@@ -18,5 +18,12 @@
 - [TypeScript](https://www.typescriptlang.org/): 强类型语言, 确保代码质量和可维护性
 - [biome](https://biomejs.dev/zh-cn/guides/getting-started/)：代码格式化和 `lint` 工具, 保证代码风格一致性和质量
 
+## 安装
+TODO
+
+## 使用
+### 主题
+
+
 ## 贡献指南
 参考 [CONTRIBUTING](./CONTRIBUTING.md)
