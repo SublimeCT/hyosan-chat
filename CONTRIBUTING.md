@@ -12,19 +12,19 @@ pnpm run dev
 pnpm run build
 ```
 ## 目录结构
-| 目录 / 文件 | 说明 |
-| --- | --- |
-| `src/lib.ts` | 打包为库时的入口文件 |
-| `src/main.ts` | 打包为应用时的入口文件 |
-| `src/components/*` | 所有组件 |
-| `src/components/index.ts` | `export` 所有对外提供的组件, 私有组件不对外 `exoprt` |
-| `src/internal` | 组件库内部使用的 class / function 等 |
-| `src/internal/shoelace-element.ts` | 组件库使用的多语言文案 |
-| `src/translations/*.ts` | 组件库使用的多语言文案 |
-| `src/translations/translation.ts` | 组件库使用的多语言文案的字段类型 |
-| `src/sheets/index.ts` | 可重用样式定义 |
-| `src/utils/*.ts` | utils 工具方法 |
-| `src/utils/localize.ts` | 基于 `Lit Controller` 的国际化支持类, 详见 [国际化](#国际化) |
+| 目录 / 文件                        | 说明                                                         |
+| ---------------------------------- | ------------------------------------------------------------ |
+| `src/lib.ts`                       | 打包为库时的入口文件                                         |
+| `src/main.ts`                      | 打包为应用时的入口文件                                       |
+| `src/components/*`                 | 所有组件                                                     |
+| `src/components/index.ts`          | `export` 所有对外提供的组件, 私有组件不对外 `exoprt`         |
+| `src/internal`                     | 组件库内部使用的 class / function 等                         |
+| `src/internal/shoelace-element.ts` | 组件库使用的多语言文案                                       |
+| `src/translations/*.ts`            | 组件库使用的多语言文案                                       |
+| `src/translations/translation.ts`  | 组件库使用的多语言文案的字段类型                             |
+| `src/sheets/index.ts`              | 可重用样式定义                                               |
+| `src/utils/*.ts`                   | utils 工具方法                                               |
+| `src/utils/localize.ts`            | 基于 `Lit Controller` 的国际化支持类, 详见 [国际化](#国际化) |
 
 ## 国际化
 组件库基于 [@shoelace-style/localize](https://www.npmjs.com/package/@shoelace-style/localize) 实现国际化功能, 在组件中应该将所有硬编码的字符改为多语言实现:
@@ -96,6 +96,9 @@ export default translation;
 
 2. 在组件中声明 `private _locailze = new LocalizeController(this)`
 3. 在 `render` 中使用 `this._locailze.term('test')`
+
+## Snippets
+在编写 `Lit` 组件时, 我们时常需要从其他写好的组件中复制代码(每个组件都要写的那部分), 在项目中的 `.vscode/hy.code-snippets` 中提供了一些 `snippets`, 在开发时可以输入 `hy-`, 就会看到这些代码片段
 
 ## 开发规范
 ### 语言规范
