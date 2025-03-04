@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-// import { LocalizeController } from '@shoelace-style/localize'
+import { LocalizeController } from '@shoelace-style/localize'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
@@ -7,19 +7,26 @@ import { customElement, property } from 'lit/decorators.js'
 @customElement('hyosan-chat-conversations-header')
 export class HyosanChatConversationsHeader extends ShoelaceElement {
 	static styles? = css`
+		header {
+			margin: 1rem 0;
+		}
 		h2 {
+			margin: 0;
 			padding: 0 1rem;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			svg {
-				margin-right: 0.5rem;
+				margin-right: var(--hy-container-padding);
 			}
+		}
+		section {
+			padding: var(--hy-container-padding);
 		}
 	`
 
-	// /** 本地化控制器 */
-	// private _localize = new LocalizeController(this)
+	/** 本地化控制器 */
+	private _localize = new LocalizeController(this)
 
 	@property()
 	title = 'Hyosan Chat'
@@ -33,6 +40,12 @@ export class HyosanChatConversationsHeader extends ShoelaceElement {
 					</span>
 				</h2>
       </header>
+			<section>
+				<sl-button variant="primary" @click=${() => this.emit('start-new-chat')}>
+					<span class="plus">+</span>
+					<span>${this._localize.term('startANewChat')}</span>
+				</sl-button>
+			</section>
     `
 	}
 }
@@ -40,5 +53,8 @@ export class HyosanChatConversationsHeader extends ShoelaceElement {
 declare global {
 	interface HTMLElementTagNameMap {
 		'hyosan-chat-conversations-header': HyosanChatConversationsHeader
+	}
+	interface GlobalEventHandlersEventMap {
+		'start-new-chat': CustomEvent<object>
 	}
 }

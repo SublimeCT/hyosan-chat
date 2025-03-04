@@ -22,6 +22,11 @@
 			"recommended": true,
 			"correctness": {
 				"noUnknownUnit": "off"
+			},
+			"complexity": {
+				"noStaticOnlyClass": "off",
+				"noForEach": "off",
+				"noThisInStatic": "off"
 			}
 		}
 	},

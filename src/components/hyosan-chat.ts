@@ -7,6 +7,7 @@ import { customElement, property } from 'lit/decorators.js'
 import '@shoelace-style/shoelace/dist/components/button/button.js'
 import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import { HasSlotController } from '@/internal/slot'
+import type { Connect } from '@/types/connect'
 import type { Conversation } from '@/types/conversations'
 
 @customElement('hyosan-chat')
@@ -33,6 +34,10 @@ export class HyosanChat extends ShoelaceElement {
 		'conversations-footer',
 	)
 
+	/** 连接参数 */
+	@property({ attribute: false, reflect: true })
+	connect!: Connect<object>
+
 	/**
 	 * 分割面板的可捕捉位置
 	 * @example '25% 50%'
@@ -42,7 +47,7 @@ export class HyosanChat extends ShoelaceElement {
 	panelSnap = '25%'
 
 	/**
-	 * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`
+	 * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`, 保持响应式
 	 * @example 25
 	 * @see https://shoelace.style/components/split-panel#initial-position
 	 */
@@ -53,6 +58,8 @@ export class HyosanChat extends ShoelaceElement {
 	@property({ attribute: false, type: Array })
 	items: Conversation[] = []
 
+	private async _handleStartNewChat() {}
+
 	render() {
 		const hasConversationsSlot = this.hasSlotController.test('conversations')
 		const hasConversationsHeaderSlot = this.hasSlotController.test(
@@ -61,7 +68,7 @@ export class HyosanChat extends ShoelaceElement {
 		/** 会话列表 header */
 		const conversationsHeader = hasConversationsHeaderSlot
 			? html`<slot name="conversations-header"></slot>`
-			: html`<hyosan-chat-conversations-header slot="conversations-header"></hyosan-chat-conversations-header>`
+			: html`<hyosan-chat-conversations-header slot="conversations-header" @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
 		/** 会话列表 */
 		const conversations = hasConversationsSlot
 			? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
@@ -80,7 +87,7 @@ export class HyosanChat extends ShoelaceElement {
 					style="height: 100%;"
 				>
 					<!-- 对话气泡 -->
-					<hyosan-chat-bubble></hyosan-chat-bubble>
+					<hyosan-chat-bubble-list></hyosan-chat-bubble-list>
 				</div>
 			</sl-split-panel>
     `

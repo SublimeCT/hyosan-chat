@@ -26,7 +26,7 @@ export interface Conversation extends AnyObject {
 	timestamp?: number
 
 	/**
-	 * @desc 会话分组类型，与 {@link ConversationsProps.groupable} 联动
+	 * @desc 会话分组类型
 	 * @descEN Conversation type
 	 */
 	group?: GroupType

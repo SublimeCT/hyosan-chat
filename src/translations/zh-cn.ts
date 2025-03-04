@@ -1,13 +1,17 @@
-import { registerTranslation, type Translation } from '@/translations/translation';
+import {
+	type Translation,
+	registerTranslation,
+} from '@/translations/translation'
 
 const translation: Translation = {
-  $code: 'zh-cn',
-  $name: '简体中文',
-  $dir: 'ltr',
+	$code: 'zh-cn',
+	$name: '简体中文',
+	$dir: 'ltr',
 
-  test: '测试',
-};
+	test: '测试',
+	startANewChat: '开始新聊天',
+}
 
-registerTranslation(translation);
+registerTranslation(translation)
 
-export default translation;
+export default translation

@@ -122,15 +122,32 @@ export function sum(countA: number, countB: number) {
 }
 ```
 
-错误示例:
+- 错误示例1:
 ```typescript
 // 计算两个数值相加的结果
 export function sum(countA: number, countB: number) {
   return countA + countB
 }
 ```
+错误原因: 没有使用 `jsdoc` 格式的注释
 
-- 如果代码中已经声明了数据类型, 在 `jsdoc` 注释中就不必再声明类型(`@param` / `@type`)
+- 错误示例2:
+```typescript
+/**
+ * 计算两个数值相加的结果
+ * @param {number} countA 数值 A
+ * @param {number} countB 数值 B
+ */
+export function sum(countA: number, countB: number) {
+  return countA + countB
+}
+```
+
+错误原因: 代码中已经声明了参数类型, 注释中还有多余的参数类型声明
+
+- 如果代码中已经声明了数据类型, 在 `jsdoc` 注释中就不必再声明类型(禁止 `@param`)
+- 禁止使用 `@property`
+- 禁止使用 `jsdoc` 中不存在的标签
 - 任何应该改为 `jsdoc` 注释的单行注释都要改为 `jsdoc` 注释
 - 必须为每个 变量 / `function` / `class` / `type` / `interface` / `enum` / `...` 添加 `jsdoc` 注释, 注释使用中文
 

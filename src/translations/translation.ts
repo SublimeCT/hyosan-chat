@@ -1,12 +1,13 @@
-import type { Translation as DefaultTranslation } from '@shoelace-style/localize';
+import type { Translation as DefaultTranslation } from '@shoelace-style/localize'
 
 // Export functions from the localize lib so we have one central place to import them from
-export { registerTranslation } from '@shoelace-style/localize';
+export { registerTranslation } from '@shoelace-style/localize'
 
 export interface Translation extends DefaultTranslation {
-  $code: string; // e.g. en, en-GB
-  $name: string; // e.g. English, Español
-  $dir: 'ltr' | 'rtl';
+	$code: string // e.g. en, en-GB
+	$name: string // e.g. English, Español
+	$dir: 'ltr' | 'rtl'
 
-  test: string;
+	test: string
+	startANewChat: string
 }

@@ -1,7 +1,8 @@
 import { LitElement, css, html } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
+import { Connect } from './types/connect'
 import type { Conversation } from './types/conversations'
 
 export const tagName = 'hyosan-chat-demo'
@@ -79,6 +80,10 @@ export class HyosanChatDemo extends LitElement {
 		{ key: '018', label: '会话18' },
 	]
 
+	/** 连接参数 */
+	@state()
+	connect: Connect<object> = new Connect()
+
 	render() {
 		return html`
 			<sl-card class="demo-container">
@@ -86,7 +91,7 @@ export class HyosanChatDemo extends LitElement {
 					<h1>HyosanChatDemo</h1>
 				</header>
 				<main>
-					<hyosan-chat .items=${this.items}></hyosan-chat>
+					<hyosan-chat .items=${this.items} .connect=${this.connect}></hyosan-chat>
 				</main>
 			</sl-card>
     `

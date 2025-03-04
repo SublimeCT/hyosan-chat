@@ -22,6 +22,12 @@
 TODO
 
 ## 使用
+```bash
+pnpm i git+https://github.com/SublimeCT/hyosan-chat.git#main
+```
+
+参考 `src/hyosan-chat-demo.ts`
+
 ### 主题
 
 
