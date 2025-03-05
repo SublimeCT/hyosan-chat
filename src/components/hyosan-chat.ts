@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import { LocalizeController } from '@/utils/localize'
+// import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
@@ -7,7 +7,6 @@ import { customElement, property } from 'lit/decorators.js'
 import '@shoelace-style/shoelace/dist/components/button/button.js'
 import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import { HasSlotController } from '@/internal/slot'
-import type { Connect } from '@/types/connect'
 import type { Conversation } from '@/types/conversations'
 
 @customElement('hyosan-chat')
@@ -26,17 +25,13 @@ export class HyosanChat extends ShoelaceElement {
 		}
 	`
 
-	private _locailze = new LocalizeController(this)
+	// private _locailze = new LocalizeController(this)
 	private readonly hasSlotController = new HasSlotController(
 		this,
 		'conversations',
 		'conversations-header',
 		'conversations-footer',
 	)
-
-	/** 连接参数 */
-	@property({ attribute: false, reflect: true })
-	connect!: Connect<object>
 
 	/**
 	 * 分割面板的可捕捉位置
