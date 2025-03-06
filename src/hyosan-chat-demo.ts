@@ -2,7 +2,7 @@ import { LitElement, css, html } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
-import { Connect } from './types/connect'
+import type { BaseServiceMessages } from './service/BaseService'
 import type { Conversation } from './types/conversations'
 
 export const tagName = 'hyosan-chat-demo'
@@ -59,30 +59,30 @@ export class HyosanChatDemo extends LitElement {
 		}
 	`)
 
-	private items: Array<Conversation> = [
+	@state()
+	private currentConversationId = ''
+	@state()
+	private conversations: Array<Conversation> = [
 		{ key: '001', label: '会话1' },
 		{ key: '002', label: '会话2' },
 		{ key: '003', label: '会话3' },
-		{ key: '004', label: '会话4' },
-		{ key: '005', label: '会话5' },
-		{ key: '006', label: '会话6' },
-		{ key: '007', label: '会话7' },
-		{ key: '008', label: '会话8' },
-		{ key: '009', label: '会话9' },
-		{ key: '010', label: '会话10' },
-		{ key: '011', label: '会话11' },
-		{ key: '012', label: '会话12' },
-		{ key: '013', label: '会话13' },
-		{ key: '014', label: '会话14' },
-		{ key: '015', label: '会话14' },
-		{ key: '016', label: '会话16' },
-		{ key: '017', label: '会话17' },
-		{ key: '018', label: '会话18' },
 	]
-
-	/** 连接参数 */
+	/** 创建新聊天 */
+	private _handleConversationsCreate() {
+		const key = Math.random().toString(36).substring(2, 9)
+		// this.conversations.push({ key, label: `新会话 ${key}` })
+		this.conversations = [
+			{
+				key,
+				label: `新会话 ${key}`,
+			},
+			...this.conversations,
+		]
+		this.currentConversationId = key
+		this.requestUpdate()
+	}
 	@state()
-	connect: Connect<object> = new Connect()
+	messages?: BaseServiceMessages
 
 	render() {
 		return html`
@@ -91,7 +91,12 @@ export class HyosanChatDemo extends LitElement {
 					<h1>HyosanChatDemo</h1>
 				</header>
 				<main>
-					<hyosan-chat .items=${this.items} .connect=${this.connect}></hyosan-chat>
+					<hyosan-chat
+						.conversations=${this.conversations}
+						.messages=${this.messages}
+						currentConversationId=${this.currentConversationId}
+						@conversations-create="${this._handleConversationsCreate}"
+					></hyosan-chat>
 				</main>
 			</sl-card>
     `

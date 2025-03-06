@@ -1,7 +1,11 @@
-import type { UserConfig } from 'cz-git'
+// import { RuleConfigSeverity } from 'commitlint'
+import { defineConfig } from 'cz-git'
 
-const config: UserConfig = {
+const config = defineConfig({
 	extends: ['@commitlint/config-conventional'],
+	rules: {
+		// 'type-enum': [RuleConfigSeverity.Error, 'always', ['foo']],
+	},
 	prompt: {
 		alias: { fd: 'docs: fix typos' },
 		messages: {
@@ -92,6 +96,6 @@ const config: UserConfig = {
 		defaultScope: '',
 		defaultSubject: '',
 	},
-}
+})
 
 export default config

@@ -23,6 +23,9 @@
 			"correctness": {
 				"noUnknownUnit": "off"
 			},
+			"style": {
+				"noUselessElse": "off"
+			},
 			"complexity": {
 				"noStaticOnlyClass": "off",
 				"noForEach": "off",

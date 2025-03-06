@@ -29,18 +29,18 @@ export class HyosanChatConversations extends ShoelaceElement {
 		'conversations-footer',
 	)
 
-	/** 当前选中的值 */
+	/** 当前选中的会话 ID */
 	@property({ reflect: true })
-	activeKey = ''
+	currentConversationId = ''
 
 	/** 会话列表数据源 */
 	@property({ attribute: false, type: Array })
-	items: Conversation[] = []
+	conversations: Conversation[] = []
 
 	private _handleClickConversation(
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
-		this.activeKey = event.detail.item.key
+		this.currentConversationId = event.detail.item.key
 		this.requestUpdate()
 	}
 
@@ -51,10 +51,10 @@ export class HyosanChatConversations extends ShoelaceElement {
 					<slot name="conversations-header"></slot>
 				</header>
 				<main>
-					${this.items.map(
+					${this.conversations.map(
 						(item) => html`
 						<hyosan-chat-conversations-item
-							.item=${item} ?actived=${this.activeKey === item.key}
+							.item=${item} ?actived=${this.currentConversationId === item.key}
 							@click-conversation=${this._handleClickConversation}
 						>
 						</hyosan-chat-conversations-item>

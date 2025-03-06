@@ -7,6 +7,8 @@ import { customElement, property } from 'lit/decorators.js'
 import '@shoelace-style/shoelace/dist/components/button/button.js'
 import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import { HasSlotController } from '@/internal/slot'
+import type { BaseService, BaseServiceMessages } from '@/service/BaseService'
+import { DefaultService } from '@/service/DefaultService'
 import type { Conversation } from '@/types/conversations'
 
 @customElement('hyosan-chat')
@@ -30,7 +32,8 @@ export class HyosanChat extends ShoelaceElement {
 		this,
 		'conversations',
 		'conversations-header',
-		'conversations-footer',
+		'main-welcome',
+		'main-header',
 	)
 
 	/**
@@ -51,9 +54,38 @@ export class HyosanChat extends ShoelaceElement {
 
 	/** 会话列表数据源 */
 	@property({ attribute: false, type: Array })
-	items: Conversation[] = []
+	conversations: Conversation[] = []
 
-	private async _handleStartNewChat() {}
+	/** 会话服务配置参数 */
+	@property({ attribute: false, reflect: true })
+	service: BaseService = new DefaultService()
+
+	/** 当前会话 ID */
+	@property({ reflect: true })
+	currentConversationId = ''
+
+	/** 会话服务消息列表 */
+	@property({ attribute: false, reflect: true })
+	messages?: BaseServiceMessages
+
+	private async _handleStartNewChat() {
+		this.emit('conversations-create')
+	}
+	private get _mainPanel() {
+		if (this.messages) {
+			return html`
+				<!-- 对话气泡 -->
+				<hyosan-chat-bubble-list></hyosan-chat-bubble-list>
+			`
+		} else {
+			return html`<slot name="welcome"></slot>`
+		}
+	}
+	private _handleClickConversation(
+		event: GlobalEventHandlersEventMap['click-conversation'],
+	) {
+		this.currentConversationId = event.detail.item.key
+	}
 
 	render() {
 		const hasConversationsSlot = this.hasSlotController.test('conversations')
@@ -67,7 +99,15 @@ export class HyosanChat extends ShoelaceElement {
 		/** 会话列表 */
 		const conversations = hasConversationsSlot
 			? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
-			: html`<hyosan-chat-conversations .items=${this.items}>${conversationsHeader}<slot name="conversations-footer"></slot></hyosan-chat-conversations>`
+			: html`
+				<hyosan-chat-conversations
+					currentConversationId=${this.currentConversationId}
+					@click-conversation=${this._handleClickConversation}
+					.conversations=${this.conversations}>
+					${conversationsHeader}
+					<slot name="conversations-footer"></slot>
+				</hyosan-chat-conversations>
+			`
 		return html`
 			<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
 				<div
@@ -81,8 +121,15 @@ export class HyosanChat extends ShoelaceElement {
 					slot="end"
 					style="height: 100%;"
 				>
-					<!-- 对话气泡 -->
-					<hyosan-chat-bubble-list></hyosan-chat-bubble-list>
+					<header>
+						<slot name="main-header"></slot>
+					</header>
+					<main>
+						${this._mainPanel}
+					</main>
+					<footer>
+						<pre>TODO: input</pre>
+					</footer>
 				</div>
 			</sl-split-panel>
     `
@@ -92,5 +139,8 @@ export class HyosanChat extends ShoelaceElement {
 declare global {
 	interface HTMLElementTagNameMap {
 		'hyosan-chat': HyosanChat
+	}
+	interface GlobalEventHandlersEventMap {
+		'conversations-create': CustomEvent<object>
 	}
 }
