@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import type { Conversation } from '@/types/conversations'
+import type { BaseServiceMessages } from '@/service/BaseService'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
@@ -17,16 +17,16 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     }
   `
 
-	/** 会话数据源 */
-	@property({ attribute: false, type: Array })
-	items: Conversation[] = []
+	/** 会话服务消息列表 */
+	@property({ attribute: false, reflect: true })
+	messages!: BaseServiceMessages
 
 	render() {
 		return html`
       <div>
-        ${this.items.map(
+        ${this.messages.map(
 					(item) => html`
-            <hyosan-chat-bubble-item .item=${item}></hyosan-chat-bubble-item>
+            <hyosan-chat-bubble-item .message=${item}></hyosan-chat-bubble-item>
           `,
 				)}
       </div>

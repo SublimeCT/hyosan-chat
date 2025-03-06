@@ -10,6 +10,7 @@ const translation: Translation = {
 
 	test: 'test',
 	startANewChat: 'Start a new chat',
+	sendTips: 'Press Enter to send, press Shift + Enter to wrap the line',
 }
 
 registerTranslation(translation)

@@ -10,4 +10,5 @@ export interface Translation extends DefaultTranslation {
 
 	test: string
 	startANewChat: string
+	sendTips: string
 }

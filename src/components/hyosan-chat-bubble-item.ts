@@ -1,8 +1,8 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import type { Conversation } from '@/types/conversations'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { marked } from 'marked'
+import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 
 /**
  * 对话气泡组件
@@ -23,11 +23,15 @@ export class HyosanChatBubbleItem extends ShoelaceElement {
     }
   `
 
-	render() {
-		// const markdownContent = this.item.content || ''
-		// const htmlContent = marked.parse(markdownContent)
+  @property({ type: Object })
+  message!: ChatCompletionMessageParam
+
+	async render() {
+		const markdownContent = this.message.content || ''
+		const htmlContent = await marked.parse(markdownContent.toString())
 		return html`
-      <div class="bubble" ></div>
+      <div class="bubble" .innerHTML=${htmlContent}>
+      </div>
     `
 	}
 }

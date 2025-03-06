@@ -22,6 +22,8 @@ export class HyosanChatConversationsHeader extends ShoelaceElement {
 		}
 		section {
 			padding: var(--hy-container-padding);
+			display: flex;
+			justify-content: center;
 		}
 	`
 

@@ -98,10 +98,11 @@ export class HyosanChat extends ShoelaceElement {
 	}
 	/** 右侧消息列表 */
 	private get _mainPanel() {
-		if (this.messages) {
+		// biome-ignore lint/complexity/useOptionalChain: <explanation>
+		if (this.messages && this.messages.length) {
 			return html`
 				<!-- 对话气泡 -->
-				<hyosan-chat-bubble-list></hyosan-chat-bubble-list>
+				<hyosan-chat-bubble-list .messages=${this.messages}></hyosan-chat-bubble-list>
 			`
 		} else {
 			return html`<slot name="welcome"></slot>`
@@ -111,6 +112,31 @@ export class HyosanChat extends ShoelaceElement {
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
 		this.currentConversationId = event.detail.item.key
+	}
+
+	private _onData() {
+		if (this.messages) {
+			this.messages = [...this.messages]
+		} else {
+			this.messages = []
+		}
+		this.requestUpdate('messages')
+	}
+	private async _handleSendMessage(event: GlobalEventHandlersEventMap['send-message']) {
+		const { content } = event.detail
+		this.service.url = import.meta.env.VITE_CONNECT_URL
+		this.service.model = import.meta.env.VITE_CONNECT_MODEL
+		this.service.apiKey = import.meta.env.VITE_API_KEY
+		this.service.emitter.on('data', () => this._onData)
+		try {
+			if (!this.messages) {
+				this.messages = []
+				this._onData()
+			}
+			await this.service.send(content, this.messages)
+		} finally {
+			this.service.emitter.all.clear()
+		}
 	}
 
 	render() {
@@ -156,7 +182,7 @@ export class HyosanChat extends ShoelaceElement {
 							${this._mainPanel}
 						</main>
 						<footer>
-							<hyosan-chat-sender></hyosan-chat-sender>
+							<hyosan-chat-sender @send-message=${this._handleSendMessage}></hyosan-chat-sender>
 						</footer>
 					</div>
 				</sl-split-panel>

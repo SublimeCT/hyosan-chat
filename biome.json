@@ -30,6 +30,9 @@
 				"noStaticOnlyClass": "off",
 				"noForEach": "off",
 				"noThisInStatic": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off"
 			}
 		}
 	},

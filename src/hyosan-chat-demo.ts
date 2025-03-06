@@ -29,8 +29,8 @@ export class HyosanChatDemo extends LitElement {
 			}
 
 			.demo-container {
-				width: 80%;
-				max-width: 1200px;
+				width: 90%;
+				max-width: 1500px;
 				min-width: 530px;
 				height: calc(100% - 6rem);
 				background-color: var(--container-background-color);

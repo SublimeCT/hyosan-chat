@@ -10,6 +10,7 @@ const translation: Translation = {
 
 	test: '测试',
 	startANewChat: '开始新聊天',
+	sendTips: '按 Enter 键发送, 按 Shift + Enter 键换行',
 }
 
 registerTranslation(translation)
