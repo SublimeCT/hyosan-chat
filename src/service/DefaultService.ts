@@ -8,12 +8,15 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 	static defaultURL = 'https://api.openai.com/v1'
 	/** `OpenAI` 的默认 {@link model} */
 	static defaultModel = 'gpt-4o-mini'
+	/** `OpenAI` 的默认预设提示词 {@link systemPrompt} */
+	static defaultSystemPrompt = 'You are a helpful assistant'
 
 	handler: ServiceHandler = new ServiceHandler()
 	key = 'Default'
 	keyHelpUrl = 'https://platform.openai.com/docs/api-reference/chat'
 	url = DefaultService.defaultURL
 	messages = []
+	systemPrompt = DefaultService.defaultSystemPrompt
 
 	chat: DefaultServiceChat = { model: DefaultService.defaultModel }
 

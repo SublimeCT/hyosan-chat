@@ -15,15 +15,40 @@ import type { Conversation } from '@/types/conversations'
 export class HyosanChat extends ShoelaceElement {
 	static styles? = css`
 		:host {
+			border: 1px solid var(--sl-color-neutral-200);
+			border-radius: var(--hy-container-radius);
 			width: 100%;
+			height: calc(100% - 2px);
+		}
+		:host > div {
 			height: 100%;
-			display: flex;
-		}	
+		}
 		sl-split-panel {
 			width: 100%;
 			height: 100%;
 			--min: 228px;
 			--max: 40%;
+		}
+		.aside-container {
+			border-top-left-radius: var(--hy-container-radius);
+			border-bottom-left-radius: var(--hy-container-radius);
+		}
+		.main-container {
+			margin: var(--hy-container-padding);
+			width: calc(100% - var(--hy-container-padding) * 2);
+			height: calc(100% - var(--hy-container-padding) * 2);
+			max-height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.main-container > header, .main-container > main, .main-container > footer {
+			display: flex;
+			width: 100%;
+		}
+		.main-container > main {
+			flex: 1;
 		}
 	`
 
@@ -71,6 +96,7 @@ export class HyosanChat extends ShoelaceElement {
 	private async _handleStartNewChat() {
 		this.emit('conversations-create')
 	}
+	/** 右侧消息列表 */
 	private get _mainPanel() {
 		if (this.messages) {
 			return html`
@@ -109,29 +135,32 @@ export class HyosanChat extends ShoelaceElement {
 				</hyosan-chat-conversations>
 			`
 		return html`
-			<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
-				<div
-					slot="start"
-					style="height: 100%; overflow-y: auto; background: var(--sl-color-neutral-50);"
-				>
-					<!-- 管理会话 -->
-					${conversations}
-				</div>
-				<div
-					slot="end"
-					style="height: 100%;"
-				>
-					<header>
-						<slot name="main-header"></slot>
-					</header>
-					<main>
-						${this._mainPanel}
-					</main>
-					<footer>
-						<pre>TODO: input</pre>
-					</footer>
-				</div>
-			</sl-split-panel>
+			<div>
+				<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
+					<div
+						slot="start"
+						class="aside-container"
+						style="height: 100%; overflow-y: auto; background: var(--sl-color-neutral-50);"
+					>
+						<!-- 管理会话 -->
+						${conversations}
+					</div>
+					<div
+						slot="end"
+						class="main-container"
+					>
+						<header>
+							<slot name="main-header"></slot>
+						</header>
+						<main>
+							${this._mainPanel}
+						</main>
+						<footer>
+							<hyosan-chat-sender></hyosan-chat-sender>
+						</footer>
+					</div>
+				</sl-split-panel>
+			</div>
     `
 	}
 }

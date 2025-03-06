@@ -29,5 +29,5 @@
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedSideEffectImports": true
 	},
-	"include": ["src", "/*.ts", "commitlint.config.ts"]
+	"include": ["src", "/*.ts"]
 }

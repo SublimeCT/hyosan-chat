@@ -1,4 +1,12 @@
 :root {
 	/* chat 容器中的边距 */
 	--hy-container-padding: 0.5rem;
+	/* chat 容器中的 radius */
+	--hy-container-radius: 0.5rem;
+	/* chat 容器中的宽度 */
+	--hy-main-container-width: 80%;
+	/* chat 容器中的最小宽度 */
+	--hy-main-container-min-width: 360px;
+	/* chat 容器中的最大宽度 */
+	--hy-main-container-max-width: 1200px;
 }

@@ -21,6 +21,8 @@ export abstract class BaseService<C extends object = object> {
 	 * @see https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages
 	 */
 	abstract messages: BaseServiceMessages
+	/** 系统预设提示词 */
+	abstract systemPrompt?: string
 
 	/**
 	 * 发起聊天请求
