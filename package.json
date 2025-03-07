@@ -16,9 +16,7 @@
 	},
 	"license": "MIT",
 	"type": "module",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"main": "./dist/hyosan-chat.umd.cjs",
 	"module": "./dist/hyosan-chat.js",
 	"types": "./dist/lib.d.ts",
@@ -42,8 +40,11 @@
 	"dependencies": {
 		"@microsoft/fetch-event-source": "^2.0.1",
 		"@shoelace-style/shoelace": "^2.20.0",
+		"highlight.js": "^11.11.1",
+		"katex": "^0.16.21",
 		"lit": "^3.2.1",
 		"marked": "^15.0.7",
+		"marked-highlight": "^2.2.1",
 		"mitt": "^3.0.1",
 		"openai": "^4.86.1"
 	},

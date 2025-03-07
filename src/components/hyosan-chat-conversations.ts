@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import { HasSlotController } from '@/internal/slot'
+// import { HasSlotController } from '@/internal/slot'
 import type { Conversation } from '@/types/conversations'
 // import { LocalizeController } from '@shoelace-style/localize'
 import { css, html } from 'lit'
@@ -23,11 +23,11 @@ export class HyosanChatConversations extends ShoelaceElement {
 
 	// /** 本地化控制器 */
 	// private _localize = new LocalizeController(this)
-	private readonly hasSlotController = new HasSlotController(
-		this,
-		'conversations-header',
-		'conversations-footer',
-	)
+	// private readonly hasSlotController = new HasSlotController(
+	// 	this,
+	// 	'conversations-header',
+	// 	'conversations-footer',
+	// )
 
 	/** 当前选中的会话 ID */
 	@property({ reflect: true })

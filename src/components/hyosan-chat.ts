@@ -32,11 +32,17 @@ export class HyosanChat extends ShoelaceElement {
 		.aside-container {
 			border-top-left-radius: var(--hy-container-radius);
 			border-bottom-left-radius: var(--hy-container-radius);
+			background: var(--sl-color-neutral-50);
+			height: 100%;
+			overflow-y: auto;
 		}
 		.main-container {
 			margin: var(--hy-container-padding);
 			width: calc(100% - var(--hy-container-padding) * 2);
 			height: calc(100% - var(--hy-container-padding) * 2);
+			max-height: calc(100% - var(--hy-container-padding) * 2);
+			overflow-y: auto;
+			overflow-x: hidden;
 			max-height: 100%;
 			display: flex;
 			flex-direction: column;
@@ -48,6 +54,8 @@ export class HyosanChat extends ShoelaceElement {
 			width: 100%;
 		}
 		.main-container > main {
+			margin: var(--hy-container-padding);
+			overflow-y: auto;
 			flex: 1;
 		}
 	`
@@ -114,26 +122,44 @@ export class HyosanChat extends ShoelaceElement {
 		this.currentConversationId = event.detail.item.key
 	}
 
-	private _onData() {
-		if (this.messages) {
-			this.messages = [...this.messages]
+	_onData() {
+		console.log('on data', this.messages)
+		if (this.messages && this.messages.length > 0) {
+			this.messages = [
+				...this.messages.slice(0, -1),
+				this.messages[this.messages.length - 1],
+			]
+			// this.messages = [...this.messages]
+			// console.log(JSON.stringify(this.messages[this.messages.length - 1]))
+			console.log(JSON.stringify(this.messages))
 		} else {
 			this.messages = []
 		}
 		this.requestUpdate('messages')
 	}
-	private async _handleSendMessage(event: GlobalEventHandlersEventMap['send-message']) {
+	private async _handleSendMessage(
+		event: GlobalEventHandlersEventMap['send-message'],
+	) {
 		const { content } = event.detail
+		// 配置请求参数
 		this.service.url = import.meta.env.VITE_CONNECT_URL
 		this.service.model = import.meta.env.VITE_CONNECT_MODEL
 		this.service.apiKey = import.meta.env.VITE_API_KEY
-		this.service.emitter.on('data', () => this._onData)
+		// 监听流式请求响应
+		this.service.emitter.on('data', this._onData.bind(this))
 		try {
 			if (!this.messages) {
 				this.messages = []
 				this._onData()
 			}
-			await this.service.send(content, this.messages)
+			console.log('start')
+			// 发起流式请求
+			await this.service.send(
+				content,
+				this.currentConversationId,
+				this.messages,
+			)
+			console.log('end')
 		} finally {
 			this.service.emitter.all.clear()
 		}
@@ -166,7 +192,6 @@ export class HyosanChat extends ShoelaceElement {
 					<div
 						slot="start"
 						class="aside-container"
-						style="height: 100%; overflow-y: auto; background: var(--sl-color-neutral-50);"
 					>
 						<!-- 管理会话 -->
 						${conversations}

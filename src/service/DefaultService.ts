@@ -1,11 +1,13 @@
-import type { ChatCompletion, ChatCompletionChunk, ChatCompletionCreateParamsStreaming } from 'openai/resources/index.mjs'
-import { BaseService, type BaseServiceMessages } from './BaseService'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 // import OpenAI from 'openai'
+import type {
+	ChatCompletionChunk,
+	ChatCompletionCreateParamsStreaming,
+} from 'openai/resources/index.mjs'
+import { BaseService, type BaseServiceMessages } from './BaseService'
 
 // const openai = new OpenAI()
-// openai.chat.completions.create({messages: [], model: 'gpt-4o-mini'})
-
+// openai.chat.completions.create({ messages: [], model: 'gpt-4o-mini' })
 
 /** `OpenAI` 或与之兼容的服务(例如 `DeepSeek`) */
 export class DefaultService extends BaseService<DefaultServiceChat> {
@@ -25,16 +27,22 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 
 	chat: DefaultServiceChat = {}
 
-	async send(content: string, messages: BaseServiceMessages = this.messages) {
+	async send(
+		content: string,
+		conversationId: string,
+		messages: BaseServiceMessages,
+	) {
 		if (!content) return // 忽略空消息
 		if (!this.apiKey) throw new Error('Missing API Key')
+		this.conversationId = conversationId
 		if (messages.length === 0) {
 			messages.push({ role: 'system', content: this.systemPrompt })
 		}
 		messages.push({ role: 'user', content }) // 加入用户消息
+		this.setChatCompletionParams()
 		return await this.fetchChatCompletion(messages)
 	}
-	async fetchChatCompletion(messages: BaseServiceMessages = this.messages) {
+	async fetchChatCompletion(messages: BaseServiceMessages) {
 		if (this.abortController) {
 			this.abortController.abort()
 		} else {
@@ -54,7 +62,7 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 				fetchEventSource(`${this.url}/chat/completions`, {
 					method: 'POST',
 					headers: {
-						'Authorization': `Bearer ${this.apiKey}`,
+						Authorization: `Bearer ${this.apiKey}`,
 						...this.headers,
 					},
 					body: JSON.stringify(body),
@@ -66,7 +74,7 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 							reject({
 								type: 'HTTP_ERROR',
 								status: response.status,
-								statusText: response.statusText
+								statusText: response.statusText,
 							})
 						}
 					},
@@ -75,33 +83,48 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 							if (event.data === '[DONE]') {
 								return resolve()
 							}
-
-							const data = this.getContentByResponse(event.data)
-							messages[messages.length - 1].content += data
-							console.log(messages[messages.length - 1])
+							const data = this.getChatCompletionByResponse(event.data)
+							const content = this.getContentByResponse(data)
+							messages[messages.length - 1].content += content
+							console.warn(JSON.stringify(messages))
+							this.setChatCompletionParams(data.id, data.created)
 							this.emitter.emit('data', data)
 						} catch (e) {
-							console.error('Data processing error:', e);
+							console.error('Data processing error:', e)
 						}
 					},
 					onclose: () => {
+						this.emitter.emit('close')
 						resolve()
 						// reject(new Error('Connection closed unexpectedly'));
 					},
 					onerror: (err) => {
-						return reject(err);
-					}
-				});
+						return reject(err)
+					},
+				})
 			} catch (error: any) {
 				if (error.name === 'AbortError') {
-					resolve();
+					this.emitter.emit('abort')
+					resolve()
 				} else {
-					reject(error);
+					reject(error)
 				}
 			} finally {
-				this.abortController = null;
+				this.abortController = null
 			}
-		});
+		})
+	}
+
+	/**
+	 * 从原始的流式请求中获取流式请求的返回数据
+	 * @param responseText 原始流式接口返回值
+	 * @returns 本次返回的文本内容
+	 */
+	getChatCompletionByResponse(responseText: string) {
+		if (typeof responseText !== 'string' || responseText === '')
+			throw new Error('Invalid response')
+		const data = JSON.parse(responseText) as ChatCompletionChunk
+		return data
 	}
 
 	/**
@@ -109,10 +132,11 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 	 * @param responseText 原始流式接口返回值
 	 * @returns 本次返回的文本内容
 	 */
-	getContentByResponse(responseText: string) {
-		if (typeof responseText !== 'string') throw new Error('Invalid response')
-		if (responseText === '') return ''
-		const data = JSON.parse(responseText) as ChatCompletionChunk
+	getContentByResponse(responseText: string | ChatCompletionChunk) {
+		const data =
+			typeof responseText === 'string'
+				? this.getChatCompletionByResponse(responseText)
+				: responseText
 		return data.choices[0]?.delta?.content || ''
 	}
 

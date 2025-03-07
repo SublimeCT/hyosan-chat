@@ -4,7 +4,25 @@ import { defineConfig } from 'cz-git'
 const config = defineConfig({
 	extends: ['@commitlint/config-conventional'],
 	rules: {
-		// 'type-enum': [RuleConfigSeverity.Error, 'always', ['foo']],
+		'type-enum': [
+			2,
+			'always',
+			[
+				'build',
+				'chore',
+				'ci',
+				'docs',
+				'feat',
+				'fix',
+				'perf',
+				'refactor',
+				'revert',
+				'style',
+				'test',
+				'WIP',
+			],
+		],
+		'type-case': [0], // 禁用类型大小写检查
 	},
 	prompt: {
 		alias: { fd: 'docs: fix typos' },

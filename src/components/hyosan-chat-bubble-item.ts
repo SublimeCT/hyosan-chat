@@ -1,36 +1,62 @@
 import ShoelaceElement from '@/internal/shoelace-element'
+import { withResetSheets } from '@/sheets'
+import { toMarkdown } from '@/utils/markdown'
 import { css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import { marked } from 'marked'
+import { customElement, property, state } from 'lit/decorators.js'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
+import 'highlight.js/styles/atom-one-dark.min.css'
+import { watch } from '@/internal/watch'
+import type { BaseServiceMessageItem } from '@/service/BaseService'
 
 /**
  * 对话气泡组件
  */
 @customElement('hyosan-chat-bubble-item')
 export class HyosanChatBubbleItem extends ShoelaceElement {
-	static styles? = css`
+	static styles? = withResetSheets(css`
     :host {
-      padding: 0.5rem;
-      margin: 0.5rem;
-      border-radius: 0.5rem;
+      display: block;
+      margin: var(--hy-bubble-spacing) 0;
+      border-radius: var(--hy-container-radius);
       background-color: var(--sl-color-neutral-100);
     }
     .bubble {
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      background-color: var(--sl-color-neutral-200);
+      display: block;
+      padding: var(--hy-bubble-padding);
+      border-radius: var(--hy-container-radius);
+      background-color: var(--sl-color-neutral-100);
     }
-  `
+		.bubble[data-role="user"] {
+      background-color: var(--sl-color-primary-100);
+		}
+  `)
 
-  @property({ type: Object })
-  message!: ChatCompletionMessageParam
+	@property({
+		attribute: false,
+		hasChanged(
+			value: BaseServiceMessageItem,
+			oldValue: ChatCompletionMessageParam,
+		) {
+			return value !== oldValue || value.$loading === true
+		},
+	})
+	message!: BaseServiceMessageItem
 
-	async render() {
-		const markdownContent = this.message.content || ''
-		const htmlContent = await marked.parse(markdownContent.toString())
+	@state()
+	htmlContent = ''
+
+	@watch('message')
+	async onMessageChange() {
+		this.htmlContent = await toMarkdown(this.message.content?.toString() || '')
+		this.requestUpdate()
+	}
+
+	render() {
+		// const markdownContent = this.message.content || ''
+		// const htmlContent = marked.parse(markdownContent.toString()) as string
+		// const htmlContent = toMarkdown((this.message.content || '')?.toString())
 		return html`
-      <div class="bubble" .innerHTML=${htmlContent}>
+      <div class="bubble" data-role=${this.message.role} .innerHTML=${this.htmlContent}>
       </div>
     `
 	}

@@ -11,19 +11,28 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 	static styles? = css`
     :host {
       display: flex;
-      flex-direction: column;
       height: 100%;
       overflow-y: auto;
+      width: 100%;
+      justify-content: center;
+    }
+    .container {
+      width: var(--hy-main-container-width);
+      min-width: var(--hy-main-container-min-width);
+      max-width: var(--hy-main-container-max-width);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
     }
   `
 
 	/** 会话服务消息列表 */
-	@property({ attribute: false, reflect: true })
+	@property({ attribute: false })
 	messages!: BaseServiceMessages
 
 	render() {
+		console.log('list render()')
 		return html`
-      <div>
+      <div class="container">
         ${this.messages.map(
 					(item) => html`
             <hyosan-chat-bubble-item .message=${item}></hyosan-chat-bubble-item>

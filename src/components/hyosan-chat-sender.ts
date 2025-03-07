@@ -1,10 +1,9 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 import { LocalizeController } from '@shoelace-style/localize'
 import { css, html } from 'lit'
-import { customElement, query, state } from 'lit/decorators.js'
+import { customElement, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js'
-import type SlTextarea from '@shoelace-style/shoelace/dist/components/textarea/textarea.js'
 
 /** 发送 组件 */
 @customElement('hyosan-chat-sender')
@@ -53,26 +52,25 @@ export class HyosanChatSender extends ShoelaceElement {
 	/** 本地化控制器 */
 	private _localize = new LocalizeController(this)
 
-  /** 由 input 事件触发时保存的输入框内容 */
-  innerContent = ''
-
 	@state()
 	content = ''
 
-  private _handleInput(event: KeyboardEvent) {
-    const textarea = event.target as HTMLTextAreaElement
-    this.innerContent = textarea.value || ''
-  }
-  private _handleTextareaKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault()
-      // this.emit('send-message', { detail: { content: this.innerContent } })
-      this.content = '' // 清空内容
-      this.innerContent = ''
-      this.requestUpdate('content')
-    }
-  }
-  
+	private _handleInput(event: KeyboardEvent) {
+		const textarea = event.target as HTMLTextAreaElement
+		this.content = textarea.value || ''
+	}
+	private _handleTextareaKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault()
+			this._handleEmitSendMessage()
+			this.content = '' // 清空内容
+			this.requestUpdate()
+		}
+	}
+	private _handleEmitSendMessage() {
+		this.emit('send-message', { detail: { content: this.content } })
+	}
+
 	render() {
 		return html`
       <div class="container">
@@ -82,7 +80,7 @@ export class HyosanChatSender extends ShoelaceElement {
         <footer>
           <div class="option-buttons"></div>
           <div class="action-buttons">
-            <sl-button variant="primary" circle @click=${() => this.emit('send-message', { detail: { content: this.content } })}>
+            <sl-button variant="primary" circle @click=${this._handleEmitSendMessage}>
               <hyosan-icon-wrapper>
                 <svg t="1741252222107" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5069" width="1em" height="1em" fill="currentColor"><path d="M133.8 579l-44.4-44.4c-18.8-18.8-18.8-49.2 0-67.8L478 78c18.8-18.8 49.2-18.8 67.8 0l388.6 388.6c18.8 18.8 18.8 49.2 0 67.8L890 578.8c-19 19-50 18.6-68.6-0.8L592 337.2V912c0 26.6-21.4 48-48 48h-64c-26.6 0-48-21.4-48-48V337.2L202.4 578.2c-18.6 19.6-49.6 20-68.6 0.8z" p-id="5070"></path></svg>
               </hyosan-icon-wrapper>
