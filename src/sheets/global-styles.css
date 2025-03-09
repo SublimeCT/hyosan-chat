@@ -13,4 +13,6 @@
 	--hy-bubble-spacing: 1rem;
 	/* 消息气泡内部的 padding */
 	--hy-bubble-padding: 0.5rem;
+	/* 头像大小 */
+	--hy-bubble-avatar-size: 2.3rem;
 }

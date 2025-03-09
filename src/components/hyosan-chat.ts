@@ -107,6 +107,10 @@ export class HyosanChat extends ShoelaceElement {
 	})
 	messages?: BaseServiceMessages
 
+  /** 是否显示头像 */
+	@property({ type: Boolean, attribute: 'show-avatar', reflect: true })
+	showAvatar = false
+
 	private async _handleStartNewChat() {
 		this.emit('conversations-create')
 	}
@@ -116,7 +120,7 @@ export class HyosanChat extends ShoelaceElement {
 			const _messages = this.messages
 			return html`
 				<!-- 对话气泡 -->
-				<hyosan-chat-bubble-list .messages=${_messages}></hyosan-chat-bubble-list>
+				<hyosan-chat-bubble-list ?show-avatar=${this.showAvatar} .messages=${_messages}></hyosan-chat-bubble-list>
 			`
 		} else {
 			return html`<slot name="welcome"></slot>`

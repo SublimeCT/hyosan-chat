@@ -125,6 +125,7 @@ export class HyosanChatDemo extends LitElement {
 				</header>
 				<main>
 					<hyosan-chat
+						show-avatar
 						.conversations=${this.conversations}
 						.messages=${this.messages}
 						currentConversationId=${this.currentConversationId}
