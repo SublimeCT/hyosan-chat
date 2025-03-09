@@ -10,6 +10,7 @@ import { HasSlotController } from '@/internal/slot'
 import type { BaseService, BaseServiceMessages } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import type { Conversation } from '@/types/conversations'
+import { ChatSettings } from '@/types/ChatSettings'
 
 @customElement('hyosan-chat')
 export class HyosanChat extends ShoelaceElement {
@@ -115,7 +116,7 @@ export class HyosanChat extends ShoelaceElement {
 		this.emit('conversations-create')
 	}
 	get isLoading() {
-		console.log('isLoading', this.messages)
+		// console.log('isLoading', this.messages)
 		return this.messages
 			? this.messages.some(v => v.$loading)
 			: false
@@ -157,10 +158,11 @@ export class HyosanChat extends ShoelaceElement {
 		event: GlobalEventHandlersEventMap['send-message'],
 	) {
 		const { content } = event.detail
+		const chatSettings = ChatSettings.fromLocalStorage()
 		// 配置请求参数
-		this.service.url = import.meta.env.VITE_CONNECT_URL
-		this.service.model = import.meta.env.VITE_CONNECT_MODEL
-		this.service.apiKey = import.meta.env.VITE_API_KEY
+		this.service.url = chatSettings.baseUrl || import.meta.env.VITE_CONNECT_URL
+		this.service.model = chatSettings.modelName || import.meta.env.VITE_CONNECT_MODEL
+		this.service.apiKey = chatSettings.apiKey || import.meta.env.VITE_API_KEY
 		// 监听流式请求响应
 		this.service.emitter.on('before-send', this._onData.bind(this))
 		this.service.emitter.on('send-open', this._onData.bind(this))

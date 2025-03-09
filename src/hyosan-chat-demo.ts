@@ -39,8 +39,9 @@ export class HyosanChatDemo extends LitElement {
 				overflow: auto;
 
 				header {
-					margin-bottom: 20px;
-
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
 					h1 {
 						font-size: 2em;
 						color: var(--text-color);
@@ -138,6 +139,7 @@ export class HyosanChatDemo extends LitElement {
 			<sl-card class="demo-container">
 				<header slot="header">
 					<h1>HyosanChatDemo</h1>
+					<hyosan-chat-settings-button></hyosan-chat-settings-button>
 				</header>
 				<main>
 					<hyosan-chat
@@ -149,7 +151,7 @@ export class HyosanChatDemo extends LitElement {
 						@click-conversation=${this._handleClickConversation}
 					>
 						<div slot="main-welcome" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-							<h2 style="font-size: 3rem; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
+							<h2 style="font-size: 3rem; margin-bottom: 1rem; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
 							<img .src=${HyosanChatIcon} />
 						</div>
 					</hyosan-chat>

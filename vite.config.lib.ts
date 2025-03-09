@@ -3,11 +3,8 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 export default defineConfig({
-	server: {
-		port: 29510,
-	},
 	preview: {
-		port: 29511,
+		port: 29521,
 	},
 	resolve: {
 		alias: {
@@ -18,4 +15,11 @@ export default defineConfig({
 		// 用于生成 `d.ts` 文件, refer https://github.com/qmhc/vite-plugin-dts/blob/HEAD/README.zh-CN.md
 		dts({ tsconfigPath: './tsconfig.lib.json' }),
 	],
+	build: {
+		lib: {
+			name: 'hyosan-chat',
+			entry: ['src/lib.ts'],
+			fileName: 'hyosan-chat',
+		},
+	},
 })

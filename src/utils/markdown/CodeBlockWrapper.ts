@@ -8,7 +8,7 @@ import hljs from "highlight.js";
 export default function CodeBlockWrapper(md: MarkdownItAsync) {
   // const defaultRenderer = md.renderer.rules.fence || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
 
-  md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+  md.renderer.rules.fence = (tokens, idx) => {
     const token = tokens[idx];
     const code = token.content.trim();
     const lang = token.info.trim();

@@ -80,7 +80,9 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 	@property({
     attribute: false,
 		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
-			return !oldValue || value.length !== oldValue.length || value.some(v => v.$loading)
+      // console.log(JSON.stringify(value), JSON.stringify(oldValue))
+			// return !oldValue || value.length !== oldValue.length || value.some(v => v.$loading)
+      return true // 父组件中调用 requestUpdate 时, value 已经与 oldValue 一致, 此时无法判断, 只能返回 true
 		},
   })
 	messages!: BaseServiceMessages
@@ -97,6 +99,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     Promise.all(this.messages.map(message => renderMarkdown((message.content || '')?.toString())))
       .then(markdownHtmlContents => {
         this.messagesHtml = markdownHtmlContents
+        // console.log('messagesHtml updated [end]')
         this.requestUpdate('messagesHtml')
       })
   }
