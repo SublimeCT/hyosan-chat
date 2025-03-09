@@ -4,6 +4,7 @@ import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import type { BaseServiceMessages } from './service/BaseService'
 import type { Conversation } from './types/conversations'
+import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
 
 export const tagName = 'hyosan-chat-demo'
 
@@ -63,7 +64,7 @@ export class HyosanChatDemo extends LitElement {
 	private currentConversationId = ''
 	@state()
 	private conversations: Array<Conversation> = [
-		{ key: '001', label: '会话1' },
+		{ key: '001', label: '会话1 (有内容)' },
 		{ key: '002', label: '会话2' },
 		{ key: '003', label: '会话3' },
 	]
@@ -79,11 +80,26 @@ export class HyosanChatDemo extends LitElement {
 			...this.conversations,
 		]
 		this.currentConversationId = key
+		this.messages = []
+		this.requestUpdate()
+	}
+	private _handleClickConversation(event: CustomEvent<{ item: Conversation }>) {
+		const conversation = event.detail.item
+		if (conversation.key === this.currentConversationId) {
+			this.messages = []
+		} else {
+			if (conversation.key === '001') {
+				this.messages = this.conversationsOneMessages
+			} else {
+				this.messages = []
+			}
+		}
+		console.log(this.messages)
 		this.requestUpdate()
 	}
 	@state()
-	// messages?: BaseServiceMessages
-	messages: BaseServiceMessages = [
+	messages?: BaseServiceMessages
+	conversationsOneMessages: BaseServiceMessages = [
 		{
 			role: 'system',
 			content: 'You are a helpful assistant',
@@ -130,7 +146,13 @@ export class HyosanChatDemo extends LitElement {
 						.messages=${this.messages}
 						currentConversationId=${this.currentConversationId}
 						@conversations-create="${this._handleConversationsCreate}"
-					></hyosan-chat>
+						@click-conversation=${this._handleClickConversation}
+					>
+						<div slot="main-welcome" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+							<h2 style="font-size: 3rem; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
+							<img .src=${HyosanChatIcon} />
+						</div>
+					</hyosan-chat>
 				</main>
 			</sl-card>
     `

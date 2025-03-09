@@ -1,6 +1,9 @@
 # hyosan-chat
 🚧 Work in Progress | 此项目处于早期开发阶段
 
+![](./hyosan-chat-welcome-screenshot.png)
+![](./hyosan-chat-messages-screenshot.png)
+
 ## 介绍
 `hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库; 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [Ant Design Pro](https://x.ant.design/index-cn)，但专注于 AI 驱动的交互体验。
 

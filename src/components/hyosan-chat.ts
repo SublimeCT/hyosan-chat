@@ -114,6 +114,12 @@ export class HyosanChat extends ShoelaceElement {
 	private async _handleStartNewChat() {
 		this.emit('conversations-create')
 	}
+	get isLoading() {
+		console.log('isLoading', this.messages)
+		return this.messages
+			? this.messages.some(v => v.$loading)
+			: false
+	}
 	/** 右侧消息列表 */
 	private get _mainPanel() {
 		if (this.messages) {
@@ -123,7 +129,7 @@ export class HyosanChat extends ShoelaceElement {
 				<hyosan-chat-bubble-list ?show-avatar=${this.showAvatar} .messages=${_messages}></hyosan-chat-bubble-list>
 			`
 		} else {
-			return html`<slot name="welcome"></slot>`
+			return html`<slot name="main-welcome"></slot>`
 		}
 	}
 	private _handleClickConversation(
@@ -172,6 +178,7 @@ export class HyosanChat extends ShoelaceElement {
 				this.messages,
 			)
 			console.log('end')
+			this.requestUpdate()
 		} finally {
 			this.service.emitter.all.clear()
 		}
@@ -219,7 +226,7 @@ export class HyosanChat extends ShoelaceElement {
 							${this._mainPanel}
 						</main>
 						<footer>
-							<hyosan-chat-sender @send-message=${this._handleSendMessage}></hyosan-chat-sender>
+							<hyosan-chat-sender ?loading=${this.isLoading} @send-message=${this._handleSendMessage}></hyosan-chat-sender>
 						</footer>
 					</div>
 				</sl-split-panel>
