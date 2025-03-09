@@ -98,7 +98,13 @@ export class HyosanChat extends ShoelaceElement {
 	currentConversationId = ''
 
 	/** 会话服务消息列表 */
-	@property({ attribute: false, reflect: true })
+	@property({
+		attribute: false,
+		reflect: true,
+		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
+			return !oldValue || value.length !== oldValue.length || value.some(v => v.$loading)
+		},
+	})
 	messages?: BaseServiceMessages
 
 	private async _handleStartNewChat() {
@@ -106,8 +112,7 @@ export class HyosanChat extends ShoelaceElement {
 	}
 	/** 右侧消息列表 */
 	private get _mainPanel() {
-		// biome-ignore lint/complexity/useOptionalChain: <explanation>
-		if (this.messages && this.messages.length) {
+		if (this.messages) {
 			return html`
 				<!-- 对话气泡 -->
 				<hyosan-chat-bubble-list .messages=${this.messages}></hyosan-chat-bubble-list>
@@ -123,15 +128,15 @@ export class HyosanChat extends ShoelaceElement {
 	}
 
 	_onData() {
-		console.log('on data', this.messages)
 		if (this.messages && this.messages.length > 0) {
-			this.messages = [
-				...this.messages.slice(0, -1),
-				this.messages[this.messages.length - 1],
-			]
-			// this.messages = [...this.messages]
+			// this.messages = [
+			// 	...this.messages.slice(0, -1),
+			// 	this.messages[this.messages.length - 1],
+			// ]
+			this.messages = [...this.messages]
+			this.service.messages = this.messages
 			// console.log(JSON.stringify(this.messages[this.messages.length - 1]))
-			console.log(JSON.stringify(this.messages))
+			// console.log('<hyosan-chat> _onData', JSON.stringify(this.messages), this.messages)
 		} else {
 			this.messages = []
 		}
@@ -146,6 +151,8 @@ export class HyosanChat extends ShoelaceElement {
 		this.service.model = import.meta.env.VITE_CONNECT_MODEL
 		this.service.apiKey = import.meta.env.VITE_API_KEY
 		// 监听流式请求响应
+		this.service.emitter.on('before-send', this._onData.bind(this))
+		this.service.emitter.on('send-open', this._onData.bind(this))
 		this.service.emitter.on('data', this._onData.bind(this))
 		try {
 			if (!this.messages) {

@@ -41,7 +41,7 @@ export abstract class BaseService<
 	 * 当前服务的消息列表
 	 * @see https://platform.openai.com/docs/api-reference/chat/create#chat-create-messages
 	 */
-	abstract messages: BaseServiceMessages
+	messages: BaseServiceMessages = []
 	/** 系统预设提示词 */
 	abstract systemPrompt?: string
 
@@ -61,12 +61,8 @@ export abstract class BaseService<
 		conversationId: string,
 		messages: BaseServiceMessages,
 	): Promise<void>
-	/**
-	 * 发起聊天请求
-	 * @param messages 聊天消息列表, 参考 https://platform.openai.com/docs/api-reference/chat/create
-	 * @param handler 聊天请求处理器, 用于处理流式请求的回调函数和停止流式请求
-	 */
-	abstract fetchChatCompletion(messages: BaseServiceMessages): Promise<void>
+	/** 发起聊天请求 */
+	abstract fetchChatCompletion(): Promise<void>
 	/**
 	 * 设置聊天流式请求接口的相关参数
 	 * @param chatCompletionId 当前聊天接口的唯一 ID

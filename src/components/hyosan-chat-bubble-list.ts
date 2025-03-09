@@ -26,11 +26,15 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   `
 
 	/** 会话服务消息列表 */
-	@property({ attribute: false })
+	@property({
+    attribute: false,
+		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
+			return !oldValue || value.length !== oldValue.length || value.some(v => v.$loading)
+		},
+  })
 	messages!: BaseServiceMessages
 
 	render() {
-		console.log('list render()')
 		return html`
       <div class="container">
         ${this.messages.map(

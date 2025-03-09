@@ -22,7 +22,7 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 	model = DefaultService.defaultModel
 	keyHelpUrl = 'https://platform.openai.com/docs/api-reference/chat'
 	url = DefaultService.defaultURL
-	messages = []
+	// messages = []
 	systemPrompt = DefaultService.defaultSystemPrompt
 
 	chat: DefaultServiceChat = {}
@@ -40,9 +40,11 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		}
 		messages.push({ role: 'user', content }) // 加入用户消息
 		this.setChatCompletionParams()
-		return await this.fetchChatCompletion(messages)
+		this.messages = messages
+		this.emitter.emit('before-send')
+		return await this.fetchChatCompletion()
 	}
-	async fetchChatCompletion(messages: BaseServiceMessages) {
+	async fetchChatCompletion() {
 		if (this.abortController) {
 			this.abortController.abort()
 		} else {
@@ -53,7 +55,7 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		const body: ChatCompletionCreateParamsStreaming = {
 			model: this.model,
 			temperature: this.chat.temperature,
-			messages,
+			messages: this.messages,
 			stream: true,
 		}
 
@@ -67,9 +69,10 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 					},
 					body: JSON.stringify(body),
 					signal: abortController.signal,
-					async onopen(response) {
+					onopen: async (response) => {
 						if (response.status === 200) {
-							messages.push({ role: 'assistant', content: '' }) // 加入助手消息
+							this.messages.push({ role: 'assistant', content: '', $loading: true }) // 加入助手消息
+							this.emitter.emit('send-open')
 						} else {
 							reject({
 								type: 'HTTP_ERROR',
@@ -81,12 +84,15 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 					onmessage: (event) => {
 						try {
 							if (event.data === '[DONE]') {
+								this.messages[this.messages.length - 1].$loading = false
+								this.emitter.emit('send-done')
 								return resolve()
 							}
+							if (event.data === '') return
 							const data = this.getChatCompletionByResponse(event.data)
 							const content = this.getContentByResponse(data)
-							messages[messages.length - 1].content += content
-							console.warn(JSON.stringify(messages))
+							this.messages[this.messages.length - 1].content += content
+							// console.warn(JSON.stringify(messages))
 							this.setChatCompletionParams(data.id, data.created)
 							this.emitter.emit('data', data)
 						} catch (e) {

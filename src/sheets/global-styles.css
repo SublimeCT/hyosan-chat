@@ -10,7 +10,7 @@
 	/* chat 容器中的最大宽度 */
 	--hy-main-container-max-width: 1200px;
 	/* 消息气泡之间的间距 */
-	--hy-bubble-spacing: 0.5rem;
+	--hy-bubble-spacing: 1rem;
 	/* 消息气泡内部的 padding */
 	--hy-bubble-padding: 0.5rem;
 }

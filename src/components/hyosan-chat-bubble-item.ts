@@ -1,12 +1,13 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 import { withResetSheets } from '@/sheets'
 import { toMarkdown } from '@/utils/markdown'
-import { css, html } from 'lit'
+import { css, html, PropertyValues, unsafeCSS } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
-import 'highlight.js/styles/atom-one-dark.min.css'
+// import highlightAtomOneDarkStyles from 'highlight.js/styles/atom-one-dark.min.css?inline'
 import { watch } from '@/internal/watch'
 import type { BaseServiceMessageItem } from '@/service/BaseService'
+import highlightAtomOneDarkStyles from 'highlight.js/styles/atom-one-dark.min.css?inline'
 
 /**
  * 对话气泡组件
@@ -29,7 +30,7 @@ export class HyosanChatBubbleItem extends ShoelaceElement {
 		.bubble[data-role="user"] {
       background-color: var(--sl-color-primary-100);
 		}
-  `)
+  `, unsafeCSS(highlightAtomOneDarkStyles))
 
 	@property({
 		attribute: false,
@@ -45,18 +46,20 @@ export class HyosanChatBubbleItem extends ShoelaceElement {
 	@state()
 	htmlContent = ''
 
-	@watch('message')
+	protected willUpdate(_changedProperties: PropertyValues): void {
+		if (_changedProperties.has('message')) {
+			this.onMessageChange()
+		}
+	}
+
 	async onMessageChange() {
 		this.htmlContent = await toMarkdown(this.message.content?.toString() || '')
 		this.requestUpdate()
 	}
 
 	render() {
-		// const markdownContent = this.message.content || ''
-		// const htmlContent = marked.parse(markdownContent.toString()) as string
-		// const htmlContent = toMarkdown((this.message.content || '')?.toString())
 		return html`
-      <div class="bubble" data-role=${this.message.role} .innerHTML=${this.htmlContent}>
+      <div class="bubble" part="hyosan-chat-bubble" data-role=${this.message.role} .innerHTML=${this.htmlContent}>
       </div>
     `
 	}
