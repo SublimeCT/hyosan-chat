@@ -1,0 +1,4 @@
+{
+  // refer https://shoelace.style/getting-started/usage#vs-code
+  "html.customData": ["./node_modules/@shoelace-style/shoelace/dist/vscode.html-custom-data.json"]
+}

@@ -113,9 +113,10 @@ export class HyosanChat extends ShoelaceElement {
 	/** 右侧消息列表 */
 	private get _mainPanel() {
 		if (this.messages) {
+			const _messages = this.messages
 			return html`
 				<!-- 对话气泡 -->
-				<hyosan-chat-bubble-list .messages=${this.messages}></hyosan-chat-bubble-list>
+				<hyosan-chat-bubble-list .messages=${_messages}></hyosan-chat-bubble-list>
 			`
 		} else {
 			return html`<slot name="welcome"></slot>`

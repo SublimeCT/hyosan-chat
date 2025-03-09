@@ -1,6 +1,5 @@
 import mitt from 'mitt'
 import type {
-	ChatCompletionCreateParamsStreaming,
 	ChatCompletionMessageParam,
 } from 'openai/resources/index.mjs'
 
