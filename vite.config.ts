@@ -18,4 +18,7 @@ export default defineConfig({
 		// 用于生成 `d.ts` 文件, refer https://github.com/qmhc/vite-plugin-dts/blob/HEAD/README.zh-CN.md
 		dts({ tsconfigPath: './tsconfig.lib.json' }),
 	],
+	build: {
+		outDir: 'dist-app',
+	},
 })
