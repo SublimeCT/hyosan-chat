@@ -18,9 +18,6 @@ export class HyosanChatMainHeader extends ShoelaceElement {
 	// }
 	render() {
 		return html`
-      <!-- <div>
-        <hyosan-chat-settings-button @hyosan-chat-settings-save=${this._handleSettingsSave}></hyosan-chat-settings-button>
-      </div> -->
     `
 	}
 }
