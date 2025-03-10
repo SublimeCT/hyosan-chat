@@ -1,16 +1,19 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 // import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { customElement, property, query, state } from 'lit/decorators.js'
 
 // shoelace 组件
 import '@shoelace-style/shoelace/dist/components/button/button.js'
 import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
+import '@shoelace-style/shoelace/dist/components/resize-observer/resize-observer.js'
+import '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { HasSlotController } from '@/internal/slot'
 import type { BaseService, BaseServiceMessages } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
 import type { Conversation } from '@/types/conversations'
+import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 @customElement('hyosan-chat')
 export class HyosanChat extends ShoelaceElement {
@@ -38,7 +41,8 @@ export class HyosanChat extends ShoelaceElement {
 		.main-container {
 			/* padding: var(--hy-container-padding); */
 			width: 100%;
-			height: calc(100% - var(--hy-container-padding) * 2);
+			/* height: calc(100% - var(--hy-container-padding) * 2); */
+			height: 100%;
 			max-height: calc(100% - var(--hy-container-padding) * 2);
 			overflow-y: auto;
 			overflow-x: hidden;
@@ -56,6 +60,28 @@ export class HyosanChat extends ShoelaceElement {
 			padding-bottom: var(--hy-container-padding);
 			overflow-y: auto;
 			flex: 1;
+		}
+		.chat-wrapper[data-compact] {
+			--hy-main-container-width: 100%;
+			--hy-main-container-margin-bottom: 0;
+		}
+		.chat-wrapper[data-compact] .aside-container {
+			width: 0;
+		}
+		.chat-wrapper[data-compact] sl-split-panel {
+			grid-template-columns: clamp(
+        0%,
+        clamp(
+          var(--min),
+          0% - 0px / 2,
+          var(--max)
+        ),
+        calc(100% - 0px)
+      )
+			0px auto !important;
+		}
+		.chat-wrapper[data-compact] sl-split-panel::part(divider) {
+			width: 0;
 		}
 	`
 
@@ -195,6 +221,39 @@ export class HyosanChat extends ShoelaceElement {
 		console.log(event.detail)
 	}
 
+	/** 在小于此宽度时隐藏左侧折叠面板, 变为 button + drawer 的形式 */
+	@property({ type: Number, reflect: true })
+	wrapWidth = 920
+	@state()
+	/** 是否应用紧凑样式 */
+	get compact() {
+		return this._width < this.wrapWidth
+	}
+
+	@state()
+	private _width = 0
+
+	private _handleResize(event: CustomEvent<{ entries: ResizeObserverEntry[] }>) {
+		const borderBoxSize = event.detail.entries[0].borderBoxSize[0]
+		const width = borderBoxSize.inlineSize
+		this._width = width
+	}
+
+	private _handleClickConversationsButton() {
+
+	}
+	@query('.drawer-contained')
+	private _drawer?: SlDrawer
+
+	private _handleClickSettingsButton() {
+		if (!this._drawer) throw new Error('Internal error: drawer not found')
+		this._drawer.open = true
+	}
+	private _handleDrawerClickClose() {
+		if (!this._drawer) throw new Error('Internal error: drawer not found')
+		this._drawer.hide()
+	}
+
 	render() {
 		const hasConversationsSlot = this.hasSlotController.test('conversations')
 		const hasConversationsHeaderSlot = this.hasSlotController.test(
@@ -226,32 +285,48 @@ export class HyosanChat extends ShoelaceElement {
 			`
 		const mainHeader = hasMainHeaderSlot
 			? html`<slot name="main-header"></slot>`
-			: html`<hyosan-chat-main-header></hyosan-chat-main-header>`
+			: (
+				this.compact
+					? html`
+						<hyosan-chat-main-header
+							?compact=${this.compact}
+							@hyosan-chat-click-conversations-button=${this._handleClickConversationsButton}
+							@hyosan-chat-click-settings-button=${this._handleClickSettingsButton}>
+							</hyosan-chat-main-header>
+						`
+					: undefined
+			)
 		return html`
-			<div>
-				<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
-					<div
-						slot="start"
-						class="aside-container"
-					>
-						<!-- 管理会话 -->
-						${conversations}
-					</div>
-					<div
-						slot="end"
-						class="main-container"
-					>
-						<header>
-							${mainHeader}
-						</header>
-						<main>
-							${this._mainPanel}
-						</main>
-						<footer>
-							<hyosan-chat-sender ?loading=${this.isLoading} @send-message=${this._handleSendMessage}></hyosan-chat-sender>
-						</footer>
-					</div>
-				</sl-split-panel>
+			<div class="chat-wrapper" ?data-compact=${this.compact}>
+				<sl-resize-observer @sl-resize=${this._handleResize}>
+					<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
+						<div
+							slot="start"
+							class="aside-container"
+						>
+							<!-- 管理会话 -->
+							${conversations}
+						</div>
+						<div
+							slot="end"
+							class="main-container"
+						>
+							<header>
+								${mainHeader}
+							</header>
+							<main>
+								${this._mainPanel}
+							</main>
+							<footer>
+								<hyosan-chat-sender ?loading=${this.isLoading} @send-message=${this._handleSendMessage}></hyosan-chat-sender>
+							</footer>
+						</div>
+					</sl-split-panel>
+				</sl-resize-observer>
+				<sl-drawer label="Drawer" contained class="drawer-contained" placement="start" style="--size: 80%;">
+					${conversations}
+					<sl-button slot="footer" variant="primary" @click=${this._handleDrawerClickClose}>Close</sl-button>
+				</sl-drawer>
 			</div>
     `
 	}

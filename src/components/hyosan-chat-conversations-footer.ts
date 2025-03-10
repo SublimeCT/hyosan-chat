@@ -9,7 +9,7 @@ import { customElement } from 'lit/decorators.js'
 export class HyosanChatConversationsFooter extends ShoelaceElement {
 	static styles? = css`
     :host {
-      width: 100%;
+      width: calc(100% - --hy-container-padding);
       height: 48px;
       display: flex;
       align-items: center;
