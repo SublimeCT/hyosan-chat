@@ -78,9 +78,9 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
         </hyosan-icon-wrapper>
       </sl-button>
       <sl-dialog label="Settings" class="settings-dialog">
-        <sl-input autofocus label="Base URL" value=${this.settings.baseUrl} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'baseUrl')}></sl-input>
-        <sl-input autofocus label="Model Name" value=${this.settings.modelName} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'modelName')}></sl-input>
-        <sl-input autofocus label="API Key" value=${this.settings.apiKey} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'apiKey')}></sl-input>
+        <sl-input label="Base URL" value=${this.settings.baseUrl} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'baseUrl')}></sl-input>
+        <sl-input label="Model Name" value=${this.settings.modelName} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'modelName')}></sl-input>
+        <sl-input label="API Key" value=${this.settings.apiKey} @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'apiKey')}></sl-input>
         <div slot="footer">
           <sl-button variant="primary" @click=${this._save}>Save</sl-button>
           <sl-button variant="warning" @click=${this._reset}>Reset</sl-button>
