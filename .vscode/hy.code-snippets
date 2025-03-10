@@ -1,0 +1,60 @@
+{
+	// Place your hyosan-chat 工作区 snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+	"Hyosan Component": {
+		"prefix": "hy-component",
+		"body": [
+      "import ShoelaceElement from '@/internal/shoelace-element'",
+      "// import { LocalizeController } from '@shoelace-style/localize'",
+      "import { css, html } from 'lit'",
+      "import { customElement, property } from 'lit/decorators.js'",
+      "",
+      "/** $0 组件 */",
+      "@customElement('${TM_FILENAME_BASE}')",
+      "export class ${TM_FILENAME_BASE/(^|\\-)(\\w)/${2:/upcase}/g} extends ShoelaceElement {",
+      "  static styles? = css``",
+      "",
+      "  // /** 本地化控制器 */",
+      "  // private _localize = new LocalizeController(this)",
+      "",
+      "  @property({ reflect: true })",
+      "  message = ''",
+      "  render() {",
+      "    return html`",
+      "      <div>${this.message}</div>",
+      "    `",
+      "  }",
+      "}",
+      "",
+      "declare global {",
+      "  interface HTMLElementTagNameMap {",
+      "    '${TM_FILENAME_BASE}': ${TM_FILENAME_BASE/(^|\\-)(\\w)/${2:/upcase}/g}",
+      "  }",
+      "}",
+      ""
+		],
+		"description": "Generate a Hyosan component based on the filename"
+	},
+	"Hyosan Component Property": {
+		"prefix": "hy-component-property",
+		"body": [
+			"/** $2 */",
+			"@property({ reflect: true })",
+			"$1 = ''"
+		]
+	}
+}
