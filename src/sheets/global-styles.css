@@ -15,4 +15,12 @@
 	--hy-bubble-padding: 8px;
 	/* 头像大小 */
 	--hy-bubble-avatar-size: 37px;
+	/* 消息气泡中的代码块的背景颜色 */
+	--hy-code-tag-background-color: var(--sl-color-primary-100);
+	/* 消息气泡中的代码块的背景颜色(用户消息) */
+	--hy-code-tag-background-color-user: var(--sl-color-neutral-200);
+	/* 消息气泡中的代码块的字体颜色 */
+	--hy-code-tag-color: var(--sl-color-primary-800);
+	/* 消息气泡中的代码块的字体颜色(用户消息) */
+	--hy-code-tag-color-user: var(--sl-color-neutral-600);
 }

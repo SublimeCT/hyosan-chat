@@ -92,6 +92,24 @@ export class HyosanChatBubbleList extends ShoelaceElement {
       tr:nth-child(even) {
         background-color: #f8f8f8;
       } 
+      code {
+        background-color: var(--hy-code-tag-background-color);
+        padding: 3px 5px;
+        border-radius: 6px;
+        color: var(--hy-code-tag-color);
+      }
+    }
+    .bubble-item[data-role="user"] {
+      code {
+        background-color: var(--hy-code-tag-background-color-user);
+        color: var(--hy-code-tag-color-user);
+      }
+    }
+    .bubble {
+      pre code {
+        background-color: inherit;
+        color: inherit;
+      }
     }
   `,
 		unsafeCSS(hljsGithubTheme),

@@ -7,7 +7,7 @@
 ![](./hyosan-chat-settings-screenshot.png)
 
 ## 介绍
-`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库; 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [Ant Design Pro](https://x.ant.design/index-cn)，但专注于 AI 驱动的交互体验。
+`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库; 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
 
 ## 功能特性
 - **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性
@@ -42,10 +42,16 @@ TODO
 
 ## API
 ### Properties
-> [!TIP] 关于 双向数据绑定
+> [!TIP]
+>
+> 关于 双向数据绑定:
+>
 > [Lit@^3.2.1](https://lit.dev) 组件不具备像 `vue` 的 `v-model` 一样的双向数据绑定, 必须结合组件提供的 **自定义事件** 来实现; 所以即使组件提供了 `Reflect`, 也无法 直接使用 `v-model`
 
-> [!TIP] 关于 属性类型
+> [!TIP]
+>
+> 关于 属性类型:
+>
 > [Lit@^3.2.1](https://lit.dev) 组件可以接收 `Property` / `Attribute` 参数:
 > - `Attribute`: 通过 **`HTML` 元素的属性(`attribute`)** 传递数据, 并且 `attribute` 属性值会转换为 `string` 类型
 > - `Property`: 通过 `JS` 获取组件, 并 **在组件对象上** 添加属性, 并且 `Property` 属性值会转换为 `JS` 原生数据类型

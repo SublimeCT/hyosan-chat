@@ -115,7 +115,7 @@ export class HyosanChatDemo extends LitElement {
 		},
 		{
 			role: 'user',
-			content: '如何获取和更新 textarea 的内容, 使用 ts 代码实现',
+			content: '如何获取和更新 `textarea` 的内容, 使用 `ts` 代码实现',
 		},
 		{
 			role: 'assistant',
