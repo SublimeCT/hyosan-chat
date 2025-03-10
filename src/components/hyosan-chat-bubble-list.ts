@@ -71,6 +71,28 @@ export class HyosanChatBubbleList extends ShoelaceElement {
         max-width: 100%;
       }
     }
+    .bubble {
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0;
+      }
+
+      th, td {
+        border: 1px solid #d6d6d6;
+        padding: 6px 13px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f8f8f8;
+        font-weight: 600;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f8f8f8;
+      } 
+    }
   `,
 		unsafeCSS(hljsGithubTheme),
 	)
