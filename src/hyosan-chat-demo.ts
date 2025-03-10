@@ -141,7 +141,6 @@ export class HyosanChatDemo extends LitElement {
 			<sl-card class="demo-container">
 				<header slot="header">
 					<h1>HyosanChatDemo</h1>
-					<hyosan-chat-settings-button></hyosan-chat-settings-button>
 				</header>
 				<main>
 					<hyosan-chat

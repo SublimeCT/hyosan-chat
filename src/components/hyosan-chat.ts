@@ -66,6 +66,7 @@ export class HyosanChat extends ShoelaceElement {
 		this,
 		'conversations',
 		'conversations-header',
+		'conversations-footer',
 		'main-welcome',
 		'main-header',
 	)
@@ -156,15 +157,19 @@ export class HyosanChat extends ShoelaceElement {
 		}
 		this.requestUpdate('messages')
 	}
+	/** 从本地存储中更新服务配置 */
+	private updateServiceSettingsFromLocalStorage() {
+		const chatSettings = ChatSettings.fromLocalStorage()
+		this.service.url = chatSettings.baseUrl
+		this.service.model = chatSettings.modelName
+		this.service.apiKey = chatSettings.apiKey
+	}
 	private async _handleSendMessage(
 		event: GlobalEventHandlersEventMap['send-message'],
 	) {
 		const { content } = event.detail
-		const chatSettings = ChatSettings.fromLocalStorage()
 		// 配置请求参数
-		this.service.url = chatSettings.baseUrl
-		this.service.model = chatSettings.modelName
-		this.service.apiKey = chatSettings.apiKey
+		this.updateServiceSettingsFromLocalStorage()
 		// 监听流式请求响应
 		this.service.emitter.on('before-send', this._onData.bind(this))
 		this.service.emitter.on('send-open', this._onData.bind(this))
@@ -188,15 +193,27 @@ export class HyosanChat extends ShoelaceElement {
 		}
 	}
 
+	private _handleSettingsSave(event: CustomEvent<ChatSettings>) {
+		console.log(event.detail)
+	}
+
 	render() {
 		const hasConversationsSlot = this.hasSlotController.test('conversations')
 		const hasConversationsHeaderSlot = this.hasSlotController.test(
 			'conversations-header',
 		)
+		const hasMainHeaderSlot = this.hasSlotController.test('main-header')
+		const hasConversationsFooterSlot = this.hasSlotController.test(
+			'conversations-footer',
+		)
 		/** 会话列表 header */
 		const conversationsHeader = hasConversationsHeaderSlot
 			? html`<slot name="conversations-header"></slot>`
 			: html`<hyosan-chat-conversations-header slot="conversations-header" @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
+		/** 会话列表 footer */
+		const conversationsFooter = hasConversationsFooterSlot
+			? html`<slot name="conversations-footer"></slot>`
+			: html`<hyosan-chat-conversations-footer slot="conversations-footer" @hyosan-chat-settings-save=${this._handleSettingsSave}></hyosan-chat-conversations-footer>`
 		/** 会话列表 */
 		const conversations = hasConversationsSlot
 			? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
@@ -206,9 +223,12 @@ export class HyosanChat extends ShoelaceElement {
 					@click-conversation=${this._handleClickConversation}
 					.conversations=${this.conversations}>
 					${conversationsHeader}
-					<slot name="conversations-footer"></slot>
+					${conversationsFooter}
 				</hyosan-chat-conversations>
 			`
+		const mainHeader = hasMainHeaderSlot
+			? html`<slot name="main-header"></slot>`
+			: html`<hyosan-chat-main-header></hyosan-chat-main-header>`
 		return html`
 			<div>
 				<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
@@ -224,7 +244,7 @@ export class HyosanChat extends ShoelaceElement {
 						class="main-container"
 					>
 						<header>
-							<slot name="main-header"></slot>
+							${mainHeader}
 						</header>
 						<main>
 							${this._mainPanel}
