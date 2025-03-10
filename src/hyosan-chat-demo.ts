@@ -30,11 +30,9 @@ export class HyosanChatDemo extends LitElement {
 			}
 
 			.demo-container {
-				width: 90%;
-				max-width: 1500px;
-				min-width: 530px;
+				width: 100%;
 				height: 100%;
-				margin-top: 32px;
+				max-height: 100%;
 				background-color: var(--container-background-color);
 				transition: background-color 0.3s;
 				overflow: auto;
@@ -138,26 +136,21 @@ export class HyosanChatDemo extends LitElement {
 
 	render() {
 		return html`
-			<sl-card class="demo-container">
-				<header slot="header">
-					<h1>HyosanChatDemo</h1>
-				</header>
-				<main>
-					<hyosan-chat
-						show-avatar
-						.conversations=${this.conversations}
-						.messages=${this.messages}
-						currentConversationId=${this.currentConversationId}
-						@conversations-create="${this._handleConversationsCreate}"
-						@click-conversation=${this._handleClickConversation}
-					>
-						<div slot="main-welcome" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-							<h2 style="font-size: 48px; margin-bottom: 16px; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
-							<img .src=${HyosanChatIcon} />
-						</div>
-					</hyosan-chat>
-				</main>
-			</sl-card>
+			<div class="demo-container">
+				<hyosan-chat
+					show-avatar
+					.conversations=${this.conversations}
+					.messages=${this.messages}
+					currentConversationId=${this.currentConversationId}
+					@conversations-create="${this._handleConversationsCreate}"
+					@click-conversation=${this._handleClickConversation}
+				>
+					<div slot="main-welcome" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
+						<h2 style="font-size: 48px; margin-bottom: 16px; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
+						<img .src=${HyosanChatIcon} />
+					</div>
+				</hyosan-chat>
+			</div>
     `
 	}
 }

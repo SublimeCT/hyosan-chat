@@ -16,10 +16,8 @@ import type { Conversation } from '@/types/conversations'
 export class HyosanChat extends ShoelaceElement {
 	static styles? = css`
 		:host {
-			border: 1px solid var(--sl-color-neutral-200);
-			border-radius: var(--hy-container-radius);
 			width: 100%;
-			height: calc(100% - 2px);
+			height: 100%;
 		}
 		:host > div {
 			height: 100%;
