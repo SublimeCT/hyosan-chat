@@ -10,7 +10,7 @@ export class HyosanChatConversationsFooter extends ShoelaceElement {
 	static styles? = css`
     :host {
       width: 100%;
-      height: 3rem;
+      height: 48px;
       display: flex;
       align-items: center;
       padding: 0 var(--hy-container-padding);

@@ -20,8 +20,8 @@ export class HyosanChatSender extends ShoelaceElement {
       min-width: var(--hy-main-container-min-width);
       max-width: var(--hy-main-container-max-width);
       background-color: var(--sl-color-neutral-100);
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      padding: var(--hy-container-padding);
+      border-radius: var(--hy-container-padding);
     }
     .container > main {
       width: 100%;

@@ -8,11 +8,11 @@ import { customElement, property } from 'lit/decorators.js'
 export class HyosanChatConversationsHeader extends ShoelaceElement {
 	static styles? = css`
 		header {
-			margin: 1rem 0;
+			margin: 16px 0;
 		}
 		h2 {
 			margin: 0;
-			padding: 0 1rem;
+			padding: 0 16px;
 			display: flex;
 			align-items: center;
 			justify-content: center;

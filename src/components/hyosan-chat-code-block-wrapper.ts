@@ -9,7 +9,7 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 	static styles? = css`
 		:host {
 			display: block;
-			margin: 1rem 0;
+			margin: 16px 0;
 		}
 		.code-block-container {
 			display: block;
@@ -17,7 +17,7 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 			border: 1px solid rgba(60, 60, 60, 0.1);
 			background-color: var(--sl-color-neutral-500);
 			header {
-				margin: 0.3rem 0.5rem;
+				margin: 4px var(--hy-container-padding);
 				color: #EEE;
 				display: flex;
 				justify-content: space-between;
@@ -60,7 +60,8 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 	}
 
 	render() {
-		const copyButtonContent = this._copyButtonContent || this._localize.term('copy')
+		const copyButtonContent =
+			this._copyButtonContent || this._localize.term('copy')
 		return html`
       <div class="code-block-container">
 				<header>
@@ -79,6 +80,6 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 
 declare global {
 	interface HTMLElementTagNameMap {
-    'hyosan-chat-code-block-wrapper': HyosanChatCodeBlockWrapper
+		'hyosan-chat-code-block-wrapper': HyosanChatCodeBlockWrapper
 	}
 }

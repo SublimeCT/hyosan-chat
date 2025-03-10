@@ -8,7 +8,7 @@ import { customElement, property } from 'lit/decorators.js'
 @customElement('hyosan-chat-conversations-item')
 export class HyosanChatConversationsItem extends ShoelaceElement {
 	static styles? = css`
-    .item-row { padding: 0.5rem; margin: 0.5rem; border-radius: 0.5rem; cursor: pointer; }
+    .item-row { padding: var(--hy-container-padding); margin: var(--hy-container-padding); border-radius: var(--hy-container-padding); cursor: pointer; }
 		:host([actived]) .item-row, .item-row:hover { background-color: var(--sl-color-neutral-200); }
   `
 

@@ -16,7 +16,7 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
 	static styles? = css`
     .settings-dialog {
       sl-input {
-        margin-bottom: 1rem;
+        margin-bottom: 16px;
       }
     }
   `
