@@ -25,8 +25,8 @@ export class HyosanChat extends ShoelaceElement {
 		sl-split-panel {
 			width: 100%;
 			height: 100%;
-			--min: 228px;
-			--max: 40%;
+			/* --min: 228px; */
+			/* --max: 40%; */
 		}
 		.aside-container {
 			border-top-left-radius: var(--hy-container-radius);
@@ -36,8 +36,8 @@ export class HyosanChat extends ShoelaceElement {
 			overflow-y: auto;
 		}
 		.main-container {
-			margin: var(--hy-container-padding);
-			width: calc(100% - var(--hy-container-padding) * 2);
+			/* padding: var(--hy-container-padding); */
+			width: 100%;
 			height: calc(100% - var(--hy-container-padding) * 2);
 			max-height: calc(100% - var(--hy-container-padding) * 2);
 			overflow-y: auto;
@@ -53,7 +53,7 @@ export class HyosanChat extends ShoelaceElement {
 			width: 100%;
 		}
 		.main-container > main {
-			margin: var(--hy-container-padding);
+			padding-bottom: var(--hy-container-padding);
 			overflow-y: auto;
 			flex: 1;
 		}
@@ -78,7 +78,7 @@ export class HyosanChat extends ShoelaceElement {
 	panelSnap = '25%'
 
 	/**
-	 * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`, 保持响应式
+	 * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`
 	 * @example 25
 	 * @see https://shoelace.style/components/split-panel#initial-position
 	 */

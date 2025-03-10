@@ -32,6 +32,7 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 			margin: 0;
 			border-bottom-left-radius: var(--hy-container-radius);
 			border-bottom-right-radius: var(--hy-container-radius);
+			overflow-x: auto;
 		}
   `
 

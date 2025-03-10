@@ -1,5 +1,6 @@
 # hyosan-chat
-🚧 Work in Progress | 此项目处于早期开发阶段
+> [!WARNING]
+> 🚧 Work in Progress | 此项目处于早期开发阶段
 
 ![](./hyosan-chat-welcome-screenshot.png)
 ![](./hyosan-chat-messages-screenshot.png)
@@ -23,17 +24,63 @@
 - [biome](https://biomejs.dev/zh-cn/guides/getting-started/)：代码格式化和 `lint` 工具, 保证代码风格一致性和质量
 
 ## 安装
-TODO
-
-## 使用
 ```bash
 pnpm i git+https://github.com/SublimeCT/hyosan-chat.git#main
 ```
 
-参考 `src/hyosan-chat-demo.ts`
+## 使用
+[🔗 `demo` 页面](https://snazzy-khapse-06e16b.netlify.app/) 的源码可直接参考 [`src/hyosan-chat-demo.ts`](./src/hyosan-chat-demo.ts)
 
-### 主题
+### vue
+> [!TIP]
+> 请先阅读官方文档 [在 Vue 中使用自定义元素](https://cn.vuejs.org/guide/extras/web-components#using-custom-elements-in-vue)
 
+TODO
+
+### react
+TODO
+
+## API
+### Properties
+> [!TIP] 关于 双向数据绑定
+> [Lit@^3.2.1](https://lit.dev) 组件不具备像 `vue` 的 `v-model` 一样的双向数据绑定, 必须结合组件提供的 **自定义事件** 来实现; 所以即使组件提供了 `Reflect`, 也无法 直接使用 `v-model`
+
+> [!TIP] 关于 属性类型
+> [Lit@^3.2.1](https://lit.dev) 组件可以接收 `Property` / `Attribute` 参数:
+> - `Attribute`: 通过 **`HTML` 元素的属性(`attribute`)** 传递数据, 并且 `attribute` 属性值会转换为 `string` 类型
+> - `Property`: 通过 `JS` 获取组件, 并 **在组件对象上** 添加属性, 并且 `Property` 属性值会转换为 `JS` 原生数据类型
+
+| 属性名 | 类型 | 属性类型 | 默认值 | 描述 | [Reflect](https://lit.dev/docs/components/properties/#reflected-attributes) |
+| --- | --- | --- | --- | --- | --- |
+| `panelSnap` | `string` | `Attribute` | `'25% 50%'` | 分割面板的可捕捉位置 | ✅ |
+| `panelPosition` | `number` | `Attribute` | `25` | 分隔线与主面板边缘的当前位置(百分比, `0-100`), 默认为容器初始大小的 `50%` | ✅ |
+| 💡 `conversations` | `Array<Conversation>` | `Property` | `[]` | 会话列表数据源 | |
+| `currentConversationId` | `BaseService` | `Attribute` | `''` | 当前会话 ID | ✅ |
+| 💡 `service` | `BaseService` | `Property` | `new DefaultService()` | 会话服务配置参数 | |
+| 💡 `messages` | `BaseServiceMessages` | `Property` | `undefined` | 会话服务消息列表 | ✅ |
+| `showAvatar` | `boolean` | `Attribute` | `undefined` | 是否显示头像 | ✅ |
+
+### Slots
+> [!TIP] 关于 插槽
+> [Lit@^3.2.1](https://lit.dev) 的插槽与 `vue` 的插槽不同, 基于原生的 [`<slot>` 元素](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_components/Using_templates_and_slots) 实现, 不具备作用域插槽, 也不能在组件内部多次渲染插槽
+
+| 名称 | 描述 |
+| --- | --- |
+| `conversations` | 左侧会话列表 |
+| `conversations-header` | 左侧会话列表的 `header` 部分 |
+| `conversations-footer` | 左侧会话列表的 `footer` 部分 |
+| `main-welcome` | 右侧消息列表的 `welcome` 界面 |
+| `main-header` | 右侧消息列表的 `header` 部分 |
+
+### Events
+| 事件名 | 参数 | 描述 |
+| --- | --- | --- |
+| `conversations-create` | `undefined` | 点击创建新会话按钮 |
+| `click-conversation` | `CustomEvent<{ item: Conversation }>` | 点击左侧会话列表中的会话 |
+| `send-message` | `CustomEvent<{ content: string }>` | 点击发送按钮 |
+| `hyosan-chat-settings-save` | `CustomEvent<{ settings: ChatSettings }>` | 在设置弹窗中点击保存按钮 |
+
+## 主题
 
 ## 贡献指南
 参考 [CONTRIBUTING](./CONTRIBUTING.md)

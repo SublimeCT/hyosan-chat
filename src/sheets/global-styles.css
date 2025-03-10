@@ -6,7 +6,7 @@
 	/* chat 容器中的宽度 */
 	--hy-main-container-width: 80%;
 	/* chat 容器中的最小宽度 */
-	--hy-main-container-min-width: 360px;
+	--hy-main-container-min-width: 300px;
 	/* chat 容器中的最大宽度 */
 	--hy-main-container-max-width: 1200px;
 	/* 消息气泡之间的间距 */
