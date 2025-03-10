@@ -9,8 +9,8 @@ import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import { HasSlotController } from '@/internal/slot'
 import type { BaseService, BaseServiceMessages } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
-import type { Conversation } from '@/types/conversations'
 import { ChatSettings } from '@/types/ChatSettings'
+import type { Conversation } from '@/types/conversations'
 
 @customElement('hyosan-chat')
 export class HyosanChat extends ShoelaceElement {
@@ -103,12 +103,16 @@ export class HyosanChat extends ShoelaceElement {
 		attribute: false,
 		reflect: true,
 		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
-			return !oldValue || value.length !== oldValue.length || value.some(v => v.$loading)
+			return (
+				!oldValue ||
+				value.length !== oldValue.length ||
+				value.some((v) => v.$loading)
+			)
 		},
 	})
 	messages?: BaseServiceMessages
 
-  /** 是否显示头像 */
+	/** 是否显示头像 */
 	@property({ type: Boolean, attribute: 'show-avatar', reflect: true })
 	showAvatar = false
 
@@ -117,9 +121,7 @@ export class HyosanChat extends ShoelaceElement {
 	}
 	get isLoading() {
 		// console.log('isLoading', this.messages)
-		return this.messages
-			? this.messages.some(v => v.$loading)
-			: false
+		return this.messages ? this.messages.some((v) => v.$loading) : false
 	}
 	/** 右侧消息列表 */
 	private get _mainPanel() {
@@ -160,9 +162,9 @@ export class HyosanChat extends ShoelaceElement {
 		const { content } = event.detail
 		const chatSettings = ChatSettings.fromLocalStorage()
 		// 配置请求参数
-		this.service.url = chatSettings.baseUrl || import.meta.env.VITE_CONNECT_URL
-		this.service.model = chatSettings.modelName || import.meta.env.VITE_CONNECT_MODEL
-		this.service.apiKey = chatSettings.apiKey || import.meta.env.VITE_API_KEY
+		this.service.url = chatSettings.baseUrl
+		this.service.model = chatSettings.modelName
+		this.service.apiKey = chatSettings.apiKey
 		// 监听流式请求响应
 		this.service.emitter.on('before-send', this._onData.bind(this))
 		this.service.emitter.on('send-open', this._onData.bind(this))

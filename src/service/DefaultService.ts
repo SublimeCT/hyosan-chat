@@ -52,10 +52,12 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		}
 		const abortController = this.abortController
 
+		this.messages.push({ role: 'assistant', content: '', $loading: true }) // 加入助手消息
+
 		const body: ChatCompletionCreateParamsStreaming = {
 			model: this.model,
 			temperature: this.chat.temperature,
-			messages: this.messages,
+			messages: this.messages.slice(0, -1),
 			stream: true,
 		}
 
@@ -71,7 +73,6 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 					signal: abortController.signal,
 					onopen: async (response) => {
 						if (response.status === 200) {
-							this.messages.push({ role: 'assistant', content: '', $loading: true }) // 加入助手消息
 							this.emitter.emit('send-open')
 						} else {
 							reject({

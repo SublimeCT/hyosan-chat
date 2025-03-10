@@ -110,7 +110,12 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 			this.messagesHtml = markdownHtmlContents
 			// console.log('messagesHtml updated [end]')
 			this.requestUpdate('messagesHtml')
+			this.updateComplete.then(() => this.scrollToBottom())
 		})
+	}
+
+	scrollToBottom() {
+		this.scrollTop = this.scrollHeight - this.clientHeight
 	}
 
 	protected willUpdate(_changedProperties: PropertyValues): void {

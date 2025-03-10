@@ -84,7 +84,7 @@ export class HyosanChatSender extends ShoelaceElement {
         <footer>
           <div class="option-buttons"></div>
           <div class="action-buttons">
-            <sl-button variant="primary" ?loading=${this.loading} circle @click=${this._handleEmitSendMessage}>
+            <sl-button variant="primary" ?loading=${this.loading} ?disabled=${this.loading} circle @click=${this._handleEmitSendMessage}>
               <hyosan-icon-wrapper>
                 <svg t="1741252222107" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5069" width="1em" height="1em" fill="currentColor"><path d="M133.8 579l-44.4-44.4c-18.8-18.8-18.8-49.2 0-67.8L478 78c18.8-18.8 49.2-18.8 67.8 0l388.6 388.6c18.8 18.8 18.8 49.2 0 67.8L890 578.8c-19 19-50 18.6-68.6-0.8L592 337.2V912c0 26.6-21.4 48-48 48h-64c-26.6 0-48-21.4-48-48V337.2L202.4 578.2c-18.6 19.6-49.6 20-68.6 0.8z" p-id="5070"></path></svg>
               </hyosan-icon-wrapper>
