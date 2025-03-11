@@ -12,7 +12,10 @@ const translation: Translation = {
 	startANewChat: 'Start a new chat',
 	sendTips: 'Press Enter to send, press Shift + Enter to wrap the line',
 	copy: 'Copy',
-	copySuccessfully: 'Copy successfully!'
+	copySuccessfully: 'Copy successfully!',
+	rename: 'Rename',
+	edit: 'Edit',
+	delete: 'Delete',
 }
 
 registerTranslation(translation)

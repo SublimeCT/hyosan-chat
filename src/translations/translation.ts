@@ -13,4 +13,7 @@ export interface Translation extends DefaultTranslation {
 	sendTips: string
 	copy: string
 	copySuccessfully: string
+	rename: string
+	edit: string
+	delete: string
 }

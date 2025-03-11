@@ -60,7 +60,7 @@ TODO
 | --- | --- | --- | --- | --- | --- |
 | `panelSnap` | `string` | `Attribute` | `'25% 50%'` | 分割面板的可捕捉位置 | ✅ |
 | `panelPosition` | `number` | `Attribute` | `25` | 分隔线与主面板边缘的当前位置(百分比, `0-100`), 默认为容器初始大小的 `50%` | ✅ |
-| 💡 `conversations` | `Array<Conversation>` | `Property` | `[]` | 会话列表数据源 | |
+| 💡 `conversations` | `Array<Conversation>` | `Property` | `[]` | 会话列表数据源 | ✅ |
 | `currentConversationId` | `BaseService` | `Attribute` | `''` | 当前会话 ID | ✅ |
 | 💡 `service` | `BaseService` | `Property` | `new DefaultService()` | 会话服务配置参数 | |
 | 💡 `messages` | `BaseServiceMessages` | `Property` | `undefined` | 会话服务消息列表 | ✅ |
@@ -85,6 +85,8 @@ TODO
 | `click-conversation` | `CustomEvent<{ item: Conversation }>` | 点击左侧会话列表中的会话 |
 | `send-message` | `CustomEvent<{ content: string }>` | 点击发送按钮 |
 | `hyosan-chat-settings-save` | `CustomEvent<{ settings: ChatSettings }>` | 在设置弹窗中点击保存按钮 |
+| `edit-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击编辑按钮, 并保存 |
+| `delete-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击删除按钮 |
 
 ## 主题
 

@@ -13,6 +13,9 @@ const translation: Translation = {
 	sendTips: '按 Enter 键发送, 按 Shift + Enter 键换行',
 	copy: '复制',
 	copySuccessfully: '复制成功!',
+	rename: '重命名',
+	edit: '编辑',
+	delete: '删除',
 }
 
 registerTranslation(translation)

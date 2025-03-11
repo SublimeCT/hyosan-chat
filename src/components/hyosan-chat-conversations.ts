@@ -34,13 +34,21 @@ export class HyosanChatConversations extends ShoelaceElement {
 	currentConversationId = ''
 
 	/** 会话列表数据源 */
-	@property({ attribute: false, type: Array })
+	@property({ attribute: false, type: Array, reflect: true })
 	conversations: Conversation[] = []
 
 	private _handleClickConversation(
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
 		this.currentConversationId = event.detail.item.key
+		this.requestUpdate()
+	}
+	private _handleDeleteConversation(
+		event: CustomEvent<{ item: Conversation }>,
+	) {
+		const index = this.conversations.findIndex((c) => c === event.detail.item)
+		this.conversations.splice(index, 1)
+		this.conversations = [...this.conversations]
 		this.requestUpdate()
 	}
 
@@ -56,6 +64,7 @@ export class HyosanChatConversations extends ShoelaceElement {
 						<hyosan-chat-conversations-item
 							.item=${item} ?actived=${this.currentConversationId === item.key}
 							@click-conversation=${this._handleClickConversation}
+							@delete-conversation=${this._handleDeleteConversation}
 						>
 						</hyosan-chat-conversations-item>
 						`,
