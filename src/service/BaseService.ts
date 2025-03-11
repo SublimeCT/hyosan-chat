@@ -1,7 +1,5 @@
 import mitt from 'mitt'
-import type {
-	ChatCompletionMessageParam,
-} from 'openai/resources/index.mjs'
+import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 
 /**
  * 对话服务 基类
@@ -74,11 +72,21 @@ export abstract class BaseService<
 		this.chatCompletionId = chatCompletionId || ''
 		this.chatCompletionCreated = chatCompletionCreated || 0
 	}
+	handleRequestMessages(messages: BaseServiceMessages) {
+		return messages.map((v) => {
+			const _message = { ...v }
+			Reflect.deleteProperty(_message, '$loading')
+			Reflect.deleteProperty(_message, '$reasoningContent')
+			return _message
+		})
+	}
 }
 
 export interface BaseServiceMessage {
 	/** 当前消息是否正在加载 */
 	$loading?: boolean
+	/** 思考阶段内容(在发起请求时会被删除) */
+	$reasoningContent?: string
 }
 export type BaseServiceMessageItem = ChatCompletionMessageParam &
 	BaseServiceMessage
@@ -88,3 +96,11 @@ export type BaseServiceMessageItem = ChatCompletionMessageParam &
  * @see 详见 [Create chat completion - OpenAI Platform](https://platform.openai.com/docs/api-reference/chat/create)
  */
 export type BaseServiceMessages = Array<BaseServiceMessageItem>
+
+/** 在组件内部使用的基本的消息类型 */
+export interface BaseServiceMessageNode {
+	/** 消息内容 */
+	content: string
+	/** 消息的思考内容 */
+	reasoningContent: string
+}

@@ -1,10 +1,13 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import type { BaseServiceMessages } from '@/service/BaseService'
+import type {
+	BaseServiceMessageNode,
+	BaseServiceMessages,
+} from '@/service/BaseService'
 import { withResetSheets } from '@/sheets'
 import { renderMarkdown } from '@/utils/markdown/markdown'
 import hljsGithubTheme from 'highlight.js/styles/github-dark.min.css?inline'
 import { type PropertyValues, css, html, unsafeCSS } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
+import { customElement, property, state } from 'lit/decorators.js'
 
 /**
  * 对话气泡列表组件
@@ -140,16 +143,57 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 	 * 由于 `custom elements` 存在样式隔离的问题, 每个 bubble 都需要引入大量样式(代码高亮),
 	 * 为了保证性能, 放弃使用子组件, 直接在 list 组件中进行渲染
 	 */
-	messagesHtml: Array<string> = []
+	@state()
+	messagesHtml: Array<BaseServiceMessageNode> = []
 
 	private _onMessagesChange() {
+		if (!this.messages || this.messages.length === 0) return
+		/** 消息列表中, 最后一部分 assistant 中的最开始的消息的索引 */
+		let assistantIndex = 0
+		const isFirstRender = this.messagesHtml.length === 0
+		if (!isFirstRender) {
+			for (let messageIndex = this.messages.length; messageIndex--; ) {
+				if (this.messages[messageIndex].role === 'assistant') {
+					assistantIndex = messageIndex
+				} else {
+					assistantIndex = messageIndex
+					break
+				}
+			}
+		}
 		Promise.all(
-			this.messages.map((message) =>
-				renderMarkdown((message.content || '')?.toString()),
-			),
+			this.messages.slice(assistantIndex).map((message, index) => {
+				const messagesHtmlItem = this.messagesHtml[assistantIndex + index]
+				const updateQueue: Array<Promise<void>> = []
+				const messageNode: BaseServiceMessageNode = {
+					content: '',
+					reasoningContent: '',
+				}
+				Object.assign(messageNode, messagesHtmlItem)
+				// 转换消息内容和思考内容
+				if (message.content)
+					updateQueue.push(
+						renderMarkdown((message.content || '')?.toString()).then((data) => {
+							messageNode.content = data
+						}),
+					)
+				if (isFirstRender || (!message.content && message.$reasoningContent)) {
+					// console.log(message.$reasoningContent)
+					updateQueue.push(
+						renderMarkdown((message.$reasoningContent || '')?.toString()).then(
+							(data) => {
+								messageNode.reasoningContent = data
+							},
+						),
+					)
+				}
+				return Promise.all(updateQueue).then(() => messageNode)
+			}),
 		).then((markdownHtmlContents) => {
-			this.messagesHtml = markdownHtmlContents
-			// console.log('messagesHtml updated [end]')
+			this.messagesHtml = this.messagesHtml
+				.slice(0, assistantIndex)
+				.concat(markdownHtmlContents)
+			// console.log('messagesHtml updated [end]', markdownHtmlContents)
 			this.requestUpdate('messagesHtml')
 			this.updateComplete.then(() => this.scrollToBottom())
 		})
@@ -187,19 +231,26 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 
 	/** 气泡消息行 */
 	private _renderMessages() {
-		return this.messagesHtml.map((item: string, index: number) => {
-			const message = this.messages[index]
-			if (!message) return html``
-			if (message.role === 'system') return html`` // 系统消息
+		return this.messagesHtml.map(
+			(item: BaseServiceMessageNode, index: number) => {
+				const message = this.messages[index]
+				if (!message) return html``
+				if (message.role === 'system') return html`` // 系统消息
 
-			return html`
+				return html`
           <div class="bubble-item" ?show-avatar=${this.showAvatar} data-role=${message?.role}>
             ${message.role === 'user' ? '' : this._assistantAvatar}
-            <div class="bubble" part="hyosan-chat-bubble" .innerHTML=${item}></div>
+            <div class="bubble" part="hyosan-chat-bubble">
+              <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!item.reasoningContent}>
+                <div slot="content" .innerHTML=${item.reasoningContent}></div>
+              </hyosan-chat-reasoner-block>
+              <div class="content" .innerHTML=${item.content}></div>
+            </div>
             ${message.role === 'user' ? this._userAvatar : ''}
           </div>
         `
-		})
+			},
+		)
 	}
 
 	render() {

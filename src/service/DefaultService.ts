@@ -4,7 +4,11 @@ import type {
 	ChatCompletionChunk,
 	ChatCompletionCreateParamsStreaming,
 } from 'openai/resources/index.mjs'
-import { BaseService, type BaseServiceMessages } from './BaseService'
+import {
+	BaseService,
+	type BaseServiceMessageNode,
+	type BaseServiceMessages,
+} from './BaseService'
 
 // const openai = new OpenAI()
 // openai.chat.completions.create({ messages: [], model: 'gpt-4o-mini' })
@@ -52,12 +56,17 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		}
 		const abortController = this.abortController
 
-		this.messages.push({ role: 'assistant', content: '', $loading: true }) // 加入助手消息
+		this.messages.push({
+			role: 'assistant',
+			content: '',
+			$loading: true,
+			$reasoningContent: '',
+		}) // 加入助手消息
 
 		const body: ChatCompletionCreateParamsStreaming = {
 			model: this.model,
 			temperature: this.chat.temperature,
-			messages: this.messages.slice(0, -1),
+			messages: this.handleRequestMessages(this.messages.slice(0, -1)),
 			stream: true,
 		}
 
@@ -92,10 +101,20 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 							if (event.data === '') return
 							const data = this.getChatCompletionByResponse(event.data)
 							const content = this.getContentByResponse(data)
-							this.messages[this.messages.length - 1].content += content
+							// 加入思考内容
+							if (content.reasoningContent)
+								this.messages[this.messages.length - 1].$reasoningContent +=
+									content.reasoningContent
+							// 加入消息内容
+							if (content.content)
+								this.messages[this.messages.length - 1].content +=
+									content.content
 							// console.warn(JSON.stringify(messages))
 							this.setChatCompletionParams(data.id, data.created)
-							this.emitter.emit('data', data)
+							// 只有返回消息内容时才触发事件
+							if (content.content || content.reasoningContent) {
+								this.emitter.emit('data', data)
+							}
 						} catch (e) {
 							console.error('Data processing error:', e)
 						}
@@ -137,14 +156,21 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 	/**
 	 * 从原始的流式请求中获取文本内容
 	 * @param responseText 原始流式接口返回值
-	 * @returns 本次返回的文本内容
+	 * @returns 本次返回的文本内容和推理内容
 	 */
-	getContentByResponse(responseText: string | ChatCompletionChunk) {
+	getContentByResponse(
+		responseText: string | ChatCompletionChunk,
+	): BaseServiceMessageNode {
 		const data =
 			typeof responseText === 'string'
 				? this.getChatCompletionByResponse(responseText)
 				: responseText
-		return data.choices[0]?.delta?.content || ''
+		/** 消息内容 */
+		const content = data.choices[0]?.delta?.content || ''
+		const deltaObject = data.choices[0]?.delta as any
+		/** 推理内容 */
+		const reasoningContent = deltaObject.reasoning_content || '' // 暂不考虑 openai 的推理模型格式
+		return { content, reasoningContent }
 	}
 
 	static from(service: Partial<DefaultService>) {
