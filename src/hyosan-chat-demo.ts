@@ -58,6 +58,26 @@ export class HyosanChatDemo extends LitElement {
 				}
 			}
 		}
+		.main-welcome {
+			display: flex;
+			min-height: 0;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+			height: 100%;
+			overflow-y: auto;
+		}
+		.main-welcome > h2 {
+			font-size: 48px;
+			/* margin-bottom: 16px; */
+			text-align: center;
+			width: 100%;
+		}
+		.main-welcome > img {
+			width: 80%;
+			max-width: 512px;
+		}
 	`)
 
 	@state()
@@ -145,8 +165,8 @@ export class HyosanChatDemo extends LitElement {
 					@conversations-create="${this._handleConversationsCreate}"
 					@click-conversation=${this._handleClickConversation}
 				>
-					<div slot="main-welcome" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%;">
-						<h2 style="font-size: 48px; margin-bottom: 16px; text-align: center;width: 100%;">Welcome To Hyosan Chat</h2>
+					<div slot="main-welcome" class="main-welcome">
+						<h2>Welcome To Hyosan Chat</h2>
 						<img .src=${HyosanChatIcon} />
 					</div>
 				</hyosan-chat>

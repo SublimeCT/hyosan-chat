@@ -21,6 +21,7 @@ export class HyosanChat extends ShoelaceElement {
 		:host {
 			width: 100%;
 			height: 100%;
+			display: block;
 		}
 		:host > div {
 			height: 100%;
@@ -44,7 +45,7 @@ export class HyosanChat extends ShoelaceElement {
 			/* height: calc(100% - var(--hy-container-padding) * 2); */
 			height: 100%;
 			max-height: calc(100% - var(--hy-container-padding) * 2);
-			overflow-y: auto;
+			/* overflow-y: auto; */
 			overflow-x: hidden;
 			max-height: 100%;
 			display: flex;
@@ -59,7 +60,17 @@ export class HyosanChat extends ShoelaceElement {
 		.main-container > main {
 			padding-bottom: var(--hy-container-padding);
 			overflow-y: auto;
+			display: flow-root;
+			/* height: calc(100% - 140px); */
 			flex: 1;
+		}
+		.main-container > footer {
+			/* height: 132px; */
+		}
+		.main-welcome-wrapper {
+			display: block;
+			width: 100%;
+			height: 100%;
 		}
 		.chat-wrapper[data-compact] {
 			--hy-main-container-width: 100%;
@@ -143,6 +154,7 @@ export class HyosanChat extends ShoelaceElement {
 
 	private async _handleStartNewChat() {
 		this.emit('conversations-create')
+		if (this.compact) this._handleDrawerClickClose()
 	}
 	get isLoading() {
 		// console.log('isLoading', this.messages)
@@ -157,13 +169,18 @@ export class HyosanChat extends ShoelaceElement {
 				<hyosan-chat-bubble-list ?show-avatar=${this.showAvatar} .messages=${_messages}></hyosan-chat-bubble-list>
 			`
 		} else {
-			return html`<slot name="main-welcome"></slot>`
+			return html`
+				<div class="main-welcome-wrapper">
+					<slot name="main-welcome"></slot>
+				</div>
+			`
 		}
 	}
 	private _handleClickConversation(
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
 		this.currentConversationId = event.detail.item.key
+		if (this.compact) this._handleDrawerClickClose()
 	}
 
 	_onData() {
@@ -225,23 +242,23 @@ export class HyosanChat extends ShoelaceElement {
 	@property({ type: Number, reflect: true })
 	wrapWidth = 920
 	@state()
-	/** 是否应用紧凑样式 */
-	get compact() {
+	get /** 是否应用紧凑样式 */
+	compact() {
 		return this._width < this.wrapWidth
 	}
 
 	@state()
 	private _width = 0
 
-	private _handleResize(event: CustomEvent<{ entries: ResizeObserverEntry[] }>) {
+	private _handleResize(
+		event: CustomEvent<{ entries: ResizeObserverEntry[] }>,
+	) {
 		const borderBoxSize = event.detail.entries[0].borderBoxSize[0]
 		const width = borderBoxSize.inlineSize
 		this._width = width
 	}
 
-	private _handleClickConversationsButton() {
-
-	}
+	private _handleClickConversationsButton() {}
 	@query('.drawer-contained')
 	private _drawer?: SlDrawer
 
@@ -285,17 +302,15 @@ export class HyosanChat extends ShoelaceElement {
 			`
 		const mainHeader = hasMainHeaderSlot
 			? html`<slot name="main-header"></slot>`
-			: (
-				this.compact
-					? html`
+			: this.compact
+				? html`
 						<hyosan-chat-main-header
 							?compact=${this.compact}
 							@hyosan-chat-click-conversations-button=${this._handleClickConversationsButton}
 							@hyosan-chat-click-settings-button=${this._handleClickSettingsButton}>
 							</hyosan-chat-main-header>
 						`
-					: undefined
-			)
+				: undefined
 		return html`
 			<div class="chat-wrapper" ?data-compact=${this.compact}>
 				<sl-resize-observer @sl-resize=${this._handleResize}>
@@ -311,7 +326,7 @@ export class HyosanChat extends ShoelaceElement {
 							slot="end"
 							class="main-container"
 						>
-							<header>
+							<header style=${mainHeader ? '' : 'height: 0; display: none;'}>
 								${mainHeader}
 							</header>
 							<main>
@@ -323,9 +338,9 @@ export class HyosanChat extends ShoelaceElement {
 						</div>
 					</sl-split-panel>
 				</sl-resize-observer>
-				<sl-drawer label="Drawer" contained class="drawer-contained" placement="start" style="--size: 80%;">
+				<sl-drawer label="Conversations" contained class="drawer-contained" placement="start" style="--size: 100%;">
 					${conversations}
-					<sl-button slot="footer" variant="primary" @click=${this._handleDrawerClickClose}>Close</sl-button>
+					<!-- <sl-button slot="footer" variant="primary" @click=${this._handleDrawerClickClose}>Close</sl-button> -->
 				</sl-drawer>
 			</div>
     `
