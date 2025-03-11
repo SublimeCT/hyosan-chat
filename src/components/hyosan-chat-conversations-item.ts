@@ -83,8 +83,8 @@ export class HyosanChatConversationsItem extends ShoelaceElement {
 	@query('.edit-input')
 	_editInput?: SlInput
 	private _handleChange() {
-		if (!this._editMode) throw new Error('Missing edit input')
-		if (this._editInput) this.item.label = this._editInput.value
+		if (!this._editInput) throw new Error('Missing edit input')
+		this.item.label = this._editInput.value
 		this.emit('edit-conversation', { detail: { item: this.item } })
 		this._editMode = false
 	}
