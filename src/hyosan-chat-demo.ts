@@ -12,8 +12,10 @@ export const tagName = 'hyosan-chat-demo'
 export class HyosanChatDemo extends LitElement {
 	static styles = withResetSheets(css`
 		:host {
-			width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
-			height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+			/* width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); */
+			/* height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); */
+			width: 100%;
+			height: 100%;
 			display: flex;
 			justify-content: center;
 			align-items: center;
