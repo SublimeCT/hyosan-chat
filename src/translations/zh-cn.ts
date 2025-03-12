@@ -16,6 +16,8 @@ const translation: Translation = {
 	rename: '重命名',
 	edit: '编辑',
 	delete: '删除',
+	stopOutput: '停止输出',
+	retry: '重新生成',
 }
 
 registerTranslation(translation)

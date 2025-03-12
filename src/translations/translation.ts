@@ -16,4 +16,6 @@ export interface Translation extends DefaultTranslation {
 	rename: string
 	edit: string
 	delete: string
+	stopOutput: string
+	retry: string
 }

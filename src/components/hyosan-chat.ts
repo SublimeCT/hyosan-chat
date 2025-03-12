@@ -1,6 +1,6 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 // import { LocalizeController } from '@/utils/localize'
-import { css, html } from 'lit'
+import { type PropertyValues, css, html } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 
 // shoelace 组件
@@ -9,7 +9,12 @@ import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import '@shoelace-style/shoelace/dist/components/resize-observer/resize-observer.js'
 import '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { HasSlotController } from '@/internal/slot'
-import type { BaseService, BaseServiceMessages } from '@/service/BaseService'
+import type {
+	BaseService,
+	BaseServiceMessageItem,
+	BaseServiceMessageNode,
+	BaseServiceMessages,
+} from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
 import type { Conversation } from '@/types/conversations'
@@ -141,6 +146,7 @@ export class HyosanChat extends ShoelaceElement {
 		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
 			return (
 				!oldValue ||
+				!value ||
 				value.length !== oldValue.length ||
 				value.some((v) => v.$loading)
 			)
@@ -152,6 +158,14 @@ export class HyosanChat extends ShoelaceElement {
 	@property({ type: Boolean, attribute: 'show-avatar', reflect: true })
 	showAvatar = false
 
+	/** 是否显示重新生成按钮 */
+	@property({ type: Boolean })
+	showRetryButton = true
+
+	/** 是否显示点赞和踩按钮 */
+	@property({ type: Boolean })
+	showLikeAndDislikeButton = true
+
 	private async _handleStartNewChat() {
 		this.emit('conversations-create')
 		if (this.compact) this._handleDrawerClickClose()
@@ -160,13 +174,77 @@ export class HyosanChat extends ShoelaceElement {
 		// console.log('isLoading', this.messages)
 		return this.messages ? this.messages.some((v) => v.$loading) : false
 	}
+	private _handleStopOutput(
+		event: CustomEvent<{
+			messages: BaseServiceMessages
+			message: BaseServiceMessageItem
+			item: BaseServiceMessageNode
+		}>,
+	) {
+		const message = event.detail.message
+		message.$loading = false
+		if (this.service.abortController) {
+			this.service.abortController.abort()
+			this.requestUpdate()
+		} else {
+			console.warn('abortController is undefined')
+		}
+	}
+	private async _handleRetryMessage(message: BaseServiceMessageItem) {
+		const index = this.messages?.findIndex((v) => v === message)
+		console.log('_handleRetryMessage', message)
+		if (index === -1) {
+			throw new Error('message not found')
+		} else {
+			this._handleSendMessage({ detail: { content: '' } } as any, message)
+		}
+	}
+	private async _handleRetry(
+		event: CustomEvent<{
+			messages: BaseServiceMessages
+			message: BaseServiceMessageItem
+			item: BaseServiceMessageNode
+		}>,
+	) {
+		if (this.service.abortController) {
+			this.service.abortController.abort()
+			this.service.emitter
+				.once('abort')
+				.then(() => this._handleRetryMessage(event.detail.message))
+			this.requestUpdate()
+		} else {
+			this._handleRetryMessage(event.detail.message)
+			this.requestUpdate()
+		}
+	}
+
+	private _handleListDisconnected() {
+		this.service.destroy()
+	}
+
+	protected willUpdate(_changedProperties: PropertyValues): void {
+		if (_changedProperties.has('currentConversationId')) {
+			// 切换会话时, 销毁当前 service 上的连接和事件监听器
+			this.service.destroy()
+		}
+	}
+
 	/** 右侧消息列表 */
 	private get _mainPanel() {
 		if (this.messages) {
 			const _messages = this.messages
 			return html`
 				<!-- 对话气泡 -->
-				<hyosan-chat-bubble-list ?show-avatar=${this.showAvatar} .messages=${_messages}></hyosan-chat-bubble-list>
+				<hyosan-chat-bubble-list
+					currentConversationId=${this.currentConversationId}
+					?showRetryButton=${this.showRetryButton}
+					?showLikeAndDislikeButton=${this.showLikeAndDislikeButton}
+					?show-avatar=${this.showAvatar}
+					@hyosan-chat-stop=${this._handleStopOutput}
+					@hyosan-chat-retry=${this._handleRetry}
+					@hyosan-chat-bubble-list-disconnected=${this._handleListDisconnected}
+					.messages=${_messages}>
+				</hyosan-chat-bubble-list>
 			`
 		} else {
 			return html`
@@ -207,6 +285,7 @@ export class HyosanChat extends ShoelaceElement {
 	}
 	private async _handleSendMessage(
 		event: GlobalEventHandlersEventMap['send-message'],
+		retryMessage?: BaseServiceMessageItem,
 	) {
 		const { content } = event.detail
 		// 配置请求参数
@@ -215,22 +294,36 @@ export class HyosanChat extends ShoelaceElement {
 		this.service.emitter.on('before-send', this._onData.bind(this))
 		this.service.emitter.on('send-open', this._onData.bind(this))
 		this.service.emitter.on('data', this._onData.bind(this))
+		if (!this.messages) {
+			this.messages = []
+			this._onData()
+		}
 		try {
-			if (!this.messages) {
-				this.messages = []
-				this._onData()
-			}
 			console.log('start')
-			// 发起流式请求
-			await this.service.send(
-				content,
-				this.currentConversationId,
-				this.messages,
-			)
-			console.log('end')
-			this.requestUpdate()
+			if (retryMessage) {
+				// 发起流式请求
+				await this.service.retry(
+					this.currentConversationId,
+					this.messages,
+					retryMessage,
+				)
+			} else {
+				// 发起流式请求
+				await this.service.send(
+					content,
+					this.currentConversationId,
+					this.messages,
+				)
+			}
+		} catch (error) {
+			console.error(`<hyosan-chat> error: ${error}`, error)
 		} finally {
-			this.service.emitter.all.clear()
+			console.log('end')
+			this.service.emitter.clearListeners()
+			for (const message of this.messages) {
+				message.$loading = false
+			}
+			this.requestUpdate()
 		}
 	}
 
@@ -241,9 +334,8 @@ export class HyosanChat extends ShoelaceElement {
 	/** 在小于此宽度时隐藏左侧折叠面板, 变为 button + drawer 的形式 */
 	@property({ type: Number, reflect: true })
 	wrapWidth = 920
-	@state()
-	get /** 是否应用紧凑样式 */
-	compact() {
+	@state() /** 是否应用紧凑样式 */
+	get compact() {
 		return this._width < this.wrapWidth
 	}
 

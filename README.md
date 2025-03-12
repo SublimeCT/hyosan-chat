@@ -65,6 +65,8 @@ TODO
 | 💡 `service` | `BaseService` | `Property` | `new DefaultService()` | 会话服务配置参数 | |
 | 💡 `messages` | `BaseServiceMessages` | `Property` | `undefined` | 会话服务消息列表 | ✅ |
 | `showAvatar` | `boolean` | `Attribute` | `undefined` | 是否显示头像 | ✅ |
+| `showRetryButton` | `boolean` | `Attribute` | `true` | 是否显示 重新生成 按钮 | |
+| `showLikeAndDislikeButton` | `boolean` | `Attribute` | `true` | 是否显示 👍 和 👎 按钮 | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -87,6 +89,8 @@ TODO
 | `hyosan-chat-settings-save` | `CustomEvent<{ settings: ChatSettings }>` | 在设置弹窗中点击保存按钮 |
 | `edit-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击编辑按钮, 并保存 |
 | `delete-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击删除按钮 |
+| `hyosan-chat-click-like-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Like 按钮(点赞) |
+| `hyosan-chat-click-dislike-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Dislike 按钮(点踩) |
 
 ## 主题
 

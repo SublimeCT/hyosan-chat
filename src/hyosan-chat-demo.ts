@@ -118,8 +118,9 @@ export class HyosanChatDemo extends LitElement {
 		this.requestUpdate()
 	}
 	@state()
-	messages?: BaseServiceMessages
-	conversationsOneMessages: BaseServiceMessages = [
+	// messages?: BaseServiceMessages
+	messages: BaseServiceMessages = [
+		// conversationsOneMessages: BaseServiceMessages = [
 		{
 			role: 'system',
 			content: 'You are a helpful assistant',
@@ -160,7 +161,7 @@ export class HyosanChatDemo extends LitElement {
 			role: 'assistant',
 			content:
 				'以下是 **Lit** 和 **Omi** 的对比分析，从核心特性、语法风格、适用场景等多个角度展开：\n\n---\n\n### **1. 核心特性对比**\n| **特性**                | **Lit**                              | **Omi**                              |\n|-------------------------|--------------------------------------|--------------------------------------|\n| **开发背景**            | Google 团队维护，专注 Web Components | 腾讯团队开发，整合 Web Components 与框架特性 |\n| **核心定位**            | 轻量级 Web Components 开发库         | 支持 Web Components 的响应式框架      |\n| **响应式数据**          | 基于 `ReactiveElement` 的装饰器语法  | 类似 Vue 的响应式系统（依赖 `@omi/reactive`） |\n| **模板语法**            | 基于 Tagged Template Literals        | 支持 JSX 和类 Vue 模板语法             |\n| **体积**                | ~5 KB (gzipped)                      | ~10 KB (gzipped)                     |\n| **生态扩展**            | 通过 Lit Labs 提供实验性功能          | 内置路由、状态管理等扩展               |\n| **浏览器兼容性**        | 现代浏览器 + Polyfill                | 现代浏览器 + Polyfill                |\n\n---\n\n### **2. 语法风格对比**\n#### **Lit**\n- **模板语法**：基于 JavaScript 模板字符串，逻辑与 UI 分离：\n  ```javascript\n  render() {\n    return html`<div>${this.count}</div>`;\n  }\n  ```\n- **响应式更新**：通过 `@property` 装饰器声明响应式属性：\n  ```typescript\n  @property({ type: Number }) count = 0;\n  ```\n- **生命周期**：直接继承 `LitElement` 的生命周期钩子（如 `firstUpdated`, `updated`）。\n\n#### **Omi**\n- **模板语法**：支持 JSX 或类 Vue 的模板语法（更贴近前端框架习惯）：\n  ```jsx\n  render() {\n    return <div>{this.count}</div>;\n  }\n  ```\n- **响应式更新**：类似 Vue 的 `reactive` 系统，自动追踪依赖：\n  ```javascript\n  data = reactive({ count: 0 });\n  ```\n- **内置功能**：提供路由 (`omi-router`)、状态管理 (`omi-store`) 等扩展。\n\n---\n\n### **3. 性能对比**\n- **Lit**：  \n  - 极简的 Virtual DOM 实现（差异更新仅针对动态部分）。  \n  - 更接近原生 Web Components，性能优化更直接。  \n- **Omi**：  \n  - 基于 Proxy 的响应式系统，依赖追踪可能引入微开销。  \n  - 适合复杂交互场景，但体积略大。\n\n---\n\n### **4. 适用场景**\n| **场景**                | **Lit**                              | **Omi**                              |\n|-------------------------|--------------------------------------|--------------------------------------|\n| **轻量级组件库**        | ✅ 更适合                             | ❌ 功能略重                           |\n| **复杂交互应用**        | ❌ 需自行扩展状态管理                 | ✅ 内置路由、状态管理                  |\n| **跨框架集成**          | ✅ 原生 Web Components，通用性强      | ✅ 支持生成标准 Custom Elements        |\n| **团队技术栈偏好**      | 偏好原生 Web Components 或轻量方案   | 偏好类 Vue/React 的开发体验            |\n\n---\n\n### **5. 生态与社区**\n- **Lit**：  \n  - Google 背书，社区活跃度高，文档完善。  \n  - 适合长期维护的开源项目。  \n- **Omi**：  \n  - 腾讯内部及国内生态支持，中文文档友好。  \n  - 适合快速开发国内项目，尤其是腾讯系技术栈。\n\n---\n\n### **总结建议**\n- **选择 Lit**：  \n  若追求极简、贴近 Web Components 标准，或需要高度可复用的跨框架组件。\n- **选择 Omi**：  \n  若需要类前端框架的开发体验（如 JSX + 响应式），或希望快速集成路由、状态管理等开箱即用的功能。\n\n根据项目需求权衡，两者均是优秀的 Web Components 解决方案。',
-			$loading: false,
+			$loading: true,
 			$reasoningContent:
 				'嗯，用户现在想对比一下Lit和Omi这两个Web Components库。我需要先了解这两个库的基本情况，然后从不同的方面进行比较。首先，Lit是Google维护的一个轻量级库，专注于提供高效的Web Components开发体验。而Omi是腾讯团队开发的，同样基于Web Components，但可能更偏向于与前端框架的集成，比如支持响应式数据绑定和更丰富的功能。\n\n用户可能是一个前端开发者，正在选型，想要知道哪个库更适合他们的项目。我需要考虑他们的使用场景，比如是否需要轻量级、性能、生态系统、语法偏好等。另外，用户可能对中文文档的支持比较在意，因为Omi是腾讯开发的，可能有更好的中文资源。\n\n首先，我应该比较两者的核心特性。Lit的模板系统基于Tagged Template Literals，而Omi支持JSX，这对于习惯React的开发者来说可能更容易上手。然后看响应式数据，Lit使用装饰器和属性显式声明，而Omi使用类似Vue的响应式系统，这可能影响开发体验。\n\n性能方面，两者都基于Web Components，理论上性能接近，但Lit更轻量，可能在某些场景下更快。生态系统方面，Lit作为Google维护的项目，可能有更活跃的社区和更多的第三方工具，而Omi可能更适合国内开发者，特别是腾讯系的项目。\n\n还有语法偏好，如果团队熟悉React，Omi的JSX可能更合适；如果倾向于原生Web Components，Lit更接近标准。另外，中文支持方面，Omi可能有优势，而Lit的文档虽然全面，但主要是英文。\n\n用户可能没有明确提到的深层需求，比如项目规模、团队熟悉的技术栈、是否需要与其他框架集成，或者是否有特定的性能要求。比如，如果项目需要高度定制化的组件，并且希望减少框架依赖，Lit可能更合适。而如果需要快速开发，并且希望利用类似Vue的响应式系统，Omi可能更适合。\n\n另外，考虑到Web Components的浏览器兼容性，两者都需要polyfill支持旧浏览器，但Lit可能在这方面有更多的优化和最佳实践。而Omi可能在集成到现有Vue或React项目中更容易，特别是如果项目已经在使用腾讯的其他技术栈。\n\n最后，总结两者的适用场景，帮助用户根据具体需求做出选择。可能需要提醒用户考虑团队熟悉度、项目需求以及长期维护的支持等因素。',
 		},
@@ -173,6 +174,7 @@ export class HyosanChatDemo extends LitElement {
 					show-avatar
 					.conversations=${this.conversations}
 					.messages=${this.messages}
+					showRetryButton
 					currentConversationId=${this.currentConversationId}
 					@conversations-create="${this._handleConversationsCreate}"
 					@click-conversation=${this._handleClickConversation}

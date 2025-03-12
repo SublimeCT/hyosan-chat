@@ -1,4 +1,7 @@
-import { fetchEventSource } from '@microsoft/fetch-event-source'
+import {
+	EventStreamContentType,
+	fetchEventSource,
+} from '@microsoft/fetch-event-source'
 // import OpenAI from 'openai'
 import type {
 	ChatCompletionChunk,
@@ -6,12 +9,30 @@ import type {
 } from 'openai/resources/index.mjs'
 import {
 	BaseService,
+	type BaseServiceMessageItem,
 	type BaseServiceMessageNode,
 	type BaseServiceMessages,
 } from './BaseService'
 
 // const openai = new OpenAI()
 // openai.chat.completions.create({ messages: [], model: 'gpt-4o-mini' })
+
+export class RetriableError<T> extends Error {
+	constructor(
+		message: string,
+		public detail: T,
+	) {
+		super(message)
+	}
+}
+export class FatalError<T = any> extends Error {
+	constructor(
+		message: string,
+		public detail: T,
+	) {
+		super(message)
+	}
+}
 
 /** `OpenAI` 或与之兼容的服务(例如 `DeepSeek`) */
 export class DefaultService extends BaseService<DefaultServiceChat> {
@@ -48,6 +69,24 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		this.emitter.emit('before-send')
 		return await this.fetchChatCompletion()
 	}
+
+	async retry(
+		conversationId: string,
+		messages: BaseServiceMessages,
+		retryMessage: BaseServiceMessageItem,
+	) {
+		if (!this.apiKey) throw new Error('Missing API Key')
+		this.conversationId = conversationId
+
+		const retryMessageIndex = messages.findIndex((m) => m === retryMessage)
+		if (retryMessageIndex === -1) throw new Error('Invalid Retry message')
+		messages.splice(retryMessageIndex, 1)
+
+		this.setChatCompletionParams()
+		this.messages = messages
+		this.emitter.emit('before-send')
+		return await this.fetchChatCompletion()
+	}
 	async fetchChatCompletion() {
 		if (this.abortController) {
 			this.abortController.abort()
@@ -56,12 +95,10 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		}
 		const abortController = this.abortController
 
-		this.messages.push({
-			role: 'assistant',
-			content: '',
-			$loading: true,
-			$reasoningContent: '',
-		}) // 加入助手消息
+		/** 初始状态下的助手消息 */
+		const assistantMessage = this.getEmptyAssistantMessage()
+
+		this.messages.push(assistantMessage) // 加入助手消息
 
 		const body: ChatCompletionCreateParamsStreaming = {
 			model: this.model,
@@ -71,73 +108,112 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 		}
 
 		return new Promise<void>((resolve, reject) => {
-			try {
-				fetchEventSource(`${this.url}/chat/completions`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${this.apiKey}`,
-						...this.headers,
-					},
-					body: JSON.stringify(body),
-					signal: abortController.signal,
-					onopen: async (response) => {
-						if (response.status === 200) {
+			fetchEventSource(`${this.url}/chat/completions`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${this.apiKey}`,
+					...this.headers,
+				},
+				body: JSON.stringify(body),
+				signal: abortController.signal,
+				onopen: async (response) => {
+					if (response.ok) {
+						if (response.type === 'cors') {
+							return
+						} else if (
+							response.headers.get('content-type') === EventStreamContentType
+						) {
 							this.emitter.emit('send-open')
+							return // everything's good
 						} else {
-							reject({
-								type: 'HTTP_ERROR',
-								status: response.status,
-								statusText: response.statusText,
-							})
+							console.warn('Unkonwn response type: ', response)
+							this.emitter.emit('send-open')
+							return
 						}
-					},
-					onmessage: (event) => {
-						try {
-							if (event.data === '[DONE]') {
-								this.messages[this.messages.length - 1].$loading = false
-								this.emitter.emit('send-done')
-								return resolve()
-							}
-							if (event.data === '') return
-							const data = this.getChatCompletionByResponse(event.data)
-							const content = this.getContentByResponse(data)
-							// 加入思考内容
-							if (content.reasoningContent)
-								this.messages[this.messages.length - 1].$reasoningContent +=
-									content.reasoningContent
-							// 加入消息内容
-							if (content.content)
-								this.messages[this.messages.length - 1].content +=
-									content.content
-							// console.warn(JSON.stringify(messages))
-							this.setChatCompletionParams(data.id, data.created)
-							// 只有返回消息内容时才触发事件
-							if (content.content || content.reasoningContent) {
-								this.emitter.emit('data', data)
-							}
-						} catch (e) {
-							console.error('Data processing error:', e)
+					} else if (
+						response.status >= 400 &&
+						response.status < 500 &&
+						response.status !== 429
+					) {
+						console.error('[DefaultService] Fatal open error: ', response)
+						// client-side errors are usually non-retriable:
+						throw new FatalError(
+							`Fatel Open Error: ${response.status}`,
+							response,
+						)
+					} else {
+						console.error('[DefaultService] Retriable open error: ', response)
+						throw new RetriableError(
+							`Retriable Open Error: ${response.status}`,
+							response,
+						)
+					}
+				},
+				onmessage: (event) => {
+					// if the server emits an error message, throw an exception
+					// so it gets handled by the onerror callback below:
+					if (event.event === 'FatalError')
+						throw new FatalError(`Fatal Error: ${event.data.toString()}`, event)
+
+					try {
+						if (event.data === '[DONE]') {
+							assistantMessage.$loading = false
+							this.emitter.emit('send-done')
+							return resolve()
 						}
-					},
-					onclose: () => {
-						this.emitter.emit('close')
-						resolve()
-						// reject(new Error('Connection closed unexpectedly'));
-					},
-					onerror: (err) => {
-						return reject(err)
-					},
-				})
-			} catch (error: any) {
-				if (error.name === 'AbortError') {
-					this.emitter.emit('abort')
+						if (event.data === '') return
+						const data = this.getChatCompletionByResponse(event.data)
+						const content = this.getContentByResponse(data)
+						// 加入思考内容
+						if (content.reasoningContent)
+							assistantMessage.$reasoningContent += content.reasoningContent
+						// 加入消息内容
+						if (content.content) assistantMessage.content += content.content
+						// console.warn(JSON.stringify(messages))
+						this.setChatCompletionParams(data.id, data.created)
+						// 只有返回消息内容时才触发事件
+						if (content.content || content.reasoningContent) {
+							this.emitter.emit('data', data)
+						}
+					} catch (e) {
+						console.error('Data processing error:', e)
+					}
+				},
+				onclose: () => {
+					console.log('close')
+					this.emitter.emit('close')
 					resolve()
-				} else {
-					reject(error)
-				}
-			} finally {
+					// reject(new Error('Connection closed unexpectedly'));
+				},
+				onerror: (error) => {
+					console.log('[DefaultService] catch error: ', error, error.message)
+					assistantMessage.$error = error
+					console.log(assistantMessage)
+					if (error instanceof FatalError) {
+						this.emitter.emit('error', error)
+						reject(error)
+						throw error
+					} else if (error && error.message === 'Failed to fetch') {
+						this.emitter.emit('error', error)
+						reject(error)
+						throw error
+					} else if (error instanceof RetriableError) {
+						this.emitter.emit('error', error)
+						reject(error)
+						throw error
+					} else if (error === 'AbortError') {
+						this.emitter.emit('abort')
+						resolve()
+					} else {
+						this.emitter.emit('error', error)
+						reject(error)
+					}
+				},
+			}).finally(() => {
+				console.log('[DefaultService] done')
+				this.emitter.emit('done')
 				this.abortController = null
-			}
+			})
 		})
 	}
 

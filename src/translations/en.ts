@@ -16,6 +16,8 @@ const translation: Translation = {
 	rename: 'Rename',
 	edit: 'Edit',
 	delete: 'Delete',
+	stopOutput: 'Stop output',
+	retry: 'Retry',
 }
 
 registerTranslation(translation)

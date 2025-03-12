@@ -1,3 +1,4 @@
+import Emittery from 'emittery'
 import mitt from 'mitt'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 
@@ -44,8 +45,16 @@ export abstract class BaseService<
 
 	/** 请求控制器 */
 	abortController: AbortController | null = null
-	/** 事件总线 */
-	emitter = mitt()
+	/**
+	 * 事件总线
+	 * @todo 声明 EventType
+	 */
+	emitter = new Emittery()
+	/** 断开流式请求 并 移除当前 service 的所有事件监听器 */
+	destroy() {
+		if (this.abortController) this.abortController.abort()
+		this.emitter.clearListeners()
+	}
 
 	/**
 	 * 发送用户输入的内容
@@ -57,6 +66,18 @@ export abstract class BaseService<
 		content: string,
 		conversationId: string,
 		messages: BaseServiceMessages,
+	): Promise<void>
+
+	/**
+	 * 发送选择重新生成
+	 * @param conversationId 当前会话 ID
+	 * @param messages 聊天消息列表, 参考 https://platform.openai.com/docs/api-reference/chat/create
+	 * @param retryMessage 当前需要重新生成的消息
+	 */
+	abstract retry(
+		conversationId: string,
+		messages: BaseServiceMessages,
+		retryMessage: BaseServiceMessageItem,
 	): Promise<void>
 	/** 发起聊天请求 */
 	abstract fetchChatCompletion(): Promise<void>
@@ -77,8 +98,22 @@ export abstract class BaseService<
 			const _message = { ...v }
 			Reflect.deleteProperty(_message, '$loading')
 			Reflect.deleteProperty(_message, '$reasoningContent')
+			Reflect.deleteProperty(_message, '$error')
 			return _message
 		})
+	}
+	/**
+	 * 获取初始状态下的助手消息
+	 * @description 用于在发送消息时加入 messages
+	 */
+	getEmptyAssistantMessage(): BaseServiceMessageItem {
+		const message: BaseServiceMessageItem = {
+			role: 'assistant',
+			content: '',
+			$loading: true,
+			$reasoningContent: '',
+		}
+		return message
 	}
 }
 
@@ -87,6 +122,8 @@ export interface BaseServiceMessage {
 	$loading?: boolean
 	/** 思考阶段内容(在发起请求时会被删除) */
 	$reasoningContent?: string
+	/** 当前消息遇到的错误 */
+	$error?: string | Error
 }
 export type BaseServiceMessageItem = ChatCompletionMessageParam &
 	BaseServiceMessage

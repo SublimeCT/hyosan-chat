@@ -31,6 +31,7 @@ export class HyosanIconWrapper extends ShoelaceElement {
 
 	@property({ reflect: true })
 	fontSize = '1.5em'
+
 	render() {
 		return html`
       <div class="wrapper" style=${this.fontSize ? `font-size: ${this.fontSize};` : ''}>
