@@ -319,7 +319,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 		/** 是否显示 停止输出按钮 */
 		const showStopButton = message.$loading === true
 		/** 是否显示重新生成按钮 */
-		const showRetryButton = this.showRetryButton && message.$loading === false
+		const showRetryButton = this.showRetryButton && message.role !== 'user' && message.$loading === false
 		/** 是否显示点赞和踩按钮 */
 		const showLikeAndDislikeButton =
 			this.showLikeAndDislikeButton &&
