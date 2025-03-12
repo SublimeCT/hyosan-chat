@@ -267,7 +267,9 @@ export class HyosanChat extends ShoelaceElement {
 	private _handleClickConversation(
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
+		const isDifferentConversation = this.currentConversationId !== event.detail.item.key
 		this.currentConversationId = event.detail.item.key
+		if (isDifferentConversation) this.emit('change-conversation', { detail: { item: event.detail.item } })
 		if (this.compact) this._handleDrawerClickClose()
 	}
 
@@ -462,5 +464,7 @@ declare global {
 	interface GlobalEventHandlersEventMap {
 		/** 消息接收完毕(可能是成功或报错) */
 		'messages-completions': CustomEvent<{ messages: BaseServiceMessages }>
+		/** 用户点击切换了会话 */
+		'change-conversation': CustomEvent<{ item: Conversation }>
 	}
 }

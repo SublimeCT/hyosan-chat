@@ -334,7 +334,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
             <div>${this._copyButtonContent}</div>
           </hyosan-chat-text-button>
           <hyosan-chat-text-button class=${showStopButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-stop', { detail: { messages: this.messages, message, item } })}>
-            <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"><path d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024z m3.008-92.992a416 416 0 1 0 0-832 416 416 0 0 0 0 832zM320 320h384v384H320V320z" fill="#262626" p-id="6077"></path></svg>
+            <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"><path d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024z m3.008-92.992a416 416 0 1 0 0-832 416 416 0 0 0 0 832zM320 320h384v384H320V320z" fill="currentColor" p-id="6077"></path></svg>
             <div>${this._localize.term('stopOutput')}</div>
           </hyosan-chat-text-button>
           <hyosan-chat-text-button class=${showRetryButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-retry', { detail: { messages: this.messages, message, item } })}>

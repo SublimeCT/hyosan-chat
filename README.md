@@ -86,6 +86,7 @@ TODO
 | --- | --- | --- |
 | `conversations-create` | `undefined` | 点击创建新会话按钮 |
 | `click-conversation` | `CustomEvent<{ item: Conversation }>` | 点击左侧会话列表中的会话 |
+| `change-conversation` | `CustomEvent<{ item: Conversation }>` | 点击 **切换** 左侧会话列表中的会话 |
 | `send-message` | `CustomEvent<{ content: string }>` | 点击发送按钮 |
 | `hyosan-chat-settings-save` | `CustomEvent<{ settings: ChatSettings }>` | 在设置弹窗中点击保存按钮 |
 | `edit-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击编辑按钮, 并保存 |
