@@ -202,7 +202,7 @@ export class HyosanChat extends ShoelaceElement {
 	}
 	private async _handleRetryMessage(message: BaseServiceMessageItem) {
 		const index = this.messages?.findIndex((v) => v === message)
-		console.log('_handleRetryMessage', message)
+		// console.log('_handleRetryMessage', message)
 		if (index === -1) {
 			throw new Error('message not found')
 		} else {

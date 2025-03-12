@@ -152,11 +152,15 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     /* 定义渐变动画 */
     @keyframes gradient-breathing {
       0%, 100% {
-        background-color: #ff7e5f; /* 起始颜色 */
+        background-color: var(--sl-color-neutral-100); /* 起始颜色 */
       }
       50% {
-        background-color: #feb47b; /* 中间颜色 */
+        background-color: var(--sl-color-neutral-200); /* 中间颜色 */
       }
+    }
+    .bubble-item[data-loading] .bubble {
+      animation: gradient-breathing 3s infinite alternate ease-in-out;
+      transition: background-color 0.5s ease-in-out;
     }
   `,
 		unsafeCSS(hljsGithubTheme),
@@ -359,7 +363,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 				if (message.role === 'system') return html`` // 系统消息
 
 				return html`
-          <div class="bubble-item" ?show-avatar=${this.showAvatar} data-role=${message?.role}>
+          <div class="bubble-item" ?data-loading=${message.$loading} ?show-avatar=${this.showAvatar} data-role=${message?.role}>
             ${message.role === 'user' ? '' : this._assistantAvatar}
             <div class="bubble" part="hyosan-chat-bubble">
               <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!item.reasoningContent}>
