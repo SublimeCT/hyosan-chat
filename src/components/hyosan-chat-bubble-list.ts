@@ -294,12 +294,12 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 	private _handleCopy(content: string) {
 		if (content) {
 			navigator.clipboard.writeText(content)
-			this._copyButtonContent = `${this._localize.term('copy')} ✅`
-			// this._copyButtonContent = this._localize.term('copySuccessfully')
-			setTimeout(() => {
-				this._copyButtonContent = this._localize.term('copy')
-				this.requestUpdate()
-			}, 2000)
+			// this._copyButtonContent = `${this._localize.term('copy')} ✅`
+			// // this._copyButtonContent = this._localize.term('copySuccessfully')
+			// setTimeout(() => {
+			// 	this._copyButtonContent = this._localize.term('copy')
+			// 	this.requestUpdate()
+			// }, 2000)
 		}
 	}
 
