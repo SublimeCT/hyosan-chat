@@ -82,6 +82,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
       word-wrap: break-word;
       table {
         display: block;
+				overflow-x: auto;
         width: 100%;
         border-collapse: collapse;
         margin: 16px 0;
