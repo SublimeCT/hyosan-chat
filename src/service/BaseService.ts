@@ -1,5 +1,4 @@
 import Emittery from 'emittery'
-import mitt from 'mitt'
 import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
 
 /**
