@@ -89,19 +89,19 @@ export class HyosanChatDemo extends LitElement {
 		{ key: '003', label: '会话3' },
 	]
 	/** 创建新聊天 */
-	private _handleConversationsCreate() {
-		const key = Math.random().toString(36).substring(2, 9)
+	private async _handleConversationsCreate(content?: string) {
+		const key = content || Math.random().toString(36).substring(2, 9)
 		// this.conversations.push({ key, label: `新会话 ${key}` })
-		this.conversations = [
-			{
-				key,
-				label: `新会话 ${key}`,
-			},
-			...this.conversations,
-		]
+		this.conversations.splice(this.conversations.length, 0, {
+			key,
+			label: content || `新会话 ${key}`,
+		})
+		this.conversations = [...this.conversations]
 		this.currentConversationId = key
+		console.log('kkkkk', this, this.currentConversationId)
 		this.messages = []
 		this.requestUpdate()
+		return key
 	}
 	private _handleClickConversation(event: CustomEvent<{ item: Conversation }>) {
 		const conversation = event.detail.item
@@ -110,17 +110,18 @@ export class HyosanChatDemo extends LitElement {
 		} else {
 			if (conversation.key === '001') {
 				this.messages = this.conversationsOneMessages
+			} else if (this._messagesMap[conversation.key]) {
+				this.messages = this._messagesMap[conversation.key]
 			} else {
 				this.messages = []
 			}
 		}
-		console.log(this.messages)
+		this.currentConversationId = conversation.key
 		this.requestUpdate()
 	}
 	@state()
-	// messages?: BaseServiceMessages
-	messages: BaseServiceMessages = [
-		// conversationsOneMessages: BaseServiceMessages = [
+	messages?: BaseServiceMessages
+	conversationsOneMessages: BaseServiceMessages = [
 		{
 			role: 'system',
 			content: 'You are a helpful assistant',
@@ -167,6 +168,16 @@ export class HyosanChatDemo extends LitElement {
 		},
 	]
 
+	/** 已保存的消息 Map 数据 */
+	private _messagesMap: Record<string, BaseServiceMessages> = {}
+
+	private _handleMessagesCompletions(
+		event: CustomEvent<{ messages: BaseServiceMessages }>,
+	) {
+		this._messagesMap[this.currentConversationId] = event.detail.messages
+		console.log('✅', event.detail.messages, this, this._messagesMap)
+	}
+
 	render() {
 		return html`
 			<div class="demo-container">
@@ -175,8 +186,9 @@ export class HyosanChatDemo extends LitElement {
 					.conversations=${this.conversations}
 					.messages=${this.messages}
 					showRetryButton
+					.onCreateMessage=${this._handleConversationsCreate.bind(this)}
 					currentConversationId=${this.currentConversationId}
-					@conversations-create="${this._handleConversationsCreate}"
+					@messages-completions=${this._handleMessagesCompletions}
 					@click-conversation=${this._handleClickConversation}
 				>
 					<div slot="main-welcome" class="main-welcome">

@@ -93,12 +93,12 @@ export class HyosanChatBubbleList extends ShoelaceElement {
       }
 
       th {
-        background-color: #f8f8f8;
+        background-color: var(--sl-color-neutral-50);
         font-weight: 600;
       }
 
       tr:nth-child(even) {
-        background-color: #f8f8f8;
+        background-color: var(--sl-color-neutral-50);
       } 
       code {
         background-color: var(--hy-code-tag-background-color);
@@ -148,6 +148,15 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     }
     .none {
       display: none;
+    }
+    /* 定义渐变动画 */
+    @keyframes gradient-breathing {
+      0%, 100% {
+        background-color: #ff7e5f; /* 起始颜色 */
+      }
+      50% {
+        background-color: #feb47b; /* 中间颜色 */
+      }
     }
   `,
 		unsafeCSS(hljsGithubTheme),

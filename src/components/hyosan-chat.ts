@@ -166,8 +166,18 @@ export class HyosanChat extends ShoelaceElement {
 	@property({ type: Boolean })
 	showLikeAndDislikeButton = true
 
+	/**
+	 * 创建消息的回调函数
+	 * @description 当没有选中会话时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息
+	 */
+	@property({ type: Function, attribute: false })
+	onCreateMessage?: (content?: string) => string | Promise<string>
+
 	private async _handleStartNewChat() {
-		this.emit('conversations-create')
+		if (this.onCreateMessage) {
+			const conversationId = await this.onCreateMessage()
+			if (conversationId) this.currentConversationId = conversationId
+		}
 		if (this.compact) this._handleDrawerClickClose()
 	}
 	get isLoading() {
@@ -292,6 +302,10 @@ export class HyosanChat extends ShoelaceElement {
 		this.updateServiceSettingsFromLocalStorage()
 		// 监听流式请求响应
 		this.service.emitter.on('before-send', this._onData.bind(this))
+		if (!this.currentConversationId && this.onCreateMessage) {
+			const conversationId = await this.onCreateMessage(content)
+			if (conversationId) this.currentConversationId = conversationId
+		}
 		this.service.emitter.on('send-open', this._onData.bind(this))
 		this.service.emitter.on('data', this._onData.bind(this))
 		if (!this.messages) {
@@ -324,6 +338,8 @@ export class HyosanChat extends ShoelaceElement {
 				message.$loading = false
 			}
 			this.requestUpdate()
+			await this.updateComplete
+			this.emit('messages-completions', { detail: { messages: this.messages } })
 		}
 	}
 
@@ -444,6 +460,7 @@ declare global {
 		'hyosan-chat': HyosanChat
 	}
 	interface GlobalEventHandlersEventMap {
-		'conversations-create': CustomEvent<object>
+		/** 消息接收完毕(可能是成功或报错) */
+		'messages-completions': CustomEvent<{ messages: BaseServiceMessages }>
 	}
 }
