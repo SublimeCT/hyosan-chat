@@ -212,7 +212,7 @@ export class DefaultService extends BaseService<DefaultServiceChat> {
 			}).finally(() => {
 				console.log('[DefaultService] done')
 				this.emitter.emit('done')
-				this.abortController = null
+				// this.abortController = null
 				resolve()
 			})
 		})

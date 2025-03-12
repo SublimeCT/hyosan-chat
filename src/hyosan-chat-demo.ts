@@ -100,7 +100,6 @@ export class HyosanChatDemo extends LitElement {
 		})
 		this.conversations = [...this.conversations]
 		this.currentConversationId = key
-		console.log('kkkkk', this, this.currentConversationId)
 		this.messages = []
 		this.requestUpdate()
 		return key
@@ -176,7 +175,7 @@ export class HyosanChatDemo extends LitElement {
 		event: CustomEvent<{ messages: BaseServiceMessages }>,
 	) {
 		this._messagesMap[this.currentConversationId] = event.detail.messages
-		console.log('✅', event.detail.messages, this, this._messagesMap)
+		// console.log('✅', event.detail.messages, this, this._messagesMap)
 	}
 
 	render() {

@@ -306,6 +306,7 @@ export class HyosanChat extends ShoelaceElement {
 		this.service.emitter.on('before-send', this._onData.bind(this))
 		if (!this.currentConversationId && this.onCreateMessage) {
 			const conversationId = await this.onCreateMessage(content)
+			await this.updateComplete // 等待当前 update 更新队列执行完毕, 否则会导致请求过程中被中断
 			if (conversationId) this.currentConversationId = conversationId
 		}
 		this.service.emitter.on('send-open', this._onData.bind(this))
