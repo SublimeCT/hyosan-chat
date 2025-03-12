@@ -257,12 +257,10 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 
 	protected willUpdate(_changedProperties: PropertyValues): void {
 		if (_changedProperties.has('currentConversationId')) {
-			console.log('willUpdate currentConversationId')
 			this.messagesHtml = []
 			this.requestUpdate()
 		}
 		if (_changedProperties.has('messages')) {
-			console.log('willUpdate messages')
 			this._onMessagesChange()
 		}
 	}
