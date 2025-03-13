@@ -16,7 +16,9 @@
 	},
 	"license": "MIT",
 	"type": "module",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"main": "./dist/hyosan-chat.umd.cjs",
 	"module": "./dist/hyosan-chat.js",
 	"types": "./dist/lib.d.ts",
@@ -35,11 +37,12 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"build:lib": "tsc && vite build --config vite.config.lib.ts",
+		"build:lib": "tsc && vite build --config vite.config.lib.ts && pnpm run cem",
 		"build:pack": "pnpm run build:lib && pnpm pack",
 		"preview": "vite preview",
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
+		"cem": "cem analyze --litelement --outdir ./dist/cem-types",
 		"cz": "czg"
 	},
 	"dependencies": {
@@ -58,9 +61,13 @@
 		"@biomejs/biome": "1.9.4",
 		"@commitlint/cli": "^19.7.1",
 		"@commitlint/config-conventional": "^19.7.1",
+		"@custom-elements-manifest/analyzer": "^0.10.4",
 		"@shoelace-style/localize": "^3.2.1",
 		"@types/markdown-it": "^14.1.2",
 		"@types/markdown-it-link-attributes": "^3.0.5",
+		"custom-element-jet-brains-integration": "^1.7.0",
+		"custom-element-vs-code-integration": "^1.5.0",
+		"custom-element-vuejs-integration": "^1.4.0",
 		"cz-git": "^1.11.0",
 		"czg": "^1.11.0",
 		"lint-staged": "^15.4.3",
