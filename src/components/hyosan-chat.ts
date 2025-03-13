@@ -218,14 +218,9 @@ export class HyosanChat extends ShoelaceElement {
 	) {
 		if (this.service.abortController) {
 			this.service.abortController.abort()
-			this.service.emitter
-				.once('abort')
-				.then(() => this._handleRetryMessage(event.detail.message))
-			this.requestUpdate()
-		} else {
-			this._handleRetryMessage(event.detail.message)
-			this.requestUpdate()
 		}
+		this._handleRetryMessage(event.detail.message)
+		this.requestUpdate()
 	}
 
 	private _handleListDisconnected() {
