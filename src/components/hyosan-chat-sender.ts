@@ -74,6 +74,8 @@ export class HyosanChatSender extends ShoelaceElement {
 	}
 	private _handleEmitSendMessage() {
 		this.emit('send-message', { detail: { content: this.content } })
+		this.content = '' // 清空内容
+		this.requestUpdate()
 	}
 
 	render() {
