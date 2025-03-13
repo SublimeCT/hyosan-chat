@@ -347,6 +347,10 @@ export class HyosanChat extends ShoelaceElement {
 		console.log(event.detail)
 	}
 
+	/** 应用标题 */
+	@property()
+	applicationTitle = 'Hyosan Chat'
+
 	/** 在小于此宽度时隐藏左侧折叠面板, 变为 button + drawer 的形式 */
 	@property({ type: Number, reflect: true })
 	wrapWidth = 920
@@ -391,7 +395,7 @@ export class HyosanChat extends ShoelaceElement {
 		/** 会话列表 header */
 		const conversationsHeader = hasConversationsHeaderSlot
 			? html`<slot name="conversations-header"></slot>`
-			: html`<hyosan-chat-conversations-header slot="conversations-header" @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
+			: html`<hyosan-chat-conversations-header slot="conversations-header" title=${this.applicationTitle} @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
 		/** 会话列表 footer */
 		const conversationsFooter = hasConversationsFooterSlot
 			? html`<slot name="conversations-footer"></slot>`
