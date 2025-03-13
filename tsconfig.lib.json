@@ -1,4 +1,14 @@
 {
 	"extends": "./tsconfig.json",
-	"include": ["./src/lib.ts", "./src/components/**/*.ts", "./src/env.d.ts"]
+	"include": [
+		"./src/lib.ts",
+		"./src/components/**/*.ts",
+		"./src/types/**/*.ts",
+		"./src/service/**/*.ts",
+		"./src/utils/**/*.ts",
+		"./src/sheets/**/*.ts",
+		"./src/internal/**/*.ts",
+		"./src/translation/**/*.ts",
+		"./src/env.d.ts"
+	]
 }

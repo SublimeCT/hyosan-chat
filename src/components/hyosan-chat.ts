@@ -267,9 +267,11 @@ export class HyosanChat extends ShoelaceElement {
 	private _handleClickConversation(
 		event: GlobalEventHandlersEventMap['click-conversation'],
 	) {
-		const isDifferentConversation = this.currentConversationId !== event.detail.item.key
+		const isDifferentConversation =
+			this.currentConversationId !== event.detail.item.key
 		this.currentConversationId = event.detail.item.key
-		if (isDifferentConversation) this.emit('change-conversation', { detail: { item: event.detail.item } })
+		if (isDifferentConversation)
+			this.emit('change-conversation', { detail: { item: event.detail.item } })
 		if (this.compact) this._handleDrawerClickClose()
 	}
 
@@ -338,7 +340,7 @@ export class HyosanChat extends ShoelaceElement {
 			console.log('end')
 			this.service.emitter.clearListeners()
 			for (const message of this.messages) {
-				message.$loading = false
+				if (Reflect.has(message, '$loading')) message.$loading = false
 			}
 			this.requestUpdate()
 			await this.updateComplete
