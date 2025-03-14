@@ -18,6 +18,10 @@ import type {
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
 import type { Conversation } from '@/types/conversations'
+import {
+  HyosanChatShoelaceTheme,
+  HyosanChatTheme,
+} from '@/utils/HyosanChatTheme'
 import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 @customElement('hyosan-chat')
@@ -57,6 +61,7 @@ export class HyosanChat extends ShoelaceElement {
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: center;
+      background-color: var(--sl-panel-background-color);
 		}
 		.main-container > header, .main-container > main, .main-container > footer {
 			display: flex;
@@ -166,6 +171,10 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Boolean })
   showLikeAndDislikeButton = true
 
+  /** shoelace 主题, 可用于切换夜间模式 */
+  @property({ reflect: true })
+  shoelaceTheme: HyosanChatShoelaceTheme = HyosanChatShoelaceTheme.shoelaceLight
+
   /**
    * 创建消息的回调函数
    * @description 当没有选中会话时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息
@@ -177,6 +186,8 @@ export class HyosanChat extends ShoelaceElement {
     if (this.onCreateMessage) {
       const conversationId = await this.onCreateMessage()
       if (conversationId) this.currentConversationId = conversationId
+      this.requestUpdate()
+      await this.updateComplete
     }
     if (this.compact) this._handleDrawerClickClose()
   }
@@ -227,10 +238,17 @@ export class HyosanChat extends ShoelaceElement {
     this.service.destroy()
   }
 
+  private _changeTheme() {
+    HyosanChatTheme.setStyleElement(this.shoelaceTheme)
+  }
   protected willUpdate(_changedProperties: PropertyValues): void {
     if (_changedProperties.has('currentConversationId')) {
       // 切换会话时, 销毁当前 service 上的连接和事件监听器
       this.service.destroy()
+    }
+    if (_changedProperties.has('shoelaceTheme')) {
+      // 切换 shoelace 主题样式(style)
+      this._changeTheme()
     }
   }
 
@@ -303,6 +321,7 @@ export class HyosanChat extends ShoelaceElement {
     this.service.emitter.on('before-send', this._onData.bind(this))
     if (!this.currentConversationId && this.onCreateMessage) {
       const conversationId = await this.onCreateMessage(content)
+      this.requestUpdate()
       await this.updateComplete // 等待当前 update 更新队列执行完毕, 否则会导致请求过程中被中断
       if (conversationId) this.currentConversationId = conversationId
     }
@@ -434,7 +453,7 @@ export class HyosanChat extends ShoelaceElement {
 						`
         : undefined
     return html`
-			<div class="chat-wrapper" ?data-compact=${this.compact}>
+			<div part="base" class="chat-wrapper" ?data-compact=${this.compact}>
 				<sl-resize-observer @sl-resize=${this._handleResize}>
 					<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
 						<div

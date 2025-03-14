@@ -1,6 +1,6 @@
 {
   "name": "hyosan-chat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A library of web components for AI conversations based on lit and shoelace",
   "keywords": [
     "hyosan-chat",

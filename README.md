@@ -1,10 +1,10 @@
 # hyosan-chat
-> [!WARNING]
-> 🚧 Work in Progress | 此项目处于早期开发阶段
 
 ![](./hyosan-chat-welcome-screenshot.png)
 ![](./hyosan-chat-messages-screenshot.png)
+![](./hyosan-chat-dark-screenshot.png)
 ![](./hyosan-chat-settings-screenshot.png)
+![](./hyosan-chat-mobile-screenshot.png)
 
 ## 介绍
 `hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库; 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
@@ -70,6 +70,7 @@ TODO
 | `showLikeAndDislikeButton` | `boolean` | `Attribute` | `true` | 是否显示 👍 和 👎 按钮 | |
 | `onCreateMessage` | `(content?: string) => string | Promise<string>` | `Property` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息; 如果不返回 conversationId, 则不会在组件内部改变 conversationId, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
 | `onEnableSearch` | `(open: boolean) => void | Promise<void>` | `Property` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
+| `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -96,7 +97,21 @@ TODO
 | `hyosan-chat-click-like-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Like 按钮(点赞) |
 | `hyosan-chat-click-dislike-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Dislike 按钮(点踩) |
 
+### CSS Parts
+可以使用 [::part()](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) 选择器修改组件的样式, 由于 `Web Components` 的样式隔离的特性, 组件外部想要修改组件内的样式只能通过 `::part()` 选择器或组件内部引用的 [css 变量](#css-variables) 来进行控制
+
+| 名称 | 描述 |
+| --- | --- |
+| `base` | 根组件(`hyosan-chat`) 最外层元素 |
+
+### CSS Variables
+组件提供的 css 变量包含两部分:
+
+- 基础组件库 [shoelace](https://shoelace.style/getting-started/themes) 的 css 变量: 参考 [Themes - shoelace](https://shoelace.style/getting-started/themes)
+- 组件内部使用的 css 变量: 参考 [src/sheets/global-styles.css](./src/sheets/global-styles.css) 文件
+
 ## 主题
+组件通过底层的基础组件库 [shoelace](https://shoelace.style) 提供了基础的 `light` / `dark` 两种主题, 如需创建新主题, 可参考 [Creating a theme](https://shoelace.style/getting-started/themes#creating-a-new-theme)
 
 ## 贡献指南
 参考 [CONTRIBUTING](./CONTRIBUTING.md)
