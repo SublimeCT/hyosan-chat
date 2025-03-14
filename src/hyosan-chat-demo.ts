@@ -4,10 +4,7 @@ import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
-import {
-  type DefaultChatCompletionCreateParamsStreamingOptions,
-  DefaultService,
-} from './service/DefaultService'
+import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
 import type { Conversation } from './types/conversations'
 
 export const tagName = 'hyosan-chat-demo'

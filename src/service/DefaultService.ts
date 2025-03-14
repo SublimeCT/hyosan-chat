@@ -316,11 +316,11 @@ export interface DefaultAliyunChatCompletionCreateParamsStreaming {
  */
 export interface DefaultTentcentCloudChatCompletionCreateParamsStreaming {
   /** 搜索引文角标开关。 */
-  citation: boolean
+  citation?: boolean
 
   /**
    * 是否开启深度研究该问题，默认是false，在值为true且命中深度研究该问题时，会返回深度研究该问题信息。
    * @see https://cloud.tencent.com/document/product/1729/111007
    */
-  enable_deep_search: boolean
+  enable_deep_search?: boolean
 }
