@@ -70,10 +70,12 @@ export class HyosanChatConversationsItem extends ShoelaceElement {
 	@state()
 	private _editMode = false
 
-	private _handleSelect(event: CustomEvent<{ item: SlMenuItem }>) {
+	private async _handleSelect(event: CustomEvent<{ item: SlMenuItem }>) {
 		const action = event.detail.item.getAttribute('data-action')
 		if (action === 'rename') {
 			this._editMode = true
+			await this.updateComplete
+			this._editInput?.focus()
 		} else if (action === 'delete') {
 			this.emit('delete-conversation', { detail: { item: this.item } })
 		}
@@ -100,6 +102,7 @@ export class HyosanChatConversationsItem extends ShoelaceElement {
 								value=${this.item.label}
 								size="small"
 								@sl-change=${this._handleChange}
+								@blur=${() => { this._editMode = false }}
 								@click=${(event: Event) => event.stopPropagation()}
 								></sl-input>`
 							: html`<span>${this.item.label}</span>`
