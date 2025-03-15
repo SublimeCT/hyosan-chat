@@ -72,7 +72,11 @@
     "typescript": "~5.7.2",
     "vite": "^6.1.0",
     "vite-plugin-dts": "^4.5.1",
-    "vite-plugin-static-copy": "^2.3.0"
+    "vite-plugin-static-copy": "^2.3.0",
+		"@custom-elements-manifest/analyzer": "^0.10.4",
+		"custom-element-jet-brains-integration": "^1.7.0",
+		"custom-element-vs-code-integration": "^1.5.0",
+		"custom-element-vuejs-integration": "^1.4.0"
   },
   "config": {
     "commitizen": {
