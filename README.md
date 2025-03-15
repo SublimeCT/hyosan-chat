@@ -62,8 +62,8 @@ TODO
 | `showAvatar` | `boolean` | `Attribute` | `undefined` | 是否显示头像 | ✅ |
 | `showRetryButton` | `boolean` | `Attribute` | `true` | 是否显示 重新生成 按钮 | |
 | `showLikeAndDislikeButton` | `boolean` | `Attribute` | `true` | 是否显示 👍 和 👎 按钮 | |
-| `onCreateMessage` | `(content?: string) => string | Promise<string>` | `Property` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息; 如果不返回 conversationId, 则不会在组件内部改变 conversationId, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
-| `onEnableSearch` | `(open: boolean) => void | Promise<void>` | `Property` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
+| `onCreateMessage` | `(content?: string) => string \| Promise<string>` | `Property` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息; 如果不返回 conversationId, 则不会在组件内部改变 conversationId, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
+| `onEnableSearch` | `(open: boolean) => void \| Promise<void>` | `Property` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
 | `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
 
 ### Slots
