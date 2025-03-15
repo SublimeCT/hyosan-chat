@@ -44,12 +44,6 @@ TODO
 ### Properties
 > [!TIP]
 >
-> 关于 双向数据绑定:
->
-> [Lit@^3.2.1](https://lit.dev) 组件不具备像 `vue` 的 `v-model` 一样的双向数据绑定, 必须结合组件提供的 **自定义事件** 来实现; 所以即使组件提供了 `Reflect`, 也无法 直接使用 `v-model`
-
-> [!TIP]
->
 > 关于 属性类型:
 >
 > [Lit@^3.2.1](https://lit.dev) 组件可以接收 `Property` / `Attribute` 参数:
