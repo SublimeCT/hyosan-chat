@@ -3,3 +3,13 @@ import '@/sheets/global-styles.css'
 
 // 对外提供的组件集合
 export * from './components'
+
+// 主题操作类
+export * from '@/utils/HyosanChatTheme'
+
+export * from '@/service/BaseService'
+export * from '@/service/DefaultService'
+
+export * from '@/types/ChatSettings'
+export * from '@/types/conversations'
+export * from '@/types/helpers'

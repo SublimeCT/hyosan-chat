@@ -10,19 +10,23 @@ import '@shoelace-style/shoelace/dist/components/resize-observer/resize-observer
 import '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { HasSlotController } from '@/internal/slot'
 import type {
-	BaseService,
-	BaseServiceMessageItem,
-	BaseServiceMessageNode,
-	BaseServiceMessages,
+  BaseService,
+  BaseServiceMessageItem,
+  BaseServiceMessageNode,
+  BaseServiceMessages,
 } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
 import type { Conversation } from '@/types/conversations'
+import {
+  HyosanChatShoelaceTheme,
+  HyosanChatTheme,
+} from '@/utils/HyosanChatTheme'
 import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 @customElement('hyosan-chat')
 export class HyosanChat extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
 		:host {
 			width: 100%;
 			height: 100%;
@@ -57,6 +61,7 @@ export class HyosanChat extends ShoelaceElement {
 			flex-direction: column;
 			justify-content: space-between;
 			align-items: center;
+      background-color: var(--sl-panel-background-color);
 		}
 		.main-container > header, .main-container > main, .main-container > footer {
 			display: flex;
@@ -101,144 +106,157 @@ export class HyosanChat extends ShoelaceElement {
 		}
 	`
 
-	// private _locailze = new LocalizeController(this)
-	private readonly hasSlotController = new HasSlotController(
-		this,
-		'conversations',
-		'conversations-header',
-		'conversations-footer',
-		'main-welcome',
-		'main-header',
-	)
+  // private _locailze = new LocalizeController(this)
+  private readonly hasSlotController = new HasSlotController(
+    this,
+    'conversations',
+    'conversations-header',
+    'conversations-footer',
+    'main-welcome',
+    'main-header',
+  )
 
-	/**
-	 * 分割面板的可捕捉位置
-	 * @example '25% 50%'
-	 * @see https://shoelace.style/components/split-panel#snapping
-	 */
-	@property({ reflect: true })
-	panelSnap = '25%'
+  /**
+   * 分割面板的可捕捉位置
+   * @example '25% 50%'
+   * @see https://shoelace.style/components/split-panel#snapping
+   */
+  @property({ reflect: true })
+  panelSnap = '25%'
 
-	/**
-	 * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`
-	 * @example 25
-	 * @see https://shoelace.style/components/split-panel#initial-position
-	 */
-	@property({ reflect: true, type: Number })
-	panelPosition = 25
+  /**
+   * 分隔线与主面板边缘的当前位置(百分比, 0-100), 默认为容器初始大小的 `50%`
+   * @example 25
+   * @see https://shoelace.style/components/split-panel#initial-position
+   */
+  @property({ reflect: true, type: Number })
+  panelPosition = 25
 
-	/** 会话列表数据源 */
-	@property({ attribute: false, type: Array })
-	conversations: Conversation[] = []
+  /** 会话列表数据源 */
+  @property({ attribute: false, type: Array })
+  conversations: Conversation[] = []
 
-	/** 会话服务配置参数 */
-	@property({ attribute: false, reflect: true })
-	service: BaseService = new DefaultService()
+  /** 会话服务配置参数 */
+  @property({ attribute: false, reflect: true })
+  service: BaseService = new DefaultService()
 
-	/** 当前会话 ID */
-	@property({ reflect: true })
-	currentConversationId = ''
+  /** 当前会话 ID */
+  @property({ reflect: true })
+  currentConversationId = ''
 
-	/** 会话服务消息列表 */
-	@property({
-		attribute: false,
-		reflect: true,
-		hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
-			return (
-				!oldValue ||
-				!value ||
-				value.length !== oldValue.length ||
-				value.some((v) => v.$loading)
-			)
-		},
-	})
-	messages?: BaseServiceMessages
+  /** 会话服务消息列表 */
+  @property({
+    attribute: false,
+    reflect: true,
+    hasChanged(value: BaseServiceMessages, oldValue: BaseServiceMessages) {
+      return (
+        !oldValue ||
+        !value ||
+        value.length !== oldValue.length ||
+        value.some((v) => v.$loading)
+      )
+    },
+  })
+  messages?: BaseServiceMessages
 
-	/** 是否显示头像 */
-	@property({ type: Boolean, attribute: 'show-avatar', reflect: true })
-	showAvatar = false
+  /** 是否显示头像 */
+  @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
+  showAvatar = false
 
-	/** 是否显示重新生成按钮 */
-	@property({ type: Boolean })
-	showRetryButton = true
+  /** 是否显示重新生成按钮 */
+  @property({ type: Boolean })
+  showRetryButton = true
 
-	/** 是否显示点赞和踩按钮 */
-	@property({ type: Boolean })
-	showLikeAndDislikeButton = true
+  /** 是否显示点赞和踩按钮 */
+  @property({ type: Boolean })
+  showLikeAndDislikeButton = true
 
-	/**
-	 * 创建消息的回调函数
-	 * @description 当没有选中会话时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息
-	 */
-	@property({ type: Function, attribute: false })
-	onCreateMessage?: (content?: string) => string | Promise<string>
+  /** shoelace 主题, 可用于切换夜间模式 */
+  @property({ reflect: true })
+  shoelaceTheme: HyosanChatShoelaceTheme = HyosanChatShoelaceTheme.shoelaceLight
 
-	private async _handleStartNewChat() {
-		if (this.onCreateMessage) {
-			const conversationId = await this.onCreateMessage()
-			if (conversationId) this.currentConversationId = conversationId
-		}
-		if (this.compact) this._handleDrawerClickClose()
-	}
-	get isLoading() {
-		// console.log('isLoading', this.messages)
-		return this.messages ? this.messages.some((v) => v.$loading) : false
-	}
-	private _handleStopOutput(
-		event: CustomEvent<{
-			messages: BaseServiceMessages
-			message: BaseServiceMessageItem
-			item: BaseServiceMessageNode
-		}>,
-	) {
-		const message = event.detail.message
-		message.$loading = false
-		if (this.service.abortController) {
-			this.service.abortController.abort()
-			this.requestUpdate()
-		} else {
-			console.warn('abortController is undefined')
-		}
-	}
-	private async _handleRetryMessage(message: BaseServiceMessageItem) {
-		const index = this.messages?.findIndex((v) => v === message)
-		// console.log('_handleRetryMessage', message)
-		if (index === -1) {
-			throw new Error('message not found')
-		} else {
-			this._handleSendMessage({ detail: { content: '' } } as any, message)
-		}
-	}
-	private async _handleRetry(
-		event: CustomEvent<{
-			messages: BaseServiceMessages
-			message: BaseServiceMessageItem
-			item: BaseServiceMessageNode
-		}>,
-	) {
-		if (this.service.abortController) {
-			this.service.abortController.abort()
-		}
-		this._handleRetryMessage(event.detail.message)
-		this.requestUpdate()
-	}
+  /**
+   * 创建消息的回调函数
+   * @description 当没有选中会话时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息
+   */
+  @property({ type: Function, attribute: false })
+  onCreateMessage?: (content?: string) => string | Promise<string>
 
-	private _handleListDisconnected() {
-		this.service.destroy()
-	}
+  private async _handleStartNewChat() {
+    if (this.onCreateMessage) {
+      const conversationId = await this.onCreateMessage()
+      if (conversationId) this.currentConversationId = conversationId
+      this.requestUpdate()
+      await this.updateComplete
+    }
+    if (this.compact) this._handleDrawerClickClose()
+  }
+  get isLoading() {
+    // console.log('isLoading', this.messages)
+    return this.messages ? this.messages.some((v) => v.$loading) : false
+  }
+  private _handleStopOutput(
+    event: CustomEvent<{
+      messages: BaseServiceMessages
+      message: BaseServiceMessageItem
+      item: BaseServiceMessageNode
+    }>,
+  ) {
+    const message = event.detail.message
+    message.$loading = false
+    if (this.service.abortController) {
+      this.service.abortController.abort()
+      this.requestUpdate()
+    } else {
+      console.warn('abortController is undefined')
+    }
+  }
+  private async _handleRetryMessage(message: BaseServiceMessageItem) {
+    const index = this.messages?.findIndex((v) => v === message)
+    // console.log('_handleRetryMessage', message)
+    if (index === -1) {
+      throw new Error('message not found')
+    } else {
+      this._handleSendMessage({ detail: { content: '' } } as any, message)
+    }
+  }
+  private async _handleRetry(
+    event: CustomEvent<{
+      messages: BaseServiceMessages
+      message: BaseServiceMessageItem
+      item: BaseServiceMessageNode
+    }>,
+  ) {
+    if (this.service.abortController) {
+      this.service.abortController.abort()
+    }
+    this._handleRetryMessage(event.detail.message)
+    this.requestUpdate()
+  }
 
-	protected willUpdate(_changedProperties: PropertyValues): void {
-		if (_changedProperties.has('currentConversationId')) {
-			// 切换会话时, 销毁当前 service 上的连接和事件监听器
-			this.service.destroy()
-		}
-	}
+  private _handleListDisconnected() {
+    this.service.destroy()
+  }
 
-	/** 右侧消息列表 */
-	private get _mainPanel() {
-		if (this.messages) {
-			const _messages = this.messages
-			return html`
+  private _changeTheme() {
+    HyosanChatTheme.setStyleElement(this.shoelaceTheme)
+  }
+  protected willUpdate(_changedProperties: PropertyValues): void {
+    if (_changedProperties.has('currentConversationId')) {
+      // 切换会话时, 销毁当前 service 上的连接和事件监听器
+      this.service.destroy()
+    }
+    if (_changedProperties.has('shoelaceTheme')) {
+      // 切换 shoelace 主题样式(style)
+      this._changeTheme()
+    }
+  }
+
+  /** 右侧消息列表 */
+  private get _mainPanel() {
+    if (this.messages) {
+      const _messages = this.messages
+      return html`
 				<!-- 对话气泡 -->
 				<hyosan-chat-bubble-list
 					currentConversationId=${this.currentConversationId}
@@ -251,159 +269,170 @@ export class HyosanChat extends ShoelaceElement {
 					.messages=${_messages}>
 				</hyosan-chat-bubble-list>
 			`
-		} else {
-			return html`
+    } else {
+      return html`
 				<div class="main-welcome-wrapper">
 					<slot name="main-welcome"></slot>
 				</div>
 			`
-		}
-	}
-	private _handleClickConversation(
-		event: GlobalEventHandlersEventMap['click-conversation'],
-	) {
-		const isDifferentConversation =
-			this.currentConversationId !== event.detail.item.key
-		this.currentConversationId = event.detail.item.key
-		if (isDifferentConversation)
-			this.emit('change-conversation', { detail: { item: event.detail.item } })
-		if (this.compact) this._handleDrawerClickClose()
-	}
+    }
+  }
+  private _handleClickConversation(
+    event: GlobalEventHandlersEventMap['click-conversation'],
+  ) {
+    const isDifferentConversation =
+      this.currentConversationId !== event.detail.item.key
+    this.currentConversationId = event.detail.item.key
+    if (isDifferentConversation)
+      this.emit('change-conversation', { detail: { item: event.detail.item } })
+    if (this.compact) this._handleDrawerClickClose()
+  }
 
-	_onData() {
-		if (this.messages && this.messages.length > 0) {
-			// this.messages = [
-			// 	...this.messages.slice(0, -1),
-			// 	this.messages[this.messages.length - 1],
-			// ]
-			this.messages = [...this.messages]
-			this.service.messages = this.messages
-			// console.log(JSON.stringify(this.messages[this.messages.length - 1]))
-			// console.log('<hyosan-chat> _onData', JSON.stringify(this.messages), this.messages)
-		} else {
-			this.messages = []
-		}
-		this.requestUpdate('messages')
-	}
-	/** 从本地存储中更新服务配置 */
-	private updateServiceSettingsFromLocalStorage() {
-		const chatSettings = ChatSettings.fromLocalStorage()
-		this.service.url = chatSettings.baseUrl
-		this.service.model = chatSettings.modelName
-		this.service.apiKey = chatSettings.apiKey
-	}
-	private async _handleSendMessage(
-		event: GlobalEventHandlersEventMap['send-message'],
-		retryMessage?: BaseServiceMessageItem,
-	) {
-		const { content } = event.detail
-		// 配置请求参数
-		this.updateServiceSettingsFromLocalStorage()
-		// 监听流式请求响应
-		this.service.emitter.on('before-send', this._onData.bind(this))
-		if (!this.currentConversationId && this.onCreateMessage) {
-			const conversationId = await this.onCreateMessage(content)
-			await this.updateComplete // 等待当前 update 更新队列执行完毕, 否则会导致请求过程中被中断
-			if (conversationId) this.currentConversationId = conversationId
-		}
-		this.service.emitter.on('send-open', this._onData.bind(this))
-		this.service.emitter.on('data', this._onData.bind(this))
-		if (!this.messages) {
-			this.messages = []
-			this._onData()
-		}
-		try {
-			console.log('start')
-			if (retryMessage) {
-				// 发起流式请求
-				await this.service.retry(
-					this.currentConversationId,
-					this.messages,
-					retryMessage,
-				)
-			} else {
-				// 发起流式请求
-				await this.service.send(
-					content,
-					this.currentConversationId,
-					this.messages,
-				)
-			}
-		} catch (error) {
-			console.error(`<hyosan-chat> error: ${error}`, error)
-		} finally {
-			console.log('end')
-			this.service.emitter.clearListeners()
-			for (const message of this.messages) {
-				if (Reflect.has(message, '$loading')) message.$loading = false
-			}
-			this.requestUpdate()
-			await this.updateComplete
-			this.emit('messages-completions', { detail: { messages: this.messages } })
-		}
-	}
+  _onData() {
+    if (this.messages && this.messages.length > 0) {
+      // this.messages = [
+      // 	...this.messages.slice(0, -1),
+      // 	this.messages[this.messages.length - 1],
+      // ]
+      this.messages = [...this.messages]
+      this.service.messages = this.messages
+      // console.log(JSON.stringify(this.messages[this.messages.length - 1]))
+      // console.log('<hyosan-chat> _onData', JSON.stringify(this.messages), this.messages)
+    } else {
+      this.messages = []
+    }
+    this.requestUpdate('messages')
+  }
+  /** 从本地存储中更新服务配置 */
+  private updateServiceSettingsFromLocalStorage() {
+    const chatSettings = ChatSettings.fromLocalStorage()
+    this.service.url = chatSettings.baseUrl
+    this.service.model = chatSettings.modelName
+    this.service.apiKey = chatSettings.apiKey
+  }
+  private async _handleSendMessage(
+    event: GlobalEventHandlersEventMap['send-message'],
+    retryMessage?: BaseServiceMessageItem,
+  ) {
+    const { content } = event.detail
+    // 配置请求参数
+    this.updateServiceSettingsFromLocalStorage()
+    // 监听流式请求响应
+    this.service.emitter.on('before-send', this._onData.bind(this))
+    if (!this.currentConversationId && this.onCreateMessage) {
+      const conversationId = await this.onCreateMessage(content)
+      this.requestUpdate()
+      await this.updateComplete // 等待当前 update 更新队列执行完毕, 否则会导致请求过程中被中断
+      if (conversationId) this.currentConversationId = conversationId
+    }
+    this.service.emitter.on('send-open', this._onData.bind(this))
+    this.service.emitter.on('data', this._onData.bind(this))
+    if (!this.messages) {
+      this.messages = []
+      this._onData()
+    }
+    try {
+      console.log('start')
+      if (retryMessage) {
+        // 发起流式请求
+        await this.service.retry(
+          this.currentConversationId,
+          this.messages,
+          retryMessage,
+        )
+      } else {
+        // 发起流式请求
+        await this.service.send(
+          content,
+          this.currentConversationId,
+          this.messages,
+        )
+      }
+    } catch (error) {
+      console.error(`<hyosan-chat> error: ${error}`, error)
+    } finally {
+      console.log('end')
+      this.service.emitter.clearListeners()
+      for (const message of this.messages) {
+        if (Reflect.has(message, '$loading')) message.$loading = false
+      }
+      this.requestUpdate()
+      await this.updateComplete
+      this.emit('messages-completions', { detail: { messages: this.messages } })
+    }
+  }
 
-	private _handleSettingsSave(event: CustomEvent<ChatSettings>) {
-		console.log(event.detail)
-	}
+  private _handleSettingsSave(event: CustomEvent<ChatSettings>) {
+    console.log(event.detail)
+  }
 
-	/** 应用标题 */
-	@property()
-	applicationTitle = 'Hyosan Chat'
+  /** 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 */
+  @property()
+  onEnableSearch?: (open: boolean, service: BaseService) => void | Promise<void>
 
-	/** 在小于此宽度时隐藏左侧折叠面板, 变为 button + drawer 的形式 */
-	@property({ type: Number, reflect: true })
-	wrapWidth = 920
-	@state() /** 是否应用紧凑样式 */
-	get compact() {
-		return this._width < this.wrapWidth
-	}
+  /** 应用标题 */
+  @property()
+  applicationTitle = 'Hyosan Chat'
 
-	@state()
-	private _width = 0
+  /** 在小于此宽度时隐藏左侧折叠面板, 变为 button + drawer 的形式 */
+  @property({ type: Number, reflect: true })
+  wrapWidth = 920
+  @state() /** 是否应用紧凑样式 */
+  get compact() {
+    return this._width < this.wrapWidth
+  }
 
-	private _handleResize(
-		event: CustomEvent<{ entries: ResizeObserverEntry[] }>,
-	) {
-		const borderBoxSize = event.detail.entries[0].borderBoxSize[0]
-		const width = borderBoxSize.inlineSize
-		this._width = width
-	}
+  @state()
+  private _width = 0
 
-	private _handleClickConversationsButton() {}
-	@query('.drawer-contained')
-	private _drawer?: SlDrawer
+  private _handleResize(
+    event: CustomEvent<{ entries: ResizeObserverEntry[] }>,
+  ) {
+    const borderBoxSize = event.detail.entries[0].borderBoxSize[0]
+    const width = borderBoxSize.inlineSize
+    this._width = width
+  }
 
-	private _handleClickSettingsButton() {
-		if (!this._drawer) throw new Error('Internal error: drawer not found')
-		this._drawer.open = true
-	}
-	private _handleDrawerClickClose() {
-		if (!this._drawer) throw new Error('Internal error: drawer not found')
-		this._drawer.hide()
-	}
+  private _handleClickConversationsButton() {}
+  @query('.drawer-contained')
+  private _drawer?: SlDrawer
 
-	render() {
-		const hasConversationsSlot = this.hasSlotController.test('conversations')
-		const hasConversationsHeaderSlot = this.hasSlotController.test(
-			'conversations-header',
-		)
-		const hasMainHeaderSlot = this.hasSlotController.test('main-header')
-		const hasConversationsFooterSlot = this.hasSlotController.test(
-			'conversations-footer',
-		)
-		/** 会话列表 header */
-		const conversationsHeader = hasConversationsHeaderSlot
-			? html`<slot name="conversations-header"></slot>`
-			: html`<hyosan-chat-conversations-header slot="conversations-header" title=${this.applicationTitle} @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
-		/** 会话列表 footer */
-		const conversationsFooter = hasConversationsFooterSlot
-			? html`<slot name="conversations-footer"></slot>`
-			: html`<hyosan-chat-conversations-footer slot="conversations-footer" @hyosan-chat-settings-save=${this._handleSettingsSave}></hyosan-chat-conversations-footer>`
-		/** 会话列表 */
-		const conversations = hasConversationsSlot
-			? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
-			: html`
+  private _handleClickSettingsButton() {
+    if (!this._drawer) throw new Error('Internal error: drawer not found')
+    this._drawer.open = true
+  }
+  private _handleDrawerClickClose() {
+    if (!this._drawer) throw new Error('Internal error: drawer not found')
+    this._drawer.hide()
+  }
+
+  private _handleOpenSearch(event: CustomEvent<{ open: boolean }>) {
+    if (typeof this.onEnableSearch === 'function') {
+      return this.onEnableSearch(event.detail.open, this.service)
+    }
+  }
+
+  render() {
+    const hasConversationsSlot = this.hasSlotController.test('conversations')
+    const hasConversationsHeaderSlot = this.hasSlotController.test(
+      'conversations-header',
+    )
+    const hasMainHeaderSlot = this.hasSlotController.test('main-header')
+    const hasConversationsFooterSlot = this.hasSlotController.test(
+      'conversations-footer',
+    )
+    /** 会话列表 header */
+    const conversationsHeader = hasConversationsHeaderSlot
+      ? html`<slot name="conversations-header"></slot>`
+      : html`<hyosan-chat-conversations-header slot="conversations-header" title=${this.applicationTitle} @start-new-chat=${this._handleStartNewChat}></hyosan-chat-conversations-header>`
+    /** 会话列表 footer */
+    const conversationsFooter = hasConversationsFooterSlot
+      ? html`<slot name="conversations-footer"></slot>`
+      : html`<hyosan-chat-conversations-footer slot="conversations-footer" @hyosan-chat-settings-save=${this._handleSettingsSave}></hyosan-chat-conversations-footer>`
+    /** 会话列表 */
+    const conversations = hasConversationsSlot
+      ? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
+      : html`
 				<hyosan-chat-conversations
 					currentConversationId=${this.currentConversationId}
 					@click-conversation=${this._handleClickConversation}
@@ -412,19 +441,19 @@ export class HyosanChat extends ShoelaceElement {
 					${conversationsFooter}
 				</hyosan-chat-conversations>
 			`
-		const mainHeader = hasMainHeaderSlot
-			? html`<slot name="main-header"></slot>`
-			: this.compact
-				? html`
+    const mainHeader = hasMainHeaderSlot
+      ? html`<slot name="main-header"></slot>`
+      : this.compact
+        ? html`
 						<hyosan-chat-main-header
 							?compact=${this.compact}
 							@hyosan-chat-click-conversations-button=${this._handleClickConversationsButton}
 							@hyosan-chat-click-settings-button=${this._handleClickSettingsButton}>
 							</hyosan-chat-main-header>
 						`
-				: undefined
-		return html`
-			<div class="chat-wrapper" ?data-compact=${this.compact}>
+        : undefined
+    return html`
+			<div part="base" class="chat-wrapper" ?data-compact=${this.compact}>
 				<sl-resize-observer @sl-resize=${this._handleResize}>
 					<sl-split-panel snap="${this.panelSnap}" position="${this.panelPosition}">
 						<div
@@ -445,7 +474,12 @@ export class HyosanChat extends ShoelaceElement {
 								${this._mainPanel}
 							</main>
 							<footer>
-								<hyosan-chat-sender ?loading=${this.isLoading} @send-message=${this._handleSendMessage}></hyosan-chat-sender>
+								<hyosan-chat-sender
+									?loading=${this.isLoading}
+									?enableSearch=${!!this.onEnableSearch}
+									@open-search=${this._handleOpenSearch}
+									@send-message=${this._handleSendMessage}>
+								</hyosan-chat-sender>
 							</footer>
 						</div>
 					</sl-split-panel>
@@ -456,17 +490,19 @@ export class HyosanChat extends ShoelaceElement {
 				</sl-drawer>
 			</div>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-chat': HyosanChat
-	}
-	interface GlobalEventHandlersEventMap {
-		/** 消息接收完毕(可能是成功或报错) */
-		'messages-completions': CustomEvent<{ messages: BaseServiceMessages }>
-		/** 用户点击切换了会话 */
-		'change-conversation': CustomEvent<{ item: Conversation }>
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-chat': HyosanChat
+  }
+  interface GlobalEventHandlersEventMap {
+    /** 消息接收完毕(可能是成功或报错) */
+    'messages-completions': CustomEvent<{ messages: BaseServiceMessages }>
+    /** 用户点击切换了会话 */
+    'change-conversation': CustomEvent<{ item: Conversation }>
+  }
 }
+
+HyosanChat.define('hyosan-chat')

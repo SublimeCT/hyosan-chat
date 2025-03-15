@@ -4,18 +4,19 @@ import type { Translation as DefaultTranslation } from '@shoelace-style/localize
 export { registerTranslation } from '@shoelace-style/localize'
 
 export interface Translation extends DefaultTranslation {
-	$code: string // e.g. en, en-GB
-	$name: string // e.g. English, Español
-	$dir: 'ltr' | 'rtl'
+  $code: string // e.g. en, en-GB
+  $name: string // e.g. English, Español
+  $dir: 'ltr' | 'rtl'
 
-	test: string
-	startANewChat: string
-	sendTips: string
-	copy: string
-	copySuccessfully: string
-	rename: string
-	edit: string
-	delete: string
-	stopOutput: string
-	retry: string
+  test: string
+  startANewChat: string
+  sendTips: string
+  copy: string
+  copySuccessfully: string
+  rename: string
+  edit: string
+  delete: string
+  stopOutput: string
+  retry: string
+  enableSearch: string
 }
