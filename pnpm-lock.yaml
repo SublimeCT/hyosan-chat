@@ -84,9 +84,9 @@ importers:
       lint-staged:
         specifier: ^15.4.3
         version: 15.4.3
-      pascal-case:
-        specifier: ^4.0.0
-        version: 4.0.0
+      pascalcase:
+        specifier: ^2.0.0
+        version: 2.0.0
       rollup-plugin-copy:
         specifier: ^3.5.0
         version: 3.5.0
@@ -823,6 +823,10 @@ packages:
   callsites@3.1.0:
     resolution: {integrity: sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==}
     engines: {node: '>=6'}
+
+  camelcase@6.3.0:
+    resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
+    engines: {node: '>=10'}
 
   chalk@5.4.1:
     resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
@@ -1566,10 +1570,6 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  no-case@4.0.0:
-    resolution: {integrity: sha512-WmS3EUGw+vXHlTgiUPi3NzbZNwH6+uGX0QLGgqG+aFSJ5rkX/Ee0nuwHBJfZTfQwwR8lGO819NEIwQ7CGhkdEQ==}
-    deprecated: Use `change-case`
-
   node-domexception@1.0.0:
     resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
     engines: {node: '>=10.5.0'}
@@ -1643,9 +1643,9 @@ packages:
   parse5@6.0.1:
     resolution: {integrity: sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==}
 
-  pascal-case@4.0.0:
-    resolution: {integrity: sha512-DPrSBfN1ivlJ5WwTdcBfCfmOHZXjaeW+b8DMHXcUWiR8wmO92T6N8elBsJj/v3g+INObw8Zx/q6eFAjA1w071Q==}
-    deprecated: Use `change-case`
+  pascalcase@2.0.0:
+    resolution: {integrity: sha512-DHpENy5Qm/FaX+x3iBLoMLG/XHNCTgL+yErm1TwuVaj6u4fiOSkYkf60vGtITk7hrKHOO4uCl9vRrD4hqjNKjg==}
+    engines: {node: '>=14'}
 
   path-browserify@1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
@@ -2718,6 +2718,8 @@ snapshots:
 
   callsites@3.1.0: {}
 
+  camelcase@6.3.0: {}
+
   chalk@5.4.1: {}
 
   cheerio-select@1.6.0:
@@ -3496,8 +3498,6 @@ snapshots:
 
   nanoid@3.3.8: {}
 
-  no-case@4.0.0: {}
-
   node-domexception@1.0.0: {}
 
   node-fetch@2.7.0:
@@ -3565,9 +3565,9 @@ snapshots:
 
   parse5@6.0.1: {}
 
-  pascal-case@4.0.0:
+  pascalcase@2.0.0:
     dependencies:
-      no-case: 4.0.0
+      camelcase: 6.3.0
 
   path-browserify@1.0.1: {}
 

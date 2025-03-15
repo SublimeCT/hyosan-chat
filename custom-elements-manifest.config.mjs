@@ -19,7 +19,7 @@ import { customElementJetBrainsPlugin } from 'custom-element-jet-brains-integrat
 import { customElementVsCodePlugin } from 'custom-element-vs-code-integration';
 import { customElementVuejsPlugin } from 'custom-element-vuejs-integration';
 import { parse } from 'comment-parser';
-import { pascalCase } from 'pascal-case';
+import { pascalcase } from 'pascalcase';
 import commandLineArgs from 'command-line-args';
 import fs from 'node:fs';
 
@@ -141,8 +141,8 @@ const userConfigOptions = {
 
             if (classDoc?.events) {
               classDoc.events.forEach(event => {
-                event.reactName = `on${pascalCase(event.name)}`;
-                event.eventName = `${pascalCase(event.name)}Event`;
+                event.reactName = `on${pascalcase(event.name)}`;
+                event.eventName = `${pascalcase(event.name)}Event`;
               });
             }
           }
@@ -177,6 +177,7 @@ const userConfigOptions = {
     customElementVuejsPlugin({
       outdir: './dist/cem-types/vue',
       fileName: 'index.d.ts',
+      globalTypePath: '../../lib'
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
     })

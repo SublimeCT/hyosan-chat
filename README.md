@@ -31,11 +31,77 @@ pnpm i git+https://github.com/SublimeCT/hyosan-chat.git#main
 ## 使用
 [🔗 `demo` 页面](https://snazzy-khapse-06e16b.netlify.app/) 的源码可直接参考 [`src/hyosan-chat-demo.ts`](./src/hyosan-chat-demo.ts)
 
+组件附带了一个用于声明自定义元素信息的文件, 可以实现在 `vscode` / `JetBrains IDE` 中的代码补全功能
+
+### vscode
+需要在 `vscode` 的 `settings.json` 中声明组件提供的 `types`:
+
+`.vscode/settings.json`:
+```diff
+{
++  "html.customData": [
++    "./node_modules/hyosan-chat/dist/cem-types/vscode.html-custom-data.json"
++  ]
+}
+```
+
+### JetBrains IDE
+组件已经声明了一个 `dist/web-types.json` 文件, **在 `JetBrains IDE` 中应该会检测到**, 如果没有任何提示, 你可能需要在 `package.json` 中声明 `web-types`, 可参考 [JetBrains IDEs - Shoelace](https://shoelace.style/getting-started/usage#jetbrains-ides)
+
+### TypeScript
+组件完全使用 `TypeScript` 编写, 也基于 [custom-elements-manifest](https://custom-elements-manifest.open-wc.org/) 提供了一流的 `TypeScript` 支持, 只需引入组件提供的类型文件即可
+
+`tsconfig.json`:
+```diff
+{
+  "compilerOptions": {
+    // ...
++    "types": [
++      "hyosan-chat/dist/cem-types/vue/index.d.ts"
++    ]
+  },
+}
+
+```
+
 ### vue
 > [!TIP]
 > 请先阅读官方文档 [在 Vue 中使用自定义元素](https://cn.vuejs.org/guide/extras/web-components#using-custom-elements-in-vue)
 
-TODO
+在 `Vue` 中默认将所有元素作为 vue 组件, 但自定义元素不能被当做 vue 组件进行处理, 我们需要显示地声明哪些是自定义组件:
+
+`vite.config.ts`:
+```typescript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: tag => tag.includes('hyosan-')
+        }
+      }
+    })
+  ],
+})
+```
+
+以上配置是将 `hyosan-*` 组件作为自定义组件处理
+
+- 在代码中我们也必须严格使用 `<hyosan-chat>`, 而不能写成 `<HyosanChat>`
+- 对于 `slot` 也不能使用 `v-slot` / `#` 语法, 因为 `Web Components` 的插槽是原生的 [slot](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/slot), vue 的特殊插槽语法无法在自定义组件中使用
+
+> [!TIP]
+> 关于自定义元素使用插槽的局限性可参考 [插槽 - vue](https://cn.vuejs.org/guide/extras/web-components.html#slots)
+
+vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属性是 `Property`) 必须添加 `.prop` 修饰符:
+
+```html
+<hyosan-chat :messages.prop="messages"></hyosan-chat>
+```
 
 ### react
 TODO

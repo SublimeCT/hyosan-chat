@@ -24,6 +24,37 @@ import {
 } from '@/utils/HyosanChatTheme'
 import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
+/**
+ * HyosanChat 根组件
+ * @tag hyosan-chat
+ * @tagname hyosan-chat
+ * @summary 作为根组件使用
+ * @documentation https://github.com/SublimeCT/hyosan-chat/blob/main/README.md
+ * 
+ * @slot conversations - 左侧会话列表
+ * @slot conversations-header - 左侧会话列表的 `header` 部分
+ * @slot conversations-footer - 左侧会话列表的 `footer` 部分
+ * @slot main-welcome - 右侧消息列表的 `welcome` 界面
+ * @slot main-header - 右侧消息列表的 `header` 界面
+ * 
+ * @event {undefined} conversations-create - 点击创建新会话按钮
+ * @event {{ item: Conversation }} click-conversation - 点击左侧会话列表中的会话
+ * @event {{ item: Conversation }} change-conversation - 点击 **切换** 左侧会话列表中的会话
+ * @event {{ content: string }} send-message - 点击发送按钮
+ * @event {{ settings: ChatSettings }} hyosan-chat-settings-save - 在设置弹窗中点击保存按钮
+ * @event {{ item: Converastion }} edit-conversation - 在会话列表中点击编辑按钮, 并保存
+ * @event {{ item: Converastion }} delete-conversation - 在会话列表中点击删除按钮
+ * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-like-button - 点击 Like 按钮(点赞)
+ * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-dislike-button - 点击 Dislike 按钮(点赞)
+ * @event {{ messages: BaseServiceMessages }} messages-completions - 消息接收完毕(可能是成功或报错)
+ * 
+ * @csspart base - 根组件(`hyosan-chat`) 最外层元素
+ * 
+ * @cssproperty [--hy-container-padding=8px] - chat 容器中的基础边距
+ * @cssproperty [--hy-container-radius=8px] - chat 容器中的 radius
+ * @cssproperty [--hy-bubble-spacing=16px] - 消息气泡之间的间距
+ * @cssproperty [--hy-bubble-padding=16px] - 消息气泡内部的 padding
+ */
 @customElement('hyosan-chat')
 export class HyosanChat extends ShoelaceElement {
   static styles? = css`
@@ -179,7 +210,7 @@ export class HyosanChat extends ShoelaceElement {
    * 创建消息的回调函数
    * @description 当没有选中会话时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息
    */
-  @property({ type: Function, attribute: false })
+  @property({ attribute: false })
   onCreateMessage?: (content?: string) => string | Promise<string>
 
   private async _handleStartNewChat() {
@@ -191,6 +222,7 @@ export class HyosanChat extends ShoelaceElement {
     }
     if (this.compact) this._handleDrawerClickClose()
   }
+  /** 当前 `messages` 中是否有消息处于 pending 状态 */
   get isLoading() {
     // console.log('isLoading', this.messages)
     return this.messages ? this.messages.some((v) => v.$loading) : false
