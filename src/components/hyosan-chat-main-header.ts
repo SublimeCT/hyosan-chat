@@ -1,6 +1,6 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 // import type { ChatSettings } from '@/types/ChatSettings'
-// import { LocalizeController } from '@shoelace-style/localize'
+// import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 

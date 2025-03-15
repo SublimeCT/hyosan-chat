@@ -1,7 +1,7 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 // import { HasSlotController } from '@/internal/slot'
 import type { Conversation } from '@/types/conversations'
-// import { LocalizeController } from '@shoelace-style/localize'
+// import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 
