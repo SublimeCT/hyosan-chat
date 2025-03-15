@@ -58,11 +58,13 @@ export class HyosanChatConversations extends ShoelaceElement {
 				<header>
 					<slot name="conversations-header"></slot>
 				</header>
-				<main>
+				<main role="list" aria-label="ariaConversationsList">
 					${this.conversations.map(
 						(item) => html`
 						<hyosan-chat-conversations-item
+							role="listitem"
 							.item=${item} ?actived=${this.currentConversationId === item.key}
+							aria-selected=${this.currentConversationId === item.key ? 'true' : 'false'}
 							@click-conversation=${this._handleClickConversation}
 							@delete-conversation=${this._handleDeleteConversation}
 						>

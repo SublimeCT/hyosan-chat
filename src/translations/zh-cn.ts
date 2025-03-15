@@ -19,6 +19,8 @@ const translation: Translation = {
   stopOutput: '停止输出',
   retry: '重新生成',
   enableSearch: '联网搜索',
+  ariaSendInput: '发送框',
+  ariaConversationsList: '会话列表',
 }
 
 registerTranslation(translation)

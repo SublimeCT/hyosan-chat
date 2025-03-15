@@ -19,6 +19,8 @@ const translation: Translation = {
   stopOutput: 'Stop output',
   retry: 'Retry',
   enableSearch: 'Enable search',
+  ariaSendInput: 'Send input',
+  ariaConversationsList: 'Conversations list',
 }
 
 registerTranslation(translation)

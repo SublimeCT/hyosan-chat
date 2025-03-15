@@ -100,7 +100,7 @@ export class HyosanChatSender extends ShoelaceElement {
     return html`
       <div class="container">
         <main>
-          <sl-textarea placeholder=${this._localize.term('sendTips')} value=${this.content} rows="2" resize="none" @sl-input=${this._handleInput} @keydown=${this._handleTextareaKeyDown}></sl-textarea>
+          <sl-textarea aria-label=${this._localize.term('ariaSendInput')} placeholder=${this._localize.term('sendTips')} value=${this.content} rows="2" resize="none" @sl-input=${this._handleInput} @keydown=${this._handleTextareaKeyDown}></sl-textarea>
         </main>
         <footer>
           <div class="option-buttons">

@@ -19,4 +19,6 @@ export interface Translation extends DefaultTranslation {
   stopOutput: string
   retry: string
   enableSearch: string
+  ariaSendInput: string
+  ariaConversationsList: string
 }
