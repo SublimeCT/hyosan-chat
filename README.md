@@ -25,7 +25,7 @@
 
 ## 安装
 ```bash
-pnpm i git+https://github.com/SublimeCT/hyosan-chat.git#main
+pnpm i hyosan-chat
 ```
 
 ## 使用
