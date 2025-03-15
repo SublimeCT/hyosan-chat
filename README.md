@@ -66,6 +66,7 @@ pnpm i git+https://github.com/SublimeCT/hyosan-chat.git#main
 
 ### vue
 > [!TIP]
+> 具体使用方式可参考示例项目: [hyosan-chat-vue-demo](https://github.com/SublimeCT/hyosan-chat-vue-demo)  
 > 请先阅读官方文档 [在 Vue 中使用自定义元素](https://cn.vuejs.org/guide/extras/web-components#using-custom-elements-in-vue)
 
 在 `Vue` 中默认将所有元素作为 vue 组件, 但自定义元素不能被当做 vue 组件进行处理, 我们需要显示地声明哪些是自定义组件:
