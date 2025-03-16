@@ -7,7 +7,7 @@
 ![](./hyosan-chat-mobile-screenshot.png)
 
 ## 介绍
-`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库; 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
+`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / `angular` / `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
 
 ## 功能特性
 - **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性
@@ -105,7 +105,15 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 ```
 
 ### react
-TODO
+> [!TIP]
+> 直接参考示例项目: [hyosan-chat-react-demo](https://github.com/SublimeCT/hyosan-chat-react-demo)
+
+组件库使用 `Lit` 搭建, 并通过 [custom-element-react-wrappers](https://www.npmjs.com/package/custom-element-react-wrappers) 使组件库使用 `forwardRef` 进行了包装, 以便为 `react` 项目提供组件和类型支持, 你可以直接参考上方的示例项目, 也可参考 [#ad39286](https://github.com/SublimeCT/hyosan-chat-react-demo/commit/ad3928658a0f620ab46097fb8c5ab826b9788e66) 了解具体的改动
+
+如果你想了解更多关于自定义组件如何在 react 项目中使用的细节, 可参考以下文档:
+- [React - Lit](https://lit.dev/docs/frameworks/react/)
+- [custom-elements-manifest plugins](https://custom-elements-manifest.open-wc.org/analyzer/plugins/intro/#community-plugins)
+- [custom-element-react-wrappers](https://www.npmjs.com/package/custom-element-react-wrappers)
 
 ## API
 ### Properties
