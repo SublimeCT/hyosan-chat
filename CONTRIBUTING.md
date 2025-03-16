@@ -8,8 +8,14 @@ pnpm i
 # 启动开发环境
 pnpm run dev
 
-# 构建生成版本
+# 打包为示例项目
 pnpm run build
+
+# 打包为库
+pnpm run build:lib
+
+# 发布包, 需要先 pnpm run npm:login 登录
+pnmp run npm:publish
 ```
 ## 目录结构
 | 目录 / 文件                        | 说明                                                         |
