@@ -1,6 +1,6 @@
 {
   "name": "hyosan-chat",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A library of web components for AI conversations based on lit and shoelace",
   "repository": {
     "url": "https://github.com/SublimeCT/hyosan-chat"
@@ -40,12 +40,7 @@
       "import": "./dist/hyosan-chat.js",
       "require": "./dist/hyosan-chat.umd.cjs"
     },
-    "./dist/hyosan-chat.css": "./dist/hyosan-chat.css",
-    "./dist/sheets/*": "./dist/sheets/*",
-    "./dist/types/*": "./dist/types/*",
-    "./dist/service/*": "./dist/service/*",
-    "./dist/utils/*": "./dist/utils/*",
-    "./dist/cem-types/*": "./dist/cem-types/*"
+    "./dist/*": "./dist/*"
   },
   "web-types": "./dist/web-types.json",
   "packageManager": "pnpm@10.4.1",
@@ -85,6 +80,7 @@
     "command-line-args": "^6.0.1",
     "comment-parser": "^1.4.1",
     "custom-element-jet-brains-integration": "^1.7.0",
+    "custom-element-react-wrappers": "^1.7.0",
     "custom-element-vs-code-integration": "^1.5.0",
     "custom-element-vuejs-integration": "^1.4.0",
     "cz-git": "^1.11.0",

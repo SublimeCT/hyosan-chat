@@ -399,7 +399,7 @@ export class HyosanChat extends ShoelaceElement {
   }
 
   /** 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 */
-  @property()
+  @property({ attribute: false })
   onEnableSearch?: (open: boolean, service: BaseService) => void | Promise<void>
 
   /** 应用标题 */

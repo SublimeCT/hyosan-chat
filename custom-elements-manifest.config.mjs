@@ -22,6 +22,7 @@ import { parse } from 'comment-parser';
 import { pascalcase } from 'pascalcase';
 import commandLineArgs from 'command-line-args';
 import fs from 'node:fs';
+import { customElementReactWrapperPlugin } from 'custom-element-react-wrappers'
 
 
 const packageData = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
@@ -180,8 +181,12 @@ const userConfigOptions = {
       globalTypePath: '../../lib'
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
-    })
+    }),
 
+    customElementReactWrapperPlugin({
+      outdir: './dist/react',
+      modulePath: () => '../hyosan-chat.js'
+    }),
   ]
 }
 
