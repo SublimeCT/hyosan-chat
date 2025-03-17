@@ -7,7 +7,7 @@
 ![](./hyosan-chat-mobile-screenshot.png)
 
 ## 介绍
-`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / [angular](#angular) / `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
+`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / [angular](#angular) / [vanilla](#vanilla) `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
 
 ## 功能特性
 - **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性, 目前已在 [vue](#vue) / [react](#react) / [angular](#angular) 等框架中测试通过
@@ -122,6 +122,13 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 > [!TIP]
 > 直接参考示例项目: [hyosan-chat-angular-demo](https://github.com/SublimeCT/hyosan-chat-angular-demo)  
 > 具体改动可参考 [#71a4ddf](https://github.com/SublimeCT/hyosan-chat-angular-demo/commit/71a4ddf41669e586c858a8c9b738b794a9952e31)
+
+### vanilla
+> [!TIP]
+> 直接参考示例项目: [hyosan-chat-vanilla-demo](https://github.com/SublimeCT/hyosan-chat-vanilla-demo)  
+> 具体改动可参考 [#c12b2b7](https://github.com/SublimeCT/hyosan-chat-vanilla-demo/commit/c12b2b722ca3fd670847c30571678dbfcfa6dbbe)
+
+`vanilla` 指的是原生的没有使用任何框架的 `javascript` 运行环境或项目, 可以理解为完全空白的项目
 
 ## API
 ### Properties
