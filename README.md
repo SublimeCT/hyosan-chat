@@ -7,10 +7,10 @@
 ![](./hyosan-chat-mobile-screenshot.png)
 
 ## 介绍
-`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / `angular` / `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
+`hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / [angular](#angular) / `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
 
 ## 功能特性
-- **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性
+- **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性, 目前已在 [vue](#vue) / [react](#react) / [angular](#angular) 等框架中测试通过
 - **`UI` 组件库**: 基于成熟的基础组件库 [Shoelace](https://shoelace.style/)
 - **`AI` 集成**: 支持与多种 `AI` 模型和服务集成, 提供智能对话功能
 - **模块化设计**: 组件高度解耦, 便于按需引入和扩展
@@ -90,6 +90,9 @@ export default defineConfig({
 })
 ```
 
+> [!TIP]
+> 对于 vue2 项目, 应该配置 [Vue.config.ignoredElements](https://v2.cn.vuejs.org/v2/api/#ignoredElements)
+
 以上配置是将 `hyosan-*` 组件作为自定义组件处理
 
 - 在代码中我们也必须严格使用 `<hyosan-chat>`, 而不能写成 `<HyosanChat>`
@@ -114,6 +117,11 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 - [React - Lit](https://lit.dev/docs/frameworks/react/)
 - [custom-elements-manifest plugins](https://custom-elements-manifest.open-wc.org/analyzer/plugins/intro/#community-plugins)
 - [custom-element-react-wrappers](https://www.npmjs.com/package/custom-element-react-wrappers)
+
+### angular
+> [!TIP]
+> 直接参考示例项目: [hyosan-chat-angular-demo](https://github.com/SublimeCT/hyosan-chat-angular-demo)  
+> 具体改动可参考 [#71a4ddf](https://github.com/SublimeCT/hyosan-chat-angular-demo/commit/71a4ddf41669e586c858a8c9b738b794a9952e31)
 
 ## API
 ### Properties
