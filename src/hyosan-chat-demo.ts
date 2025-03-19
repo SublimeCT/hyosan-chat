@@ -195,12 +195,6 @@ export class HyosanChatDemo extends LitElement {
     }
   }
 
-  private _avatarGetter(message: BaseServiceMessageItem) {
-    return message.role === 'user'
-      ? html`<div>user</div>`
-      : html`<div>assistant</div>`
-  }
-
   render() {
     return html`
 			<div class="demo-container">
