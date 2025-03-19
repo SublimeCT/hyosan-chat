@@ -21,6 +21,14 @@ const translation: Translation = {
   enableSearch: '联网搜索',
   ariaSendInput: '发送框',
   ariaConversationsList: '会话列表',
+  settings: '设置',
+  baseUrl: 'Base URL',
+  modelName: '模型名称',
+  apiKey: 'API Key',
+  systemPrompts: '默认的系统提示词',
+  save: '保存',
+  reset: '重置',
+  close: '关闭',
 }
 
 registerTranslation(translation)

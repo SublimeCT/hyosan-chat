@@ -21,4 +21,12 @@ export interface Translation extends DefaultTranslation {
   enableSearch: string
   ariaSendInput: string
   ariaConversationsList: string
+  settings: string
+  baseUrl: string
+  modelName: string
+  apiKey: string
+  systemPrompts: string
+  save: string
+  reset: string
+  close: string
 }

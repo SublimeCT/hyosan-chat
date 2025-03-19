@@ -352,6 +352,8 @@ export class HyosanChat extends ShoelaceElement {
     this.service.url = chatSettings.baseUrl
     this.service.model = chatSettings.modelName
     this.service.apiKey = chatSettings.apiKey
+    if (chatSettings.systemPrompts)
+      this.service.systemPrompt = chatSettings.systemPrompts
   }
   private async _handleSendMessage(
     event: GlobalEventHandlersEventMap['send-message'],

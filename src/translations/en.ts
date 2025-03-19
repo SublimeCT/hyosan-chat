@@ -21,6 +21,14 @@ const translation: Translation = {
   enableSearch: 'Enable search',
   ariaSendInput: 'Send input',
   ariaConversationsList: 'Conversations list',
+  settings: 'Settings',
+  baseUrl: 'Base URL',
+  modelName: 'Model Name',
+  apiKey: 'API Key',
+  systemPrompts: 'System Prompts',
+  save: 'Save',
+  reset: 'Reset',
+  close: 'Close',
 }
 
 registerTranslation(translation)
