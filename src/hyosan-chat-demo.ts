@@ -3,11 +3,7 @@ import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
-import type {
-  BaseService,
-  BaseServiceMessageItem,
-  BaseServiceMessages,
-} from './service/BaseService'
+import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
 import type { Conversation } from './types/conversations'
 
