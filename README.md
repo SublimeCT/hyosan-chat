@@ -113,6 +113,8 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 
 组件库使用 `Lit` 搭建, 并通过 [custom-element-react-wrappers](https://www.npmjs.com/package/custom-element-react-wrappers) 使组件库使用 `forwardRef` 进行了包装, 以便为 `react` 项目提供组件和类型支持, 你可以直接参考上方的示例项目, 也可参考 [#ad39286](https://github.com/SublimeCT/hyosan-chat-react-demo/commit/ad3928658a0f620ab46097fb8c5ab826b9788e66) 了解具体的改动
 
+需要特别注意的是, `react` 组件本身不是 `HTML` 元素, 无法直接作为 `slot`, 应该包裹一个具有 `slot` 属性的容器元素, 然后在容器元素中放置组件, 详见 [using slot - Lit](https://lit.dev/docs/frameworks/react/#using-slots)
+
 如果你想了解更多关于自定义组件如何在 react 项目中使用的细节, 可参考以下文档:
 - [React - Lit](https://lit.dev/docs/frameworks/react/)
 - [custom-elements-manifest plugins](https://custom-elements-manifest.open-wc.org/analyzer/plugins/intro/#community-plugins)
@@ -155,6 +157,7 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `onCreateMessage` | `(content?: string) => string \| Promise<string>` | `Property` | `undefined` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息; 如果不返回 conversationId, 则不会在组件内部改变 conversationId, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
 | `onEnableSearch` | `(open: boolean) => void \| Promise<void>` | `Property` | `undefined` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
 | `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | `HyosanChatShoelaceTheme.shoelaceLight` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
+| `avatarGetter`(`0.3.1`) | `(message: BaseServiceMessageItem) => TemplateResult` | `Property` | `undefined` | 消息列表中的头像获取函数, 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html, 详见 [lit html slot](#lit-html-slot) | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -167,6 +170,17 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `conversations-footer` | 左侧会话列表的 `footer` 部分 |
 | `main-welcome` | 右侧消息列表的 `welcome` 界面 |
 | `main-header` | 右侧消息列表的 `header` 部分 |
+
+### Lit html slot
+由于原生的 [`<slot>` 元素](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_components/Using_templates_and_slots) 存在诸多限制, 既无法在组件内部渲染多次, 也无法实现作用域插槽, 所以本组件对外 `export` 了 [html - lit](https://lit.dev/docs/api/static-html/#html) 方法, 用于创建在 `lit` 中使用的 `html` 模板:
+
+```typescript
+import { html } from 'hyosan-chat'
+
+const avatar = html`<div>Hello Lit html</div>`
+```
+
+`html` 的语法可参考 [lit html](https://lit.dev/docs/templates/expressions/#html-templates) / [Rendering - Lit](https://lit.dev/docs/components/rendering/)
 
 ### Events
 | 事件名 | 参数 | 描述 |

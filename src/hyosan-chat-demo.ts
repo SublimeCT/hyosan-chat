@@ -3,7 +3,11 @@ import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
-import type { BaseService, BaseServiceMessages } from './service/BaseService'
+import type {
+  BaseService,
+  BaseServiceMessageItem,
+  BaseServiceMessages,
+} from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
 import type { Conversation } from './types/conversations'
 
@@ -189,6 +193,12 @@ export class HyosanChatDemo extends LitElement {
       Reflect.deleteProperty(service.chat, 'enable_deep_search')
       Reflect.deleteProperty(service.chat, 'enable_search')
     }
+  }
+
+  private _avatarGetter(message: BaseServiceMessageItem) {
+    return message.role === 'user'
+      ? html`<div>user</div>`
+      : html`<div>assistant</div>`
   }
 
   render() {

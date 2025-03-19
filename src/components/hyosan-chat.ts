@@ -1,6 +1,6 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 // import { LocalizeController } from '@/utils/localize'
-import { type PropertyValues, css, html } from 'lit'
+import { type PropertyValues, type TemplateResult, css, html } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 
 // shoelace 组件
@@ -30,13 +30,13 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  * @tagname hyosan-chat
  * @summary 作为根组件使用
  * @documentation https://github.com/SublimeCT/hyosan-chat/blob/main/README.md
- * 
+ *
  * @slot conversations - 左侧会话列表
  * @slot conversations-header - 左侧会话列表的 `header` 部分
  * @slot conversations-footer - 左侧会话列表的 `footer` 部分
  * @slot main-welcome - 右侧消息列表的 `welcome` 界面
  * @slot main-header - 右侧消息列表的 `header` 界面
- * 
+ *
  * @event {undefined} conversations-create - 点击创建新会话按钮
  * @event {{ item: Conversation }} click-conversation - 点击左侧会话列表中的会话
  * @event {{ item: Conversation }} change-conversation - 点击 **切换** 左侧会话列表中的会话
@@ -47,9 +47,10 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-like-button - 点击 Like 按钮(点赞)
  * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-dislike-button - 点击 Dislike 按钮(点赞)
  * @event {{ messages: BaseServiceMessages }} messages-completions - 消息接收完毕(可能是成功或报错)
- * 
+ *
  * @csspart base - 根组件(`hyosan-chat`) 最外层元素
- * 
+ * @csspart avatar - (since `0.3.1`) 消息列表组件(`hyosan-chat-bubble-list`) 中的头像部分
+ *
  * @cssproperty [--hy-container-padding=8px] - chat 容器中的基础边距
  * @cssproperty [--hy-container-radius=8px] - chat 容器中的 radius
  * @cssproperty [--hy-bubble-spacing=16px] - 消息气泡之间的间距
@@ -194,6 +195,14 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
   showAvatar = false
 
+  /**
+   * 消息列表中的头像获取函数
+   * @description 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html
+   * @since 0.3.1
+   */
+  @property({ attribute: false })
+  avatarGetter?: (message: BaseServiceMessageItem) => TemplateResult
+
   /** 是否显示重新生成按钮 */
   @property({ type: Boolean })
   showRetryButton = true
@@ -291,6 +300,7 @@ export class HyosanChat extends ShoelaceElement {
       return html`
 				<!-- 对话气泡 -->
 				<hyosan-chat-bubble-list
+          exportparts="avatar"
 					currentConversationId=${this.currentConversationId}
 					?showRetryButton=${this.showRetryButton}
 					?showLikeAndDislikeButton=${this.showLikeAndDislikeButton}
@@ -298,6 +308,7 @@ export class HyosanChat extends ShoelaceElement {
 					@hyosan-chat-stop=${this._handleStopOutput}
 					@hyosan-chat-retry=${this._handleRetry}
 					@hyosan-chat-bubble-list-disconnected=${this._handleListDisconnected}
+          .avatarGetter=${this.avatarGetter}
 					.messages=${_messages}>
 				</hyosan-chat-bubble-list>
 			`

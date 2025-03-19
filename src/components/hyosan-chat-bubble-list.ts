@@ -8,7 +8,13 @@ import { withResetSheets } from '@/sheets'
 import { LocalizeController } from '@/utils/localize'
 import { renderMarkdown } from '@/utils/markdown/markdown'
 import hljsGithubTheme from 'highlight.js/styles/github-dark.min.css?inline'
-import { type PropertyValues, css, html, unsafeCSS } from 'lit'
+import {
+  type PropertyValues,
+  type TemplateResult,
+  css,
+  html,
+  unsafeCSS,
+} from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/copy-button/copy-button.js'
@@ -176,6 +182,14 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
   showAvatar = false
 
+  /**
+   * 消息列表中的头像获取函数
+   * @description 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html
+   * @since 0.3.1
+   */
+  @property({ attribute: false })
+  avatarGetter?: (message: BaseServiceMessageItem) => TemplateResult
+
   /** 会话服务消息列表 */
   @property({
     attribute: false,
@@ -277,22 +291,34 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     }
   }
 
-  private get _userAvatar() {
+  private _userAvatar(message: BaseServiceMessageItem) {
     return html`
-      <div class="avatar user">
-        <hyosan-icon-wrapper>
-          <svg t="1741513569281" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1614" width="1em" height="1em" fill="currentColor"><path d="M908.6432 802.848q0 68.576-41.728 108.288t-110.848 39.712l-499.424 0q-69.152 0-110.848-39.712t-41.728-108.288q0-30.272 2.016-59.136t8-62.272 15.136-62.016 24.576-55.712 35.424-46.272 48.864-30.56 63.712-11.424q5.152 0 24 12.288t42.56 27.424 61.728 27.424 76.288 12.288 76.288-12.288 61.728-27.424 42.56-27.424 24-12.288q34.848 0 63.712 11.424t48.864 30.56 35.424 46.272 24.576 55.712 15.136 62.016 8 62.272 2.016 59.136zM725.7952 292.576q0 90.848-64.288 155.136t-155.136 64.288-155.136-64.288-64.288-155.136 64.288-155.136 155.136-64.288 155.136 64.288 64.288 155.136z" p-id="1615"></path></svg>       
-        </hyosan-icon-wrapper>
+      <div class="avatar user" part="avatar">
+        ${
+          this.avatarGetter
+            ? this.avatarGetter(message)
+            : html`
+              <hyosan-icon-wrapper>
+                <svg t="1741513569281" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1614" width="1em" height="1em" fill="currentColor"><path d="M908.6432 802.848q0 68.576-41.728 108.288t-110.848 39.712l-499.424 0q-69.152 0-110.848-39.712t-41.728-108.288q0-30.272 2.016-59.136t8-62.272 15.136-62.016 24.576-55.712 35.424-46.272 48.864-30.56 63.712-11.424q5.152 0 24 12.288t42.56 27.424 61.728 27.424 76.288 12.288 76.288-12.288 61.728-27.424 42.56-27.424 24-12.288q34.848 0 63.712 11.424t48.864 30.56 35.424 46.272 24.576 55.712 15.136 62.016 8 62.272 2.016 59.136zM725.7952 292.576q0 90.848-64.288 155.136t-155.136 64.288-155.136-64.288-64.288-155.136 64.288-155.136 155.136-64.288 155.136 64.288 64.288 155.136z" p-id="1615"></path></svg>       
+              </hyosan-icon-wrapper>
+            `
+        }
       </div>
     `
   }
 
-  private get _assistantAvatar() {
+  private _assistantAvatar(message: BaseServiceMessageItem) {
     return html`
-      <div class="avatar assistant">
-        <hyosan-icon-wrapper>
-          <svg t="1741514236963" class="icon" viewBox="0 0 1072 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15523" width="1em" height="1em" fill="currentColor"><path d="M474.65142875 55.68000031a45.71428594 45.71428594 0 1 1 80.09142844 44.11428563l-37.89714282 68.79999937L672.18285687 169.14285688c40.63999969 0.13714313 60.89142844 49.32571406 32.13714282 78.03428624l-54.67428563 54.67428563H809.14285719a137.14285688 137.14285688 0 0 1 137.14285687 137.14285688v137.14285687a45.71428594 45.71428594 0 1 1 91.42857188 0v137.14285781a45.71428594 45.71428594 0 0 1-91.42857188 0v137.14285688a137.14285688 137.14285688 0 0 1-137.14285687 137.14285687H260.57142875a137.14285688 137.14285688 0 0 1-137.14285688-137.14285687v-137.14285688a45.71428594 45.71428594 0 0 1-91.42857187 0v-137.14285781a45.71428594 45.71428594 0 1 1 91.42857188 0v-137.14285688a137.14285688 137.14285688 0 0 1 137.14285687-137.14285687h260.47999969c1.27999969-1.7371425 2.74285688-3.42857156 4.34285718-5.02857187l36.61714313-36.61714219-122.51428594-0.45714281A45.71428594 45.71428594 0 0 1 399.54285687 192.00000031zM809.14285719 393.32571406H260.57142875a45.71428594 45.71428594 0 0 0-45.71428594 45.71428594v411.42857156a45.71428594 45.71428594 0 0 0 45.71428594 45.71428594h548.57142844a45.71428594 45.71428594 0 0 0 45.71428594-45.71428594v-411.42857156a45.71428594 45.71428594 0 0 0-45.71428594-45.71428594z m-434.28571406 182.85714282a68.57142844 68.57142844 0 1 1-1e-8 137.14285781 68.57142844 68.57142844 0 0 1 0-137.14285782z m319.99999968-1e-8a68.57142844 68.57142844 0 1 1 0 137.14285782 68.57142844 68.57142844 0 0 1 0-137.14285781z" p-id="15524"></path></svg>
-        </hyosan-icon-wrapper>
+      <div class="avatar assistant" part="avatar">
+        ${
+          this.avatarGetter
+            ? this.avatarGetter(message)
+            : html`
+              <hyosan-icon-wrapper>
+                <svg t="1741514236963" class="icon" viewBox="0 0 1072 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15523" width="1em" height="1em" fill="currentColor"><path d="M474.65142875 55.68000031a45.71428594 45.71428594 0 1 1 80.09142844 44.11428563l-37.89714282 68.79999937L672.18285687 169.14285688c40.63999969 0.13714313 60.89142844 49.32571406 32.13714282 78.03428624l-54.67428563 54.67428563H809.14285719a137.14285688 137.14285688 0 0 1 137.14285687 137.14285688v137.14285687a45.71428594 45.71428594 0 1 1 91.42857188 0v137.14285781a45.71428594 45.71428594 0 0 1-91.42857188 0v137.14285688a137.14285688 137.14285688 0 0 1-137.14285687 137.14285687H260.57142875a137.14285688 137.14285688 0 0 1-137.14285688-137.14285687v-137.14285688a45.71428594 45.71428594 0 0 1-91.42857187 0v-137.14285781a45.71428594 45.71428594 0 1 1 91.42857188 0v-137.14285688a137.14285688 137.14285688 0 0 1 137.14285687-137.14285687h260.47999969c1.27999969-1.7371425 2.74285688-3.42857156 4.34285718-5.02857187l36.61714313-36.61714219-122.51428594-0.45714281A45.71428594 45.71428594 0 0 1 399.54285687 192.00000031zM809.14285719 393.32571406H260.57142875a45.71428594 45.71428594 0 0 0-45.71428594 45.71428594v411.42857156a45.71428594 45.71428594 0 0 0 45.71428594 45.71428594h548.57142844a45.71428594 45.71428594 0 0 0 45.71428594-45.71428594v-411.42857156a45.71428594 45.71428594 0 0 0-45.71428594-45.71428594z m-434.28571406 182.85714282a68.57142844 68.57142844 0 1 1-1e-8 137.14285781 68.57142844 68.57142844 0 0 1 0-137.14285782z m319.99999968-1e-8a68.57142844 68.57142844 0 1 1 0 137.14285782 68.57142844 68.57142844 0 0 1 0-137.14285781z" p-id="15524"></path></svg>
+              </hyosan-icon-wrapper>
+            `
+        }
       </div>
     `
   }
@@ -382,7 +408,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 
         return html`
           <div class="bubble-item" ?data-loading=${message.$loading} ?show-avatar=${this.showAvatar} data-role=${message?.role}>
-            ${message.role === 'user' ? '' : this._assistantAvatar}
+            ${message.role === 'user' ? '' : this._assistantAvatar(message)}
             <div class="bubble" part="hyosan-chat-bubble">
               <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!item.reasoningContent}>
                 <div slot="content" .innerHTML=${item.reasoningContent}></div>
@@ -391,7 +417,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
               ${message.$error ? html`<hyosan-chat-bubble-error-block .error=${message.$error}></hyosan-chat-bubble-error-block>` : ''}
               ${this._bubbleItemFooter(message, item, index >= assistantIndex)}
             </div>
-            ${message.role === 'user' ? this._userAvatar : ''}
+            ${message.role === 'user' ? this._userAvatar(message) : ''}
           </div>
         `
       },
