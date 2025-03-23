@@ -29,4 +29,11 @@ export interface Translation extends DefaultTranslation {
   save: string
   reset: string
   close: string
+  theme: string
+  lightTheme: string
+  darkTheme: string
+  followSystemTheme: string
+  language: string
+  en: string
+  zhCn: string
 }

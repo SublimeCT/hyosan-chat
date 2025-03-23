@@ -27,7 +27,8 @@
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
-		"noUncheckedSideEffectImports": true
+		"noUncheckedSideEffectImports": true,
+    "verbatimModuleSyntax": true,
 	},
 	"include": ["src", "/*.ts", "/*.mjs"]
 }

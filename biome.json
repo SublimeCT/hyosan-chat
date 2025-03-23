@@ -25,7 +25,8 @@
         "noUnknownUnit": "off"
       },
       "style": {
-        "noUselessElse": "off"
+        "noUselessElse": "off",
+        "useEnumInitializers": "off"
       },
       "complexity": {
         "noStaticOnlyClass": "off",
