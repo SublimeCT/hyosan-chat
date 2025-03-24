@@ -1,3 +1,4 @@
+import type { Translation } from '@/translations/translation'
 import shoelaceDarkCss from '@shoelace-style/shoelace/dist/themes/dark.css?inline'
 import shoelaceLightCss from '@shoelace-style/shoelace/dist/themes/light.css?inline'
 
@@ -5,14 +6,43 @@ import shoelaceLightCss from '@shoelace-style/shoelace/dist/themes/light.css?inl
 export enum HyosanChatShoelaceTheme {
   shoelaceLight = 'sl-theme-light',
   shoelaceDark = 'sl-theme-dark',
+  auto = 'auto',
+}
+
+export interface HyosanChatThemeItem {
+  /** 主题名称(多语言 key) */
+  i18nKey: keyof Translation
+  /** css 内容 */
+  cssText: string
 }
 
 /** shoelace 组件库的主题 css 内容 */
-export const HyosanChatShoelaceThemes = {
+export const HyosanChatShoelaceThemes: Record<
+  HyosanChatShoelaceTheme,
+  HyosanChatThemeItem
+> = {
   /** light theme */
-  [HyosanChatShoelaceTheme.shoelaceLight]: shoelaceLightCss,
+  [HyosanChatShoelaceTheme.shoelaceLight]: {
+    i18nKey: 'lightTheme',
+    cssText: shoelaceLightCss,
+  },
   /** dark theme */
-  [HyosanChatShoelaceTheme.shoelaceDark]: shoelaceDarkCss,
+  [HyosanChatShoelaceTheme.shoelaceDark]: {
+    i18nKey: 'darkTheme',
+    cssText: shoelaceDarkCss,
+  },
+  /** Follow system Settings */
+  [HyosanChatShoelaceTheme.auto]: {
+    i18nKey: 'followSystemTheme',
+    cssText: `
+      @media (prefers-color-scheme: light) {
+        ${shoelaceLightCss}
+      }
+      @media (prefers-color-scheme: dark) {
+        :root, ${shoelaceDarkCss}
+      }
+    `,
+  },
 }
 
 /**
@@ -26,11 +56,12 @@ export class HyosanChatTheme {
   }
   static setStyleElement(theme: HyosanChatShoelaceTheme) {
     const styleElement = HyosanChatTheme.getStyleElement()
-    const cssText = HyosanChatShoelaceThemes[theme]
-    const cssNode = document.createTextNode(cssText)
+    const item = HyosanChatShoelaceThemes[theme]
+    const cssNode = document.createTextNode(item.cssText)
     if (styleElement) {
       styleElement.innerHTML = ''
       styleElement.appendChild(cssNode)
+      styleElement.setAttribute(HyosanChatTheme.TAG_ATTRIBUTE, theme)
     } else {
       const style = document.createElement('style')
       style.setAttribute(HyosanChatTheme.TAG_ATTRIBUTE, theme)
@@ -44,7 +75,6 @@ export class HyosanChatTheme {
   private static _updateThemeClass(theme: HyosanChatShoelaceTheme) {
     document.documentElement.classList.add(theme)
     Object.values(HyosanChatShoelaceTheme).forEach((c) => {
-      console.log(c)
       if (c !== theme) {
         document.documentElement.classList.remove(c)
       }

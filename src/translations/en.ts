@@ -29,6 +29,13 @@ const translation: Translation = {
   save: 'Save',
   reset: 'Reset',
   close: 'Close',
+  theme: 'Theme',
+  lightTheme: 'Light',
+  darkTheme: 'Dark',
+  followSystemTheme: 'Follow System Theme',
+  language: 'language',
+  en: 'English',
+  zhCn: 'Chinese',
 }
 
 registerTranslation(translation)

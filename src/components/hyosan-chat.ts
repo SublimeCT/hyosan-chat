@@ -213,9 +213,12 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Boolean })
   showLikeAndDislikeButton = true
 
-  /** shoelace 主题, 可用于切换夜间模式 */
+  /**
+   * shoelace 主题, 可用于切换夜间模式
+   * @description (`0.4.0`)用户可在设置弹窗内修改主题
+   */
   @property({ reflect: true })
-  shoelaceTheme: HyosanChatShoelaceTheme = HyosanChatShoelaceTheme.shoelaceLight
+  shoelaceTheme: HyosanChatShoelaceTheme = HyosanChatShoelaceTheme.auto
 
   /**
    * 创建消息的回调函数

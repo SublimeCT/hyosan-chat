@@ -1,13 +1,16 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import { LocalizeController } from '@/utils/localize'
+import { HyosanChatLanguages, LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import '@shoelace-style/shoelace/dist/components/input/input.js'
 import '@shoelace-style/shoelace/dist/components/button/button.js'
+import '@shoelace-style/shoelace/dist/components/select/select.js'
+import '@shoelace-style/shoelace/dist/components/option/option.js'
 import { HasSlotController } from '@/internal/slot'
 import { ChatSettings } from '@/types/ChatSettings'
+import { HyosanChatShoelaceThemes } from '@/utils/HyosanChatTheme'
 import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js'
 
@@ -47,8 +50,7 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
   ) {
     const target = event.target as SlInput
     if (!target) return
-    this.settings[field] = target.value || ''
-    // ChatSettings.saveLocalStorage(this.settings)
+    Object.assign(this.settings, { [field]: target.value })
   }
 
   private _save() {
