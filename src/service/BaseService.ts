@@ -83,7 +83,7 @@ export abstract class BaseService<
   abstract fetchChatCompletion(): Promise<void>
   /**
    * 设置聊天流式请求接口的相关参数
-   * @param chatCompletionId 当前聊天接口的唯一 ID
+   * @param chatCompletionId 当前聊天接口的唯一 `ID`
    * @param chatCompletionCreated 当前聊天接口创建的时间
    */
   setChatCompletionParams(

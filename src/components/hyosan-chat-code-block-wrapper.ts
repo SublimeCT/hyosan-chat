@@ -6,7 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js'
 /** 发送 组件 */
 @customElement('hyosan-chat-code-block-wrapper')
 export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
 		:host {
 			display: block;
 			margin: 16px 0;
@@ -36,34 +36,34 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 		}
   `
 
-	@property({ type: String })
-	language = 'javascript'
+  @property({ type: String })
+  language = 'javascript'
 
-	@state()
-	private _copyButtonContent = ''
+  @state()
+  private _copyButtonContent = ''
 
-	/** 本地化控制器 */
-	private _localize = new LocalizeController(this)
+  /** 本地化控制器 */
+  private _localize = new LocalizeController(this)
 
-	private _handleCopy() {
-		const pre = this.querySelector('pre')
-		if (pre) {
-			const text = pre.textContent
-			if (text) {
-				navigator.clipboard.writeText(text)
-				this._copyButtonContent = this._localize.term('copySuccessfully')
-				setTimeout(() => {
-					this._copyButtonContent = this._localize.term('copy')
-					this.requestUpdate()
-				}, 2000)
-			}
-		}
-	}
+  private _handleCopy() {
+    const pre = this.querySelector('pre')
+    if (pre) {
+      const text = pre.textContent
+      if (text) {
+        navigator.clipboard.writeText(text)
+        this._copyButtonContent = this._localize.term('copySuccessfully')
+        setTimeout(() => {
+          this._copyButtonContent = this._localize.term('copy')
+          this.requestUpdate()
+        }, 2000)
+      }
+    }
+  }
 
-	render() {
-		const copyButtonContent =
-			this._copyButtonContent || this._localize.term('copy')
-		return html`
+  render() {
+    const copyButtonContent =
+      this._copyButtonContent || this._localize.term('copy')
+    return html`
       <div class="code-block-container">
 				<header>
 					<div class="lang">${this.language}</div>
@@ -76,11 +76,11 @@ export class HyosanChatCodeBlockWrapper extends ShoelaceElement {
 				</main>
       </div>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-chat-code-block-wrapper': HyosanChatCodeBlockWrapper
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-chat-code-block-wrapper': HyosanChatCodeBlockWrapper
+  }
 }

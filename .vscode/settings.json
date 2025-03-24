@@ -1,4 +1,15 @@
 {
   // refer https://shoelace.style/getting-started/usage#vs-code
-  "html.customData": ["./node_modules/@shoelace-style/shoelace/dist/vscode.html-custom-data.json"]
+  "html.customData": [
+    "./node_modules/@shoelace-style/shoelace/dist/vscode.html-custom-data.json"
+  ],
+  // refer https://biomejs.dev/zh-cn/reference/vscode/
+  "editor.defaultFormatter": "biomejs.biome",
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  }
 }

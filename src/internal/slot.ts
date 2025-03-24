@@ -2,76 +2,76 @@ import type { ReactiveController, ReactiveControllerHost } from 'lit'
 
 /** A reactive controller that determines when slots exist. */
 export class HasSlotController implements ReactiveController {
-	host: ReactiveControllerHost & Element
-	slotNames: string[] = []
+  host: ReactiveControllerHost & Element
+  slotNames: string[] = []
 
-	constructor(host: ReactiveControllerHost & Element, ...slotNames: string[]) {
-		this.host = host
-		this.host.addController(this)
-		this.slotNames = slotNames
-	}
+  constructor(host: ReactiveControllerHost & Element, ...slotNames: string[]) {
+    this.host = host
+    this.host.addController(this)
+    this.slotNames = slotNames
+  }
 
-	private hasDefaultSlot() {
-		return [...this.host.childNodes].some((node) => {
-			if (
-				node.nodeType === node.TEXT_NODE &&
-				(node.textContent || '').trim() !== ''
-			) {
-				return true
-			}
+  private hasDefaultSlot() {
+    return [...this.host.childNodes].some((node) => {
+      if (
+        node.nodeType === node.TEXT_NODE &&
+        (node.textContent || '').trim() !== ''
+      ) {
+        return true
+      }
 
-			if (node.nodeType === node.ELEMENT_NODE) {
-				const el = node as HTMLElement
-				const tagName = el.tagName.toLowerCase()
+      if (node.nodeType === node.ELEMENT_NODE) {
+        const el = node as HTMLElement
+        const tagName = el.tagName.toLowerCase()
 
-				// Ignore visually hidden elements since they aren't rendered
-				if (tagName === 'sl-visually-hidden') {
-					return false
-				}
+        // Ignore visually hidden elements since they aren't rendered
+        if (tagName === 'sl-visually-hidden') {
+          return false
+        }
 
-				// If it doesn't have a slot attribute, it's part of the default slot
-				if (!el.hasAttribute('slot')) {
-					return true
-				}
-			}
+        // If it doesn't have a slot attribute, it's part of the default slot
+        if (!el.hasAttribute('slot')) {
+          return true
+        }
+      }
 
-			return false
-		})
-	}
+      return false
+    })
+  }
 
-	private hasNamedSlot(name: string) {
-		return this.host.querySelector(`:scope > [slot="${name}"]`) !== null
-	}
+  private hasNamedSlot(name: string) {
+    return this.host.querySelector(`:scope > [slot="${name}"]`) !== null
+  }
 
-	test(slotName: string) {
-		return slotName === '[default]'
-			? this.hasDefaultSlot()
-			: this.hasNamedSlot(slotName)
-	}
+  test(slotName: string) {
+    return slotName === '[default]'
+      ? this.hasDefaultSlot()
+      : this.hasNamedSlot(slotName)
+  }
 
-	hostConnected() {
-		if (this.host.shadowRoot)
-			this.host.shadowRoot.addEventListener('slotchange', this.handleSlotChange)
-	}
+  hostConnected() {
+    if (this.host.shadowRoot)
+      this.host.shadowRoot.addEventListener('slotchange', this.handleSlotChange)
+  }
 
-	hostDisconnected() {
-		if (this.host.shadowRoot)
-			this.host.shadowRoot.removeEventListener(
-				'slotchange',
-				this.handleSlotChange,
-			)
-	}
+  hostDisconnected() {
+    if (this.host.shadowRoot)
+      this.host.shadowRoot.removeEventListener(
+        'slotchange',
+        this.handleSlotChange,
+      )
+  }
 
-	private handleSlotChange = (event: Event) => {
-		const slot = event.target as HTMLSlotElement
+  private handleSlotChange = (event: Event) => {
+    const slot = event.target as HTMLSlotElement
 
-		if (
-			(this.slotNames.includes('[default]') && !slot.name) ||
-			(slot.name && this.slotNames.includes(slot.name))
-		) {
-			this.host.requestUpdate()
-		}
-	}
+    if (
+      (this.slotNames.includes('[default]') && !slot.name) ||
+      (slot.name && this.slotNames.includes(slot.name))
+    ) {
+      this.host.requestUpdate()
+    }
+  }
 }
 
 /**
@@ -79,20 +79,20 @@ export class HasSlotController implements ReactiveController {
  * HTML as a string. This is useful because we can't use slot.innerHTML as an alternative.
  */
 export function getInnerHTML(slot: HTMLSlotElement): string {
-	const nodes = slot.assignedNodes({ flatten: true })
-	let html = ''
+  const nodes = slot.assignedNodes({ flatten: true })
+  let html = ''
 
-	for (const node of nodes) {
-		if (node.nodeType === Node.ELEMENT_NODE) {
-			html += (node as HTMLElement).outerHTML
-		}
+  for (const node of nodes) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      html += (node as HTMLElement).outerHTML
+    }
 
-		if (node.nodeType === Node.TEXT_NODE) {
-			html += node.textContent
-		}
-	}
+    if (node.nodeType === Node.TEXT_NODE) {
+      html += node.textContent
+    }
+  }
 
-	return html
+  return html
 }
 
 /**
@@ -100,18 +100,18 @@ export function getInnerHTML(slot: HTMLSlotElement): string {
  * string. This is useful because we can't use slot.textContent as an alternative.
  */
 export function getTextContent(
-	slot: HTMLSlotElement | undefined | null,
+  slot: HTMLSlotElement | undefined | null,
 ): string {
-	if (!slot) {
-		return ''
-	}
-	const nodes = slot.assignedNodes({ flatten: true })
-	let text = ''
-	for (const node of nodes) {
-		if (node.nodeType === Node.TEXT_NODE) {
-			text += node.textContent
-		}
-	}
+  if (!slot) {
+    return ''
+  }
+  const nodes = slot.assignedNodes({ flatten: true })
+  let text = ''
+  for (const node of nodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent
+    }
+  }
 
-	return text
+  return text
 }

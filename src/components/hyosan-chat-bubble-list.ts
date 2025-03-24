@@ -18,6 +18,7 @@ import {
 import { customElement, property, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/copy-button/copy-button.js'
+import morphdom from 'morphdom'
 
 /**
  * 对话气泡列表组件
@@ -267,14 +268,36 @@ export class HyosanChatBubbleList extends ShoelaceElement {
         }
         return Promise.all(updateQueue).then(() => messageNode)
       }),
-    ).then((markdownHtmlContents) => {
-      this.messagesHtml = this.messagesHtml
-        .slice(0, assistantIndex)
-        .concat(markdownHtmlContents)
-      // console.log('messagesHtml updated [end]', markdownHtmlContents)
-      this.requestUpdate('messagesHtml')
-      this.updateComplete.then(() => this.scrollToBottom())
-    })
+    )
+      .then((markdownHtmlContents) => {
+        this.messagesHtml = this.messagesHtml
+          .slice(0, assistantIndex)
+          .concat(markdownHtmlContents)
+        // console.log('messagesHtml updated [end]', markdownHtmlContents)
+        this.requestUpdate('messagesHtml')
+        return this.updateComplete
+      })
+      .then(() => {
+        const markdownContainers = this.shadowRoot?.querySelectorAll(
+          '.bubble-item[data-loading] .markdown-container',
+        ) as NodeListOf<
+          HTMLElement & { hyosanChatHtml: string; hyosanChatLastHtml: string }
+        >
+        for (const container of markdownContainers) {
+          const innerContainer = container.querySelector(
+            '.markdown-container-inner',
+          )
+          if (!innerContainer) throw new Error('Missing Inner Element')
+          if (!container.hyosanChatHtml) continue
+          morphdom(
+            innerContainer,
+            `<div class="markdown-container-inner">${container.hyosanChatHtml}</div>`,
+          )
+        }
+
+        // 滚动到最底部
+        this.scrollToBottom()
+      })
   }
 
   scrollToBottom() {
@@ -411,9 +434,27 @@ export class HyosanChatBubbleList extends ShoelaceElement {
             ${message.role === 'user' ? '' : this._assistantAvatar(message)}
             <div class="bubble" part="hyosan-chat-bubble">
               <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!item.reasoningContent}>
-                <div slot="content" .innerHTML=${item.reasoningContent}></div>
+                <!-- <div slot="content" .innerHTML=${item.reasoningContent}></div> -->
+                ${
+                  message.role === 'assistant' && message.$loading
+                    ? html`
+                      <div slot="content" class="markdown-container markdown-container-reasoning" .hyosanChatHtml=${item.reasoningContent}>
+                        <div class="markdown-container-inner"></div>
+                      </div>
+                    `
+                    : html`<div slot="content" .innerHTML=${item.reasoningContent}></div>`
+                }
               </hyosan-chat-reasoner-block>
-              <div class="content" .innerHTML=${item.content}></div>
+              <!-- <div class="content" .innerHTML=${item.content}></div> -->
+              ${
+                message.role === 'assistant' && message.$loading
+                  ? html`
+                    <div slot="content" class="markdown-container markdown-container-content" .hyosanChatHtml=${item.content}>
+                      <div class="markdown-container-inner"></div>
+                    </div>
+                  `
+                  : html`<div slot="content" .innerHTML=${item.content}></div>`
+              }
               ${message.$error ? html`<hyosan-chat-bubble-error-block .error=${message.$error}></hyosan-chat-bubble-error-block>` : ''}
               ${this._bubbleItemFooter(message, item, index >= assistantIndex)}
             </div>

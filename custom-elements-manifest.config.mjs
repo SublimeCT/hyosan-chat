@@ -1,3 +1,6 @@
+import fs from 'node:fs'
+import commandLineArgs from 'command-line-args'
+import { parse } from 'comment-parser'
 /**
  * @typedef {Object} UserConfigOptions
  * @property {string[]} globs - 要分析的文件路径模式。
@@ -15,35 +18,31 @@
  * @property {function({ts: import('@custom-elements-manifest/analyzer').InitializeParams['ts'], globs: string[]}): SourceFile[]} overrideModuleCreation - 覆盖默认模块创建的函数。
  */
 // import * as path from 'node:path';
-import { customElementJetBrainsPlugin } from 'custom-element-jet-brains-integration';
-import { customElementVsCodePlugin } from 'custom-element-vs-code-integration';
-import { customElementVuejsPlugin } from 'custom-element-vuejs-integration';
-import { parse } from 'comment-parser';
-import { pascalcase } from 'pascalcase';
-import commandLineArgs from 'command-line-args';
-import fs from 'node:fs';
+import { customElementJetBrainsPlugin } from 'custom-element-jet-brains-integration'
 import { customElementReactWrapperPlugin } from 'custom-element-react-wrappers'
+import { customElementVsCodePlugin } from 'custom-element-vs-code-integration'
+import { customElementVuejsPlugin } from 'custom-element-vuejs-integration'
+import { pascalcase } from 'pascalcase'
 
-
-const packageData = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
-const { name, description, version, author, homepage, license } = packageData;
+const packageData = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+const { name, description, version, author, homepage, license } = packageData
 
 const { outdir } = commandLineArgs([
   { name: 'litelement', type: String },
   { name: 'analyze', defaultOption: true },
-  { name: 'outdir', type: String }
-]);
+  { name: 'outdir', type: String },
+])
 
 function noDash(string) {
-  return string.replace(/^\s?-/, '').trim();
+  return string.replace(/^\s?-/, '').trim()
 }
 
 function replace(string, terms) {
   terms.forEach(({ from, to }) => {
-    _string = string?.replace(from, to);
-  });
+    _string = string?.replace(from, to)
+  })
 
-  return _string;
+  return _string
 }
 
 /**
@@ -57,8 +56,15 @@ const userConfigOptions = {
     {
       name: 'shoelace-package-data',
       packageLinkPhase({ customElementsManifest }) {
-        customElementsManifest.package = { name, description, version, author, homepage, license };
-      }
+        customElementsManifest.package = {
+          name,
+          description,
+          version,
+          author,
+          homepage,
+          license,
+        }
+      },
     },
     // Parse custom jsDoc tags
     {
@@ -66,70 +72,81 @@ const userConfigOptions = {
       analyzePhase({ ts, node, moduleDoc }) {
         switch (node.kind) {
           case ts.SyntaxKind.ClassDeclaration: {
-            const className = node.name.getText();
-            const classDoc = moduleDoc?.declarations?.find(declaration => declaration.name === className);
-            const customTags = ['animation', 'dependency', 'documentation', 'since', 'status', 'title'];
-            let customComments = '/**';
+            const className = node.name.getText()
+            const classDoc = moduleDoc?.declarations?.find(
+              (declaration) => declaration.name === className,
+            )
+            const customTags = [
+              'animation',
+              'dependency',
+              'documentation',
+              'since',
+              'status',
+              'title',
+            ]
+            let customComments = '/**'
 
-            node.jsDoc?.forEach(jsDoc => {
-              jsDoc?.tags?.forEach(tag => {
-                const tagName = tag.tagName.getText();
+            node.jsDoc?.forEach((jsDoc) => {
+              jsDoc?.tags?.forEach((tag) => {
+                const tagName = tag.tagName.getText()
 
                 if (customTags.includes(tagName)) {
-                  customComments += `\n * @${tagName} ${tag.comment}`;
+                  customComments += `\n * @${tagName} ${tag.comment}`
                 }
-              });
-            });
+              })
+            })
 
             // This is what allows us to map JSDOC comments to ReactWrappers.
-            classDoc.jsDoc = node.jsDoc?.map(jsDoc => jsDoc.getFullText()).join('\n');
+            classDoc.jsDoc = node.jsDoc
+              ?.map((jsDoc) => jsDoc.getFullText())
+              .join('\n')
 
-            const parsed = parse(`${customComments}\n */`);
-            parsed[0].tags?.forEach(t => {
+            const parsed = parse(`${customComments}\n */`)
+            parsed[0].tags?.forEach((t) => {
               switch (t.tag) {
                 // Animations
                 case 'animation':
                   if (!Array.isArray(classDoc.animations)) {
-                    classDoc.animations = [];
+                    classDoc.animations = []
                   }
                   classDoc.animations.push({
                     name: t.name,
-                    description: noDash(t.description)
-                  });
-                  break;
+                    description: noDash(t.description),
+                  })
+                  break
 
                 // Dependencies
                 case 'dependency':
                   if (!Array.isArray(classDoc.dependencies)) {
-                    classDoc.dependencies = [];
+                    classDoc.dependencies = []
                   }
-                  classDoc.dependencies.push(t.name);
-                  break;
+                  classDoc.dependencies.push(t.name)
+                  break
 
                 // Value-only metadata tags
                 case 'documentation':
                 case 'since':
                 case 'status':
                 case 'title':
-                  classDoc[t.tag] = t.name;
-                  break;
+                  classDoc[t.tag] = t.name
+                  break
 
                 // All other tags
                 default:
                   if (!Array.isArray(classDoc[t.tag])) {
-                    classDoc[t.tag] = [];
+                    classDoc[t.tag] = []
                   }
 
                   classDoc[t.tag].push({
                     name: t.name,
                     description: t.description,
-                    type: t.type || undefined
-                  });
+                    type: t.type || undefined,
+                  })
               }
-            });
+            })
           }
         }
-      }
+      },
     },
 
     {
@@ -137,18 +154,20 @@ const userConfigOptions = {
       analyzePhase({ ts, node, moduleDoc }) {
         switch (node.kind) {
           case ts.SyntaxKind.ClassDeclaration: {
-            const className = node.name.getText();
-            const classDoc = moduleDoc?.declarations?.find(declaration => declaration.name === className);
+            const className = node.name.getText()
+            const classDoc = moduleDoc?.declarations?.find(
+              (declaration) => declaration.name === className,
+            )
 
             if (classDoc?.events) {
-              classDoc.events.forEach(event => {
-                event.reactName = `on${pascalcase(event.name)}`;
-                event.eventName = `${pascalcase(event.name)}Event`;
-              });
+              classDoc.events.forEach((event) => {
+                event.reactName = `on${pascalcase(event.name)}`
+                event.eventName = `${pascalcase(event.name)}Event`
+              })
             }
           }
         }
-      }
+      },
     },
 
     // Generate custom VS Code data
@@ -178,16 +197,16 @@ const userConfigOptions = {
     customElementVuejsPlugin({
       outdir: './dist/cem-types/vue',
       fileName: 'index.d.ts',
-      globalTypePath: '../../lib'
+      globalTypePath: '../../lib',
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
       // componentTypePath: (_, tag) => `../../components/${tag.replace('sl-', '')}/${tag.replace('sl-', '')}.component.js`
     }),
 
     customElementReactWrapperPlugin({
       outdir: './dist/react',
-      modulePath: () => '../hyosan-chat.js'
+      modulePath: () => '../hyosan-chat.js',
     }),
-  ]
+  ],
 }
 
 export default userConfigOptions

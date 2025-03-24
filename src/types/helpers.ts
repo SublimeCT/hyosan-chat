@@ -1,4 +1,4 @@
 export type AnyObject = Record<
-	PropertyKey,
-	string | number | boolean | object | null | undefined
+  PropertyKey,
+  string | number | boolean | object | null | undefined
 >

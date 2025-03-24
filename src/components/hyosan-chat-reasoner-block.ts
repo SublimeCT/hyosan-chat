@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js'
 /** 消息气泡中的思考内容块 组件 */
 @customElement('hyosan-chat-reasoner-block')
 export class HyosanChatReasonerBlock extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
     :host {
       width: 100%;
     }
@@ -23,22 +23,22 @@ export class HyosanChatReasonerBlock extends ShoelaceElement {
     }
   `
 
-	// /** 本地化控制器 */
-	// private _localize = new LocalizeController(this)
+  // /** 本地化控制器 */
+  // private _localize = new LocalizeController(this)
 
-	@property({ type: Boolean, attribute: 'has-content' })
-	hasContent = false
-	render() {
-		return html`
+  @property({ type: Boolean, attribute: 'has-content' })
+  hasContent = false
+  render() {
+    return html`
       <div class="reasoner-block" ?data-has-content="${this.hasContent}">
         <slot name="content"></slot>
       </div>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-chat-reasoner-block': HyosanChatReasonerBlock
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-chat-reasoner-block': HyosanChatReasonerBlock
+  }
 }

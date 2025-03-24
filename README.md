@@ -214,5 +214,52 @@ const avatar = html`<div>Hello Lit html</div>`
 ## 主题
 组件通过底层的基础组件库 [shoelace](https://shoelace.style) 提供了基础的 `light` / `dark` 两种主题, 如需创建新主题, 可参考 [Creating a theme](https://shoelace.style/getting-started/themes#creating-a-new-theme)
 
+## Service
+`BaseService` 是组件在请求和处理聊天消息时的抽象类, 它将处理聊天消息的逻辑进行了抽象, 在实际项目中可以根据情况实现自己的 `Service`, 组件默认使用 `DefaultService`, 它继承了 `BaseService` 抽象类, 并且实现了 `BaseService` 的抽象方法, 提供了默认的消息处理逻辑
+
+现阶段从用户发起聊天到聊天内容渲染到 `DOM` 元素上, **消息内容的处理** 都是由 `Service` 完成的, 以聊天界面为例:
+
+1. 用户在输入框内输入内容, 点击发送按钮或按下 `Enter` 键, `hyosan-chat` 组件会执行 `_handleSendMessage` 方法
+2. 更新 `Service` 上的聊天配置参数, 并通过 `this.service.emitter` 监听 `Service` 提供的事件
+3. 如果会话不存在, 则调用 `onCreateMessage` `property` 来创建会话和 `messages`
+4. 触发 `onBeforeSendMessage` `property` 回调函数
+5. 调用 `this.service.send()` / `this.service.retry()` 方法来发送或重新发送消息
+6. (`DefaultService`) 在 `send()` 中处理 `messages`, 如果不存在 `system message` 则加入包含默认系统提示词(`this.service.systemPrompt`) 的 `system message`, 并加入用户消息内容
+7. (`DefaultService`) 调用 `setChatCompletionParams()` 设置聊天流式请求接口的相关参数
+8. (`DefaultService`) **`this.emitter.emit('before-send')`** 触发 `before-send` 事件
+9. (`DefaultService`) **调用 `this.fetchChatCompletion()`** 触发 `before-send` 事件
+10. (`DefaultService`) **创建 `this.abortController`** 用于停止流式请求
+11. (`BaseService`) 调用 `this.getEmptyAssistantMessage()` 加入助手消息
+12. (`BaseService`) 调用 `this.handleRequestMessages()` 将 `messages` 处理为请求参数 `messages`
+13. (`DefaultService`) 发起流式请求并触发相关事件:
+  1. `send-open`: 已建立连接
+  2. `data`: 接收流式请求返回数据
+  3. `send-done`: 所有内容返回完毕
+  4. `error`: 消息请求报错
+  5. `abort`: 中断连接
+  6. `close`: 关闭连接
+14. 进入 `finally` 代码块
+15. `this.service.emitter.clearListeners()` 移除 `Service` 上的所有事件监听器
+16. 将所有新消息的 `$loading` 设置为 `false`
+17. 触发 `messages-completions` 事件
+
+其中 `DefaultService` / `BaseService` 就是在 `Service` 上执行的, 以上步骤可简化为:
+
+1. 组件监听到用户发送消息, 调用 `this.service.send()`
+2. 在 `DefaultService` 内部处理请求参数并发起请求
+3. 在请求开始直到请求结束时触发指定的事件
+4. 请求结束后在组件中触发 `messages-completions` 事件
+
+>[!TIP]
+> `<hyosan-chat>` 组件的 `service` 是一个 `property`, 如果要自定义消息数据的处理逻辑, 可以直接创建一个新的 `Service` 并实现 `BaseService` 抽象类, 然后将新的 `Service` 传给 `<hyosan-chat>` 组件
+
+## 消息数据处理
+在 `Service` 中发起了聊天请求, 并不断地更新 `messages`, 但接口返回的消息内容为 `markdown` 格式, 最终渲染到页面上时需要将 `markdown` 转换为 `html`, 下面介绍转换的步骤:
+
+1. 在 `Service` 中的每次流式请求返回内容时, 更新 `messages` 中的消息内容
+2. 在 `<hyosan-chat-bubble-list>` 组件中, 监听到 `messages` 变化时, 调用 `markdown-it-async` 异步地将 `markdown` 转换为 `html string`
+3. 在异步转换结束后, 更新 `this.messagesHtml`, 调用 `this.requestUpdate()` 触发 DOM 层渲染(`render()`)
+4. 在 `render()` 中根据 `this.messagesHtml` 渲染出消息内容 `DOM`(使用 `innerHTML`)
+
 ## 贡献指南
 参考 [CONTRIBUTING](./CONTRIBUTING.md)

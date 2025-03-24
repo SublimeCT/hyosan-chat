@@ -14,7 +14,7 @@ import { customElement, property } from 'lit/decorators.js'
  */
 @customElement('hyosan-icon-wrapper')
 export class HyosanIconWrapper extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
     :host {
       display: block;
       width: 100%;
@@ -29,20 +29,20 @@ export class HyosanIconWrapper extends ShoelaceElement {
     }
   `
 
-	@property({ reflect: true })
-	fontSize = '1.5em'
+  @property({ reflect: true })
+  fontSize = '1.5em'
 
-	render() {
-		return html`
+  render() {
+    return html`
       <div class="wrapper" style=${this.fontSize ? `font-size: ${this.fontSize};` : ''}>
         <slot></slot>
       </div>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-icon-wrapper': HyosanIconWrapper
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-icon-wrapper': HyosanIconWrapper
+  }
 }

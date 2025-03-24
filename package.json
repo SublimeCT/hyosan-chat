@@ -63,6 +63,7 @@
     "markdown-it-highlightjs": "^4.2.0",
     "markdown-it-link-attributes": "^4.0.1",
     "markdown-it-mathjax3": "^4.3.2",
+    "morphdom": "^2.7.4",
     "openai": "^4.86.1"
   },
   "devDependencies": {

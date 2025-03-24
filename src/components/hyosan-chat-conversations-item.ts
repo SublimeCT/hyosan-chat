@@ -14,7 +14,7 @@ import type SlMenuItem from '@shoelace-style/shoelace/dist/components/menu-item/
 /** 会话列表项 组件 */
 @customElement('hyosan-chat-conversations-item')
 export class HyosanChatConversationsItem extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
     .item-row {
 			margin: var(--hy-container-padding);
 			border-radius: var(--hy-container-padding);
@@ -49,64 +49,66 @@ export class HyosanChatConversationsItem extends ShoelaceElement {
 		}
   `
 
-	/** 本地化控制器 */
-	private _localize = new LocalizeController(this)
+  /** 本地化控制器 */
+  private _localize = new LocalizeController(this)
 
-	/** 是否选中 */
-	@property({ type: Boolean })
-	actived = false
+  /** 是否选中 */
+  @property({ type: Boolean })
+  actived = false
 
-	/** 会话列表数据源 */
-	@property({
-		attribute: false,
-		type: Object,
-		reflect: true,
-		hasChanged(value: Conversation, oldValue: Conversation) {
-			return value !== oldValue || value.label !== oldValue?.label
-		},
-	})
-	item!: Conversation
+  /** 会话列表数据源 */
+  @property({
+    attribute: false,
+    type: Object,
+    reflect: true,
+    hasChanged(value: Conversation, oldValue: Conversation) {
+      return value !== oldValue || value.label !== oldValue?.label
+    },
+  })
+  item!: Conversation
 
-	@state()
-	private _editMode = false
+  @state()
+  private _editMode = false
 
-	private async _handleSelect(event: CustomEvent<{ item: SlMenuItem }>) {
-		const action = event.detail.item.getAttribute('data-action')
-		if (action === 'rename') {
-			this._editMode = true
-			await this.updateComplete
-			this._editInput?.focus()
-		} else if (action === 'delete') {
-			this.emit('delete-conversation', { detail: { item: this.item } })
-		}
-	}
+  private async _handleSelect(event: CustomEvent<{ item: SlMenuItem }>) {
+    const action = event.detail.item.getAttribute('data-action')
+    if (action === 'rename') {
+      this._editMode = true
+      await this.updateComplete
+      this._editInput?.focus()
+    } else if (action === 'delete') {
+      this.emit('delete-conversation', { detail: { item: this.item } })
+    }
+  }
 
-	/** 编辑输入框元素 */
-	@query('.edit-input')
-	_editInput?: SlInput
-	private _handleChange() {
-		if (!this._editInput) throw new Error('Missing edit input')
-		this.item.label = this._editInput.value
-		this.emit('edit-conversation', { detail: { item: this.item } })
-		this._editMode = false
-	}
+  /** 编辑输入框元素 */
+  @query('.edit-input')
+  _editInput?: SlInput
+  private _handleChange() {
+    if (!this._editInput) throw new Error('Missing edit input')
+    this.item.label = this._editInput.value
+    this.emit('edit-conversation', { detail: { item: this.item } })
+    this._editMode = false
+  }
 
-	render() {
-		return html`
+  render() {
+    return html`
       <div class="item-row" @click=${() => this.emit('click-conversation', { detail: { item: this.item } })}>
         <div class="title">
 					${
-						this._editMode
-							? html`<sl-input
+            this._editMode
+              ? html`<sl-input
 								class="edit-input"
 								value=${this.item.label}
 								size="small"
 								@sl-change=${this._handleChange}
-								@blur=${() => { this._editMode = false }}
+								@blur=${() => {
+                  this._editMode = false
+                }}
 								@click=${(event: Event) => event.stopPropagation()}
 								></sl-input>`
-							: html`<span>${this.item.label}</span>`
-					}
+              : html`<span>${this.item.label}</span>`
+          }
 				</div>
 				<div class="actions-group" @click=${(event: Event) => event.stopPropagation()}>
 					<sl-dropdown @sl-select=${this._handleSelect}>
@@ -123,19 +125,19 @@ export class HyosanChatConversationsItem extends ShoelaceElement {
 				</div>
       </div>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-chat-conversations-item': HyosanChatConversationsItem
-	}
-	interface GlobalEventHandlersEventMap {
-		/** 点击会话 */
-		'click-conversation': CustomEvent<{ item: Conversation }>
-		/** 删除会话 */
-		'delete-conversation': CustomEvent<{ item: Conversation }>
-		/** 编辑会话 */
-		'edit-conversation': CustomEvent<{ item: Conversation }>
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-chat-conversations-item': HyosanChatConversationsItem
+  }
+  interface GlobalEventHandlersEventMap {
+    /** 点击会话 */
+    'click-conversation': CustomEvent<{ item: Conversation }>
+    /** 删除会话 */
+    'delete-conversation': CustomEvent<{ item: Conversation }>
+    /** 编辑会话 */
+    'edit-conversation': CustomEvent<{ item: Conversation }>
+  }
 }

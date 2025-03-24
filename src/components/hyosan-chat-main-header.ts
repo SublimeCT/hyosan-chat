@@ -7,7 +7,7 @@ import { customElement } from 'lit/decorators.js'
 /** 主体头部 组件 */
 @customElement('hyosan-chat-main-header')
 export class HyosanChatMainHeader extends ShoelaceElement {
-	static styles? = css`
+  static styles? = css`
 		:host {
 			width: 100%;
 			--padding: calc(var(--hy-container-padding) * 2);
@@ -30,14 +30,14 @@ export class HyosanChatMainHeader extends ShoelaceElement {
 		}
   `
 
-	// /** 本地化控制器 */
-	// private _localize = new LocalizeController(this)
+  // /** 本地化控制器 */
+  // private _localize = new LocalizeController(this)
 
-	// private _handleSettingsSave(event: CustomEvent<ChatSettings>) {
-	// 	console.log(event.detail)
-	// }
-	render() {
-		return html`
+  // private _handleSettingsSave(event: CustomEvent<ChatSettings>) {
+  // 	console.log(event.detail)
+  // }
+  render() {
+    return html`
 			<header>
 				<div class="leadings">
 					<div class="header-button" @click=${() => this.emit('hyosan-chat-click-settings-button')}>
@@ -57,17 +57,17 @@ export class HyosanChatMainHeader extends ShoelaceElement {
 				</div>
 			</header>
     `
-	}
+  }
 }
 
 declare global {
-	interface HTMLElementTagNameMap {
-		'hyosan-chat-main-header': HyosanChatMainHeader
-	}
-	interface GlobalEventHandlersEventMap {
-		/** 点击 main 区域顶部会话列表按钮 */
-		'hyosan-chat-click-conversations-button': CustomEvent<void>,
-		/** 点击 main 区域顶部设置按钮 */
-		'hyosan-chat-click-settings-button': CustomEvent<void>,
-	}
+  interface HTMLElementTagNameMap {
+    'hyosan-chat-main-header': HyosanChatMainHeader
+  }
+  interface GlobalEventHandlersEventMap {
+    /** 点击 main 区域顶部会话列表按钮 */
+    'hyosan-chat-click-conversations-button': CustomEvent<void>
+    /** 点击 main 区域顶部设置按钮 */
+    'hyosan-chat-click-settings-button': CustomEvent<void>
+  }
 }

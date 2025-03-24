@@ -1,8 +1,8 @@
 import { MarkdownItAsync } from 'markdown-it-async'
 import highlight from 'markdown-it-highlightjs'
-import CodeBlockWrapper from './CodeBlockWrapper'
 import linkAttr from 'markdown-it-link-attributes'
 import mathjax3 from 'markdown-it-mathjax3'
+import CodeBlockWrapper from './CodeBlockWrapper'
 
 /** markdown-it 实例 */
 let _md: MarkdownItAsync
@@ -16,22 +16,22 @@ export async function getMarkdownItInstance(): Promise<MarkdownItAsync> {
   // 代码块使用自定义组件包裹
   _md.use(CodeBlockWrapper)
   // 链接在新窗口打开
-  _md.use(linkAttr, { attrs: { target: '_blank', rel: 'noopener'} })
+  _md.use(linkAttr, { attrs: { target: '_blank', rel: 'noopener' } })
   // 渲染数学公式
   _md.use(mathjax3, {
     tex: {
       tags: 'ams',
       inlineMath: [
         // start/end delimiter pairs for in-line math
-        ["$", "$"],
-        ["\\(", "\\)"]
+        ['$', '$'],
+        ['\\(', '\\)'],
       ],
       displayMath: [
         // start/end delimiter pairs for display math
-        ["$$", "$$"],
-        ["\\[", "\\]"]
+        ['$$', '$$'],
+        ['\\[', '\\]'],
       ],
-    }
+    },
   })
   return _md
 }
@@ -44,8 +44,8 @@ export async function getMarkdownItInstance(): Promise<MarkdownItAsync> {
 export async function renderMarkdown(content: string) {
   const processedContent = getProcessedContent(content)
   const md = await getMarkdownItInstance()
-	const htmlContent = await md.renderAsync(processedContent)
-	return htmlContent
+  const htmlContent = await md.renderAsync(processedContent)
+  return htmlContent
 }
 
 /**
