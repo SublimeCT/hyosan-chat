@@ -158,6 +158,7 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `onEnableSearch` | `(open: boolean) => void \| Promise<void>` | `Property` | `undefined` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
 | `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | `HyosanChatShoelaceTheme.shoelaceLight` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
 | `avatarGetter`(`0.3.1`) | `(message: BaseServiceMessageItem) => TemplateResult` | `Property` | `undefined` | 消息列表中的头像获取函数, 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html, 详见 [lit html slot](#lit-html-slot) | |
+| `onBeforeSendMessage`(`0.3.2`) | `(service: BaseService, messages: BaseServiceMessages) => void \| Promise<void>` | `Property` | `undefined` | 在每次发送消息之前执行 | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -194,6 +195,8 @@ const avatar = html`<div>Hello Lit html</div>`
 | `delete-conversation` | `CustomEvent<{ item: Converastion }>` | 在会话列表中点击删除按钮 |
 | `hyosan-chat-click-like-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Like 按钮(点赞) |
 | `hyosan-chat-click-dislike-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Dislike 按钮(点踩) |
+| `first-updated` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发时执行 |
+| `first-updated-complete` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发后等待 `updateComplete` 后执行 |
 
 ### CSS Parts
 可以使用 [::part()](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) 选择器修改组件的样式, 由于 `Web Components` 的样式隔离的特性, 组件外部想要修改组件内的样式只能通过 `::part()` 选择器或组件内部引用的 [css 变量](#css-variables) 来进行控制

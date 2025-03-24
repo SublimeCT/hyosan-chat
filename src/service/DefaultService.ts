@@ -260,12 +260,13 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
  * `OpenAI` 或与之兼容的服务(例如 `DeepSeek`)的 chat 配置
  * @description 根据使用情况 `pick`
  */
-export type DefaultServiceChat = Partial<
-  Pick<
-    ChatCompletionCreateParamsStreaming,
-    'temperature' | 'tools' | 'max_tokens' | 'top_p' | 'stream_options'
-  >
->
+export type DefaultServiceChat = Partial<ChatCompletionCreateParamsStreaming>
+// export type DefaultServiceChat = Partial<
+//   Pick<
+//     ChatCompletionCreateParamsStreaming,
+//     'temperature' | 'tools' | 'max_tokens' | 'top_p' | 'stream_options' | 'response_format'
+//   >
+// >
 
 /**
  * 当前适配的大模型的请求参数类型

@@ -39,7 +39,7 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  *
  * @event {undefined} conversations-create - 点击创建新会话按钮
  * @event {{ item: Conversation }} click-conversation - 点击左侧会话列表中的会话
- * @event {{ item: Conversation }} change-conversation - 点击 **切换** 左侧会话列表中的会话
+ * @event {{ item: Conversation, service: BaseService }} change-conversation - 点击 **切换** 左侧会话列表中的会话
  * @event {{ content: string }} send-message - 点击发送按钮
  * @event {{ settings: ChatSettings }} hyosan-chat-settings-save - 在设置弹窗中点击保存按钮
  * @event {{ item: Converastion }} edit-conversation - 在会话列表中点击编辑按钮, 并保存
@@ -47,6 +47,8 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-like-button - 点击 Like 按钮(点赞)
  * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-dislike-button - 点击 Dislike 按钮(点赞)
  * @event {{ messages: BaseServiceMessages }} messages-completions - 消息接收完毕(可能是成功或报错)
+ * @event {{ service: BaseService }} first-updated - (since `0.4.0`) lit 原生的 first-updated hooks 触发时执行
+ * @event {{ service: BaseService }} first-updated-complete - (since `0.4.0`) lit 原生的 first-updated hooks 触发后等待 updateComplete 后执行
  *
  * @csspart base - 根组件(`hyosan-chat`) 最外层元素
  * @csspart avatar - (since `0.3.1`) 消息列表组件(`hyosan-chat-bubble-list`) 中的头像部分
@@ -327,7 +329,9 @@ export class HyosanChat extends ShoelaceElement {
       this.currentConversationId !== event.detail.item.key
     this.currentConversationId = event.detail.item.key
     if (isDifferentConversation)
-      this.emit('change-conversation', { detail: { item: event.detail.item } })
+      this.emit('change-conversation', {
+        detail: { item: event.detail.item, service: this.service },
+      })
     if (this.compact) this._handleDrawerClickClose()
   }
 
@@ -355,6 +359,15 @@ export class HyosanChat extends ShoelaceElement {
     if (chatSettings.systemPrompts)
       this.service.systemPrompt = chatSettings.systemPrompts
   }
+  /**
+   * 在每次发送消息之前执行
+   * @since 0.3.2
+   */
+  @property({ attribute: false })
+  onBeforeSendMessage?: (
+    service: BaseService,
+    messages: BaseServiceMessages,
+  ) => void | Promise<void>
   private async _handleSendMessage(
     event: GlobalEventHandlersEventMap['send-message'],
     retryMessage?: BaseServiceMessageItem,
@@ -376,6 +389,9 @@ export class HyosanChat extends ShoelaceElement {
       this.messages = []
       this._onData()
     }
+    // 在发送消息之前调用 onBeforeSendMessage property
+    if (typeof this.onBeforeSendMessage === 'function')
+      await this.onBeforeSendMessage(this.service, this.messages)
     try {
       console.log('start')
       if (retryMessage) {
@@ -455,6 +471,14 @@ export class HyosanChat extends ShoelaceElement {
     if (typeof this.onEnableSearch === 'function') {
       return this.onEnableSearch(event.detail.open, this.service)
     }
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValues): void {
+    super.firstUpdated(_changedProperties)
+    this.emit('first-updated', { detail: { service: this.service } })
+    this.updateComplete.then(() => {
+      this.emit('first-updated-complete', { detail: { service: this.service } })
+    })
   }
 
   render() {
@@ -546,7 +570,20 @@ declare global {
     /** 消息接收完毕(可能是成功或报错) */
     'messages-completions': CustomEvent<{ messages: BaseServiceMessages }>
     /** 用户点击切换了会话 */
-    'change-conversation': CustomEvent<{ item: Conversation }>
+    'change-conversation': CustomEvent<{
+      item: Conversation
+      service: BaseService
+    }>
+    /**
+     * lit 原生的 first-updated hooks 触发时执行
+     * @since 0.4.0
+     */
+    'first-updated': CustomEvent<{ service: BaseService }>
+    /**
+     * lit 原生的 first-updated hooks 触发时执行
+     * @since 0.4.0
+     */
+    'first-updated-complete': CustomEvent<{ service: BaseService }>
   }
 }
 
