@@ -5,7 +5,6 @@ import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
-import type { ChatSettings } from './types/ChatSettings'
 import type { Conversation } from './types/conversations'
 
 export const tagName = 'hyosan-chat-demo'

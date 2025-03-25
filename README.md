@@ -159,6 +159,7 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | `HyosanChatShoelaceTheme.shoelaceLight` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
 | `avatarGetter`(`0.3.1`) | `(message: BaseServiceMessageItem) => TemplateResult` | `Property` | `undefined` | 消息列表中的头像获取函数, 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html, 详见 [lit html slot](#lit-html-slot) | |
 | `onBeforeSendMessage`(`0.3.2`) | `(service: BaseService, messages: BaseServiceMessages) => void \| Promise<void>` | `Property` | `undefined` | 在每次发送消息之前执行 | |
+| `showReadAloudButton`(`0.4.0`) | `boolean` | `Attribute` | `undefined` | 是否显示 朗读 按钮 | |
 
 ### Slots
 > [!TIP] 关于 插槽

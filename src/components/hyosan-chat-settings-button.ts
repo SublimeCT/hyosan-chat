@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import { HyosanChatLanguages, LocalizeController } from '@/utils/localize'
+import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 
@@ -10,7 +10,6 @@ import '@shoelace-style/shoelace/dist/components/select/select.js'
 import '@shoelace-style/shoelace/dist/components/option/option.js'
 import { HasSlotController } from '@/internal/slot'
 import { ChatSettings } from '@/types/ChatSettings'
-import { HyosanChatShoelaceThemes } from '@/utils/HyosanChatTheme'
 import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js'
 
