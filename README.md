@@ -163,6 +163,7 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `avatarGetter`(`0.3.1`) | `(message: BaseServiceMessageItem) => TemplateResult` | `Property` | `undefined` | 消息列表中的头像获取函数, 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html, 详见 [lit html slot](#lit-html-slot) | |
 | `onBeforeSendMessage`(`0.3.2`) | `(service: BaseService, messages: BaseServiceMessages) => void \| Promise<void>` | `Property` | `undefined` | 在每次发送消息之前执行 | |
 | `showReadAloudButton`(`0.4.0`) | `boolean` | `Attribute` | `undefined` | 是否显示 朗读 按钮 | |
+| `onSendFirstMessage`(`0.4.1`) | `Promise<number \| string \| undefined> \| number \| string \| undefined` | `Property` | `undefined` | 在当前会话中首次发送 `user` 消息时调用, 一般用于更新当前会话的 `label`; 返回一个 `number | string` 值, 将作为消息内容(`content`)的最大截取长度并赋值给 `label` 或 直接作为 `label` | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -205,6 +206,7 @@ const avatar = html`<div>Hello Lit html</div>`
 | `hyosan-chat-click-dislike-button` | `CustomEvent<{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }>` | 点击 Dislike 按钮(点踩) |
 | `first-updated` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发时执行 |
 | `first-updated-complete` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发后等待 `updateComplete` 后执行 |
+| `localize-update-conversations`(`0.4.1`) | `CustomEvent<{ conversations: Array<Conversation> }>` | 当启用本地存储时, 组件首次加载时获取 `conversations` 数据时触发 |
 
 ### CSS Parts
 可以使用 [::part()](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) 选择器修改组件的样式, 由于 `Web Components` 的样式隔离的特性, 组件外部想要修改组件内的样式只能通过 `::part()` 选择器或组件内部引用的 [css 变量](#css-variables) 来进行控制

@@ -93,9 +93,9 @@ export class HyosanChatDemo extends LitElement {
   ]
   /** 创建新聊天 */
   private async _handleConversationsCreate(content?: string) {
-    const key = content || Math.random().toString(36).substring(2, 9)
+    const key = Math.random().toString(36).substring(2, 9)
     // this.conversations.push({ key, label: `新会话 ${key}` })
-    this.conversations.splice(this.conversations.length, 0, {
+    this.conversations.splice(0, 0, {
       key,
       label: content || `新会话 ${key}`,
     })
@@ -105,8 +105,10 @@ export class HyosanChatDemo extends LitElement {
     this.requestUpdate()
     return key
   }
-  private _handleClickConversation(event: CustomEvent<{ item: Conversation }>) {
+  private _handleClickConversation(event: CustomEvent<{ item: Conversation, localMessages: BaseServiceMessages | null }>) {
     const conversation = event.detail.item
+    const localMessages = event.detail.localMessages
+    // console.log('change', localMessages)
     if (conversation.key === this.currentConversationId) {
       this.messages = []
     } else {
@@ -115,7 +117,7 @@ export class HyosanChatDemo extends LitElement {
       } else if (this._messagesMap[conversation.key]) {
         this.messages = this._messagesMap[conversation.key]
       } else {
-        this.messages = []
+        this.messages = localMessages || []
       }
     }
     this.currentConversationId = conversation.key
@@ -191,6 +193,13 @@ export class HyosanChatDemo extends LitElement {
       Reflect.deleteProperty(service.chat, 'enable_search')
     }
   }
+  private _handleLocalizeUpdateConversations(event: CustomEvent<{ conversations: Array<Conversation> }>) {
+    this.conversations = event.detail.conversations
+  }
+
+  private async _handleSendFirstMessage(content: string) {
+    return content.substring(0, 20)
+  }
 
   render() {
     return html`
@@ -202,10 +211,12 @@ export class HyosanChatDemo extends LitElement {
 					showRetryButton
           showReadAloudButton
 					.onCreateMessage=${this._handleConversationsCreate.bind(this)}
+          .onSendFirstMessage=${this._handleSendFirstMessage.bind(this)}
 					.onEnableSearch=${this._handleEnableSearch.bind(this)}
 					currentConversationId=${this.currentConversationId}
 					@messages-completions=${this._handleMessagesCompletions}
 					@change-conversation=${this._handleClickConversation}
+          @localize-update-conversations=${this._handleLocalizeUpdateConversations}
 				>
 					<div slot="main-welcome" class="main-welcome">
 						<h2>Welcome To Hyosan Chat</h2>
