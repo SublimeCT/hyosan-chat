@@ -37,6 +37,9 @@ const translation: Translation = {
   en: 'English',
   zhCn: 'Chinese',
   readAloud: 'Read',
+  localize: 'Localized storage',
+  localizeTips:
+    'The conversation and message data will be saved in the browser (indexeddb).',
 }
 
 registerTranslation(translation)

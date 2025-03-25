@@ -1,7 +1,7 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
-import { customElement } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import '@shoelace-style/shoelace/dist/components/input/input.js'
@@ -10,6 +10,7 @@ import '@shoelace-style/shoelace/dist/components/select/select.js'
 import '@shoelace-style/shoelace/dist/components/option/option.js'
 import { HasSlotController } from '@/internal/slot'
 import { ChatSettings } from '@/types/ChatSettings'
+import type { SlSwitch } from '@shoelace-style/shoelace'
 import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import type SlInput from '@shoelace-style/shoelace/dist/components/input/input.js'
 
@@ -30,6 +31,13 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
   private readonly hasSlotController = new HasSlotController(this, 'base')
 
   private settings = ChatSettings.fromLocalStorage()
+
+  /**
+   * 禁用的字段
+   * @since 0.4.1
+   */
+  @property({ type: Array })
+  disabledFields: Array<string> = []
 
   private _handleClickSettings() {
     const dialog = this.shadowRoot?.querySelector(
@@ -65,6 +73,9 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
     this.settings = new ChatSettings()
     ChatSettings.saveLocalStorage(this.settings)
     this.requestUpdate()
+    this.emit('hyosan-chat-settings-reset', {
+      detail: { settings: this.settings },
+    })
   }
 
   private _close() {
@@ -72,6 +83,11 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
       '.settings-dialog',
     ) as SlDialog
     dialog.hide()
+  }
+  private _handleChangeLocalize(event: CustomEvent<object>) {
+    // this._onFieldChange(event, 'localize')
+    const target = event.composedPath()[0] as SlSwitch
+    this.settings.localize = target?.checked ? 'true' : 'false'
   }
 
   render() {
@@ -88,10 +104,32 @@ export class HyosanChatSettingsButton extends ShoelaceElement {
     return html`
 			${baseButton}
       <sl-dialog label=${this._localize.term('settings')} class="settings-dialog">
-        <sl-input label=${this._localize.term('baseUrl')} value=${this.settings.baseUrl} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'baseUrl')}></sl-input>
-        <sl-input label=${this._localize.term('modelName')} value=${this.settings.modelName} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'modelName')}></sl-input>
-        <sl-input label=${this._localize.term('apiKey')} value=${this.settings.apiKey} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'apiKey')}></sl-input>
-        <sl-textarea label=${this._localize.term('systemPrompts')} value=${this.settings.systemPrompts} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'systemPrompts')}></sl-textarea>
+        ${
+          this.disabledFields.includes('baseUrl')
+            ? undefined
+            : html`<sl-input label=${this._localize.term('baseUrl')} value=${this.settings.baseUrl} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'baseUrl')}></sl-input>`
+        }
+        ${
+          this.disabledFields.includes('modelName')
+            ? undefined
+            : html`<sl-input label=${this._localize.term('modelName')} value=${this.settings.modelName} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'modelName')}></sl-input>`
+        }
+        ${
+          this.disabledFields.includes('apiKey')
+            ? undefined
+            : html`<sl-input label=${this._localize.term('apiKey')} value=${this.settings.apiKey} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'apiKey')}></sl-input>`
+        }
+        ${
+          this.disabledFields.includes('systemPrompts')
+            ? undefined
+            : html`<sl-textarea label=${this._localize.term('systemPrompts')} value=${this.settings.systemPrompts} clearable @sl-change=${(event: CustomEvent<object>) => this._onFieldChange(event, 'systemPrompts')}></sl-textarea>`
+        }
+        ${
+          this.disabledFields.includes('localize')
+            ? undefined
+            : html`<sl-switch style="margin-top: 16px;" label=${this._localize.term('localize')} help-text=${this._localize.term('localizeTips')} ?checked=${this.settings.localize === 'true'} clearable @sl-change=${(event: CustomEvent<object>) => this._handleChangeLocalize(event)}>${this._localize.term('localize')}</sl-switch>`
+        }
+        <slot name="settings-main"></slot>
         <div slot="footer">
           <sl-button variant="primary" @click=${this._save}>${this._localize.term('save')}</sl-button>
           <sl-button variant="warning" @click=${this._reset}>${this._localize.term('reset')}</sl-button>
@@ -107,6 +145,12 @@ declare global {
     'hyosan-chat-settings-button': HyosanChatSettingsButton
   }
   interface GlobalEventHandlersEventMap {
+    /** 用户在设置弹窗中点击了保存 */
     'hyosan-chat-settings-save': CustomEvent<{ settings: ChatSettings }>
+    /**
+     * 用户在设置弹窗中点击了重置
+     * @since 0.4.1
+     */
+    'hyosan-chat-settings-reset': CustomEvent<{ settings: ChatSettings }>
   }
 }

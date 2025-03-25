@@ -9,6 +9,9 @@
 ## 介绍
 `hyosan-chat` 是一个基于 [Lit](https://lit.dev) 和 [Shoelace](https://shoelace.style/) 实现的 AI 对话组件库, **基于 `Web Components` 技术栈, 适用于任何框架([vue](#vue) / [react](#react) / [angular](#angular) / [vanilla](#vanilla) `...`)**, 该项目旨在提供一个现代化、高性能且易于扩展的 Web 组件库, 用于构建智能对话界面; 最终实现效果将类似于 [ant-design-x](https://x.ant.design/index-cn)
 
+## Demo
+[🔗 `demo` 页面](https://snazzy-khapse-06e16b.netlify.app/)
+
 ## 功能特性
 - **`Web Components`**: 使用 [Lit](https://lit.dev) 构建的自定义元素, 确保跨框架兼容性, 目前已在 [vue](#vue) / [react](#react) / [angular](#angular) 等框架中测试通过
 - **`UI` 组件库**: 基于成熟的基础组件库 [Shoelace](https://shoelace.style/)
@@ -172,6 +175,10 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `conversations-footer` | 左侧会话列表的 `footer` 部分 |
 | `main-welcome` | 右侧消息列表的 `welcome` 界面 |
 | `main-header` | 右侧消息列表的 `header` 部分 |
+| `settings-main-header` | 设置弹窗(从顶部的设置按钮打开)中的表单项部分 |
+| `settings-main-aside` | 设置弹窗(从侧边栏底部的设置按钮打开)中的表单项部分 |
+
+其中 `settings-main-header` 和 `settings-main-aside` 都是在设置弹窗中显示的内容, 但因为 `slot` 不能多次渲染, 为了避免渲染失败, 所以将其分为两个 `slot`, 在使用时应该入相同的内容
 
 ### Lit html slot
 由于原生的 [`<slot>` 元素](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_components/Using_templates_and_slots) 存在诸多限制, 既无法在组件内部渲染多次, 也无法实现作用域插槽, 所以本组件对外 `export` 了 [html - lit](https://lit.dev/docs/api/static-html/#html) 方法, 用于创建在 `lit` 中使用的 `html` 模板:

@@ -6,6 +6,7 @@ import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
 import type { Conversation } from './types/conversations'
+import { LocalConversations } from './utils/LocalConversations'
 
 export const tagName = 'hyosan-chat-demo'
 

@@ -37,6 +37,8 @@ const translation: Translation = {
   en: 'English',
   zhCn: '中文',
   readAloud: '朗读',
+  localize: '使用本地化数据',
+  localizeTips: '会话和消息数据将保存至浏览器中(indexeddb)',
 }
 
 registerTranslation(translation)

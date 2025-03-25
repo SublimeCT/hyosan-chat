@@ -12,6 +12,11 @@ interface ImportMetaEnv {
    * @since 0.3.1
    */
   readonly VITE_SYSTEM_PROMPTS: string
+  /**
+   * 是否将所有会话 / 消息数据保存到本地(`indexeddb`)
+   * @since 0.4.1
+   */
+  readonly VITE_DATA_LOCALIZE: string
 }
 
 interface ImportMeta {

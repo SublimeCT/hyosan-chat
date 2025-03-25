@@ -23,6 +23,7 @@ import {
   HyosanChatShoelaceTheme,
   HyosanChatTheme,
 } from '@/utils/HyosanChatTheme'
+import { LocalConversations } from '@/utils/LocalConversations'
 import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 
 /**
@@ -37,6 +38,7 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  * @slot conversations-footer - 左侧会话列表的 `footer` 部分
  * @slot main-welcome - 右侧消息列表的 `welcome` 界面
  * @slot main-header - 右侧消息列表的 `header` 界面
+ * @slot settings-main - 设置弹窗中的表单项部分
  *
  * @event {undefined} conversations-create - 点击创建新会话按钮
  * @event {{ item: Conversation }} click-conversation - 点击左侧会话列表中的会话
@@ -149,6 +151,8 @@ export class HyosanChat extends ShoelaceElement {
     'conversations-footer',
     'main-welcome',
     'main-header',
+    'settings-main-header',
+    'settings-main-aside',
   )
 
   /**
@@ -194,6 +198,23 @@ export class HyosanChat extends ShoelaceElement {
   })
   messages?: BaseServiceMessages
 
+  localConversations: LocalConversations | null = null
+
+  connectedCallback() {
+    super.connectedCallback()
+    this._initLocalizeData()
+  }
+
+  private async _initLocalizeData() {
+    const chatSettings = ChatSettings.fromLocalStorage()
+    if (chatSettings.localize !== 'true') return
+    console.warn('use localize data')
+    this.localConversations = new LocalConversations()
+    await this.localConversations.initDB()
+    const conversations = await this.localConversations.getConversations()
+    console.log(conversations)
+  }
+
   /** 是否显示头像 */
   @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
   showAvatar = false
@@ -234,6 +255,13 @@ export class HyosanChat extends ShoelaceElement {
    */
   @property({ attribute: false })
   onCreateMessage?: (content?: string) => string | Promise<string>
+
+  /**
+   * 禁用的字段
+   * @since 0.4.1
+   */
+  @property({ type: Array, attribute: false })
+  disabledFields: Array<string> = []
 
   private async _handleStartNewChat() {
     if (this.onCreateMessage) {
@@ -521,6 +549,20 @@ export class HyosanChat extends ShoelaceElement {
     const hasConversationsFooterSlot = this.hasSlotController.test(
       'conversations-footer',
     )
+    const hasSettingsMainHeaderSlot = this.hasSlotController.test(
+      'settings-main-header',
+    )
+    /** settings-main-header slot */
+    const settingsMainHeaderSlot = hasSettingsMainHeaderSlot
+      ? html`<div slot="settings-main"><slot name="settings-main-header"></slot></div>`
+      : ''
+    const hasSettingsMainAsideSlot = this.hasSlotController.test(
+      'settings-main-aside',
+    )
+    /** settings-main-aside slot */
+    const settingsMainAsideSlot = hasSettingsMainAsideSlot
+      ? html`<div slot="settings-main"><slot name="settings-main-aside"></slot></div>`
+      : ''
     /** 会话列表 header */
     const conversationsHeader = hasConversationsHeaderSlot
       ? html`<slot name="conversations-header"></slot>`
@@ -528,7 +570,11 @@ export class HyosanChat extends ShoelaceElement {
     /** 会话列表 footer */
     const conversationsFooter = hasConversationsFooterSlot
       ? html`<slot name="conversations-footer"></slot>`
-      : html`<hyosan-chat-conversations-footer slot="conversations-footer" @hyosan-chat-settings-save=${this._handleSettingsSave}></hyosan-chat-conversations-footer>`
+      : html`
+        <hyosan-chat-conversations-footer slot="conversations-footer" @hyosan-chat-settings-save=${this._handleSettingsSave} .disabledFields=${this.disabledFields}>
+          ${settingsMainAsideSlot}
+        </hyosan-chat-conversations-footer>
+      `
     /** 会话列表 */
     const conversations = hasConversationsSlot
       ? html`<slot name="conversations">${conversationsHeader}<slot name="conversations-footer"></slot></slot>`
@@ -547,10 +593,12 @@ export class HyosanChat extends ShoelaceElement {
         ? html`
 						<hyosan-chat-main-header
 							?compact=${this.compact}
+              .disabledFields=${this.disabledFields}
 							@hyosan-chat-click-conversations-button=${this._handleClickConversationsButton}
 							@hyosan-chat-click-settings-button=${this._handleClickSettingsButton}>
-							</hyosan-chat-main-header>
-						`
+                ${settingsMainHeaderSlot}
+            </hyosan-chat-main-header>
+          `
         : undefined
     return html`
 			<div part="base" class="chat-wrapper" ?data-compact=${this.compact}>

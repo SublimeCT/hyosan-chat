@@ -6,37 +6,42 @@ import type { Conversation } from '@/types/conversations'
  * @description 使用 IndexedDB 存储会话和消息
  */
 export class LocalConversations {
+  /**
+   * IndexedDB 数据库实例
+   */
   private db: IDBDatabase | null = null
-
-  constructor() {
-    this.initDB()
-  }
 
   /**
    * 初始化 IndexedDB 数据库
+   * @returns 初始化完成后的 Promise
    */
-  private initDB() {
-    const request = indexedDB.open('hyosan-chat-db', 1)
-
-    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      const db = (event.target as IDBRequest<IDBDatabase>)?.result
-
-      if (!db.objectStoreNames.contains('conversations')) {
-        db.createObjectStore('conversations', { keyPath: 'key' })
-      }
-
-      if (!db.objectStoreNames.contains('messages')) {
-        db.createObjectStore('messages', { keyPath: 'conversationId' })
-      }
-    }
-
-    request.onsuccess = (event: Event) => {
-      this.db = (event.target as IDBOpenDBRequest).result
-    }
-
-    request.onerror = (event: Event) => {
-      console.error('Database error:', (event.target as IDBOpenDBRequest).error)
-    }
+  public async initDB(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('hyosan-chat-db', 1)
+      request.addEventListener(
+        'upgradeneeded',
+        (event: IDBVersionChangeEvent) => {
+          const db = (event.target as IDBOpenDBRequest).result
+          if (!db.objectStoreNames.contains('conversations')) {
+            db.createObjectStore('conversations', { keyPath: 'key' })
+          }
+          if (!db.objectStoreNames.contains('messages')) {
+            db.createObjectStore('messages', { keyPath: 'conversationId' })
+          }
+        },
+      )
+      request.addEventListener('success', (event: Event) => {
+        this.db = (event.target as IDBOpenDBRequest).result
+        resolve()
+      })
+      request.addEventListener('error', (event: Event) => {
+        console.error(
+          'Database error:',
+          (event.target as IDBOpenDBRequest).error,
+        )
+        reject((event.target as IDBOpenDBRequest).error)
+      })
+    })
   }
 
   /**
@@ -58,54 +63,54 @@ export class LocalConversations {
   /**
    * 保存会话
    * @param conversation 会话对象
+   * @returns 保存操作的 Promise
    */
-  public async saveConversation(conversation: Conversation) {
-    return new Promise<void>((resolve, reject) => {
+  public async saveConversation(conversation: Conversation): Promise<void> {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('conversations', 'readwrite')
       const conversationWithTime = {
         ...conversation,
         createTime: new Date(),
       }
       const request = store.put(conversationWithTime)
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () => resolve())
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 
   /**
    * 读取所有会话
-   * @returns 会话对象数组
+   * @returns 会话对象数组的 Promise
    */
   public async getConversations(): Promise<Conversation[]> {
-    return new Promise<Conversation[]>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('conversations')
       const request = store.getAll()
-
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () => resolve(request.result))
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 
   /**
    * 更新会话
    * @param conversation 会话对象
+   * @returns 更新操作的 Promise
    */
-  public async updateConversation(conversation: Conversation) {
+  public async updateConversation(conversation: Conversation): Promise<void> {
     return this.saveConversation(conversation)
   }
 
   /**
    * 删除会话
    * @param key 会话的 key
+   * @returns 删除操作的 Promise
    */
-  public async deleteConversation(key: string) {
-    return new Promise<void>((resolve, reject) => {
+  public async deleteConversation(key: string): Promise<void> {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('conversations', 'readwrite')
       const request = store.delete(key)
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () => resolve())
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 
@@ -113,34 +118,35 @@ export class LocalConversations {
    * 保存消息
    * @param conversationId 会话 ID
    * @param messages 消息数组
+   * @returns 保存操作的 Promise
    */
   public async saveMessages(
     conversationId: string,
     messages: BaseServiceMessages,
-  ) {
-    return new Promise<void>((resolve, reject) => {
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('messages', 'readwrite')
       const request = store.put({ conversationId, messages })
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () => resolve())
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 
   /**
    * 读取消息
    * @param conversationId 会话 ID
-   * @returns 消息数组
+   * @returns 消息数组的 Promise
    */
   public async getMessages(
     conversationId: string,
   ): Promise<BaseServiceMessages> {
-    return new Promise<BaseServiceMessages>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('messages')
       const request = store.get(conversationId)
-
-      request.onsuccess = () => resolve(request.result?.messages || [])
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () =>
+        resolve(request.result?.messages || []),
+      )
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 
@@ -148,25 +154,26 @@ export class LocalConversations {
    * 更新消息
    * @param conversationId 会话 ID
    * @param messages 消息数组
+   * @returns 更新操作的 Promise
    */
   public async updateMessages(
     conversationId: string,
     messages: BaseServiceMessages,
-  ) {
+  ): Promise<void> {
     return this.saveMessages(conversationId, messages)
   }
 
   /**
    * 删除消息
    * @param conversationId 会话 ID
+   * @returns 删除操作的 Promise
    */
-  public async deleteMessages(conversationId: string) {
-    return new Promise<void>((resolve, reject) => {
+  public async deleteMessages(conversationId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
       const store = this.getStore('messages', 'readwrite')
       const request = store.delete(conversationId)
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+      request.addEventListener('success', () => resolve())
+      request.addEventListener('error', () => reject(request.error))
     })
   }
 }
