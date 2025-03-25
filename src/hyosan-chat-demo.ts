@@ -200,6 +200,7 @@ export class HyosanChatDemo extends LitElement {
 					.conversations=${this.conversations}
 					.messages=${this.messages}
 					showRetryButton
+          showReadAloudButton
 					.onCreateMessage=${this._handleConversationsCreate.bind(this)}
 					.onEnableSearch=${this._handleEnableSearch.bind(this)}
 					currentConversationId=${this.currentConversationId}

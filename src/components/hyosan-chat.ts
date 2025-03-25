@@ -18,6 +18,7 @@ import type {
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
 import type { Conversation } from '@/types/conversations'
+import { HyosanChatSpeech } from '@/utils/HyosanChatSpeech'
 import {
   HyosanChatShoelaceTheme,
   HyosanChatTheme,
@@ -209,6 +210,13 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Boolean })
   showRetryButton = true
 
+  /**
+   * 是否显示朗读按钮
+   * @since 0.4.0
+   */
+  @property({ type: Boolean })
+  showReadAloudButton = true
+
   /** 是否显示点赞和踩按钮 */
   @property({ type: Boolean })
   showLikeAndDislikeButton = true
@@ -279,6 +287,25 @@ export class HyosanChat extends ShoelaceElement {
     this._handleRetryMessage(event.detail.message)
     this.requestUpdate()
   }
+  private _handleRead(
+    event: CustomEvent<{
+      messages: BaseServiceMessages
+      message: BaseServiceMessageItem
+      item: BaseServiceMessageNode
+      target: HTMLElement
+    }>,
+  ) {
+    console.log('read', event)
+    const messageElement = event.detail.target.closest('.bubble')
+    if (!messageElement)
+      throw new Error('Internal Error: Missing message element')
+    const messageContentElement =
+      messageElement.querySelector('div.read-element')
+    if (!messageContentElement)
+      throw new Error('Internal Error: Missing message content element')
+    HyosanChatSpeech.speak(messageContentElement as HTMLElement)
+    // this.service.speak()
+  }
 
   private _handleListDisconnected() {
     this.service.destroy()
@@ -312,7 +339,9 @@ export class HyosanChat extends ShoelaceElement {
 					?show-avatar=${this.showAvatar}
 					@hyosan-chat-stop=${this._handleStopOutput}
 					@hyosan-chat-retry=${this._handleRetry}
+					@hyosan-chat-read=${this._handleRead}
 					@hyosan-chat-bubble-list-disconnected=${this._handleListDisconnected}
+          ?showReadAloudButton=${this.showReadAloudButton}
           .avatarGetter=${this.avatarGetter}
 					.messages=${_messages}>
 				</hyosan-chat-bubble-list>

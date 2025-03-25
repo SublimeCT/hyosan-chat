@@ -36,6 +36,7 @@ const translation: Translation = {
   language: '语言',
   en: 'English',
   zhCn: '中文',
+  readAloud: '朗读',
 }
 
 registerTranslation(translation)

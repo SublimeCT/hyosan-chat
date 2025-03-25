@@ -372,6 +372,13 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   @property({ type: Boolean })
   showLikeAndDislikeButton = true
 
+  /**
+   * 是否显示朗读按钮
+   * @since 0.4.0
+   */
+  @property({ type: Boolean })
+  showReadAloudButton = true
+
   /** 气泡框底部的底部内容 */
   private _bubbleItemFooter(
     message: BaseServiceMessageItem,
@@ -391,6 +398,9 @@ export class HyosanChatBubbleList extends ShoelaceElement {
       this.showLikeAndDislikeButton &&
       message.role !== 'user' &&
       !message.$loading
+    /** 是否显示朗读按钮 */
+    const showReadAloudButton =
+      this.showReadAloudButton && message.role !== 'user'
     return html`
       <footer class="bubble-item-footer">
         <div class="footer-left">
@@ -405,6 +415,10 @@ export class HyosanChatBubbleList extends ShoelaceElement {
           <hyosan-chat-text-button class=${showRetryButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-retry', { detail: { messages: this.messages, message, item } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7060" width="1em" height="1em" fill="currentColor"><path d="M936.432 603.424q0 2.848-0.576 4-36.576 153.152-153.152 248.288t-273.152 95.136q-83.424 0-161.44-31.424t-139.136-89.728l-73.728 73.728q-10.848 10.848-25.728 10.848t-25.728-10.848-10.848-25.728l0-256q0-14.848 10.848-25.728t25.728-10.848l256 0q14.848 0 25.728 10.848t10.848 25.728-10.848 25.728l-78.272 78.272q40.576 37.728 92 58.272t106.848 20.576q76.576 0 142.848-37.152t106.272-102.272q6.272-9.728 30.272-66.848 4.576-13.152 17.152-13.152l109.728 0q7.424 0 12.864 5.44t5.44 12.864zM950.736 146.272l0 256q0 14.848-10.848 25.728t-25.728 10.848l-256 0q-14.848 0-25.728-10.848t-10.848-25.728 10.848-25.728l78.848-78.848q-84.576-78.272-199.424-78.272-76.576 0-142.848 37.152t-106.272 102.272q-6.272 9.728-30.272 66.848-4.576 13.152-17.152 13.152l-113.728 0q-7.424 0-12.864-5.44t-5.44-12.864l0-4q37.152-153.152 154.272-248.288t274.272-95.136q83.424 0 162.272 31.712t140 89.44l74.272-73.728q10.848-10.848 25.728-10.848t25.728 10.848 10.848 25.728z" p-id="7061"></path></svg>
             <div>${this._localize.term('retry')}</div>
+          </hyosan-chat-text-button>
+          <hyosan-chat-text-button class=${showReadAloudButton ? '' : 'none'} @click=${(event: MouseEvent) => this.emit('hyosan-chat-read', { detail: { messages: this.messages, message, item, target: event.target as HTMLElement } })}>
+            <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9743" width="1em" height="1em" fill="currentColor"><path d="M369.493333 718.08H159.146667c-35.413333 0-64-28.586667-64-64V394.24c0-35.413333 28.586667-64 64-64h210.346666v387.84z" p-id="9744"></path><path d="M212.266667 377.173333L480.426667 162.56c20.906667-16.853333 52.053333-1.92 52.053333 24.96v661.12c0 28.586667-33.066667 44.586667-55.466667 26.666667L208.426667 660.266667l3.84-283.093334zM854.4 517.76c0 85.12-28.8 163.626667-77.013333 226.346667l54.186666 50.56c6.186667-7.04 4.693333 10.666667 10.453334 3.2C902.4 720.64 938.666667 623.573333 938.666667 517.76c0-106.026667-36.48-203.093333-97.066667-280.533333-5.546667-7.253333-69.973333 46.933333-66.56 51.2 49.493333 63.146667 79.36 142.72 79.36 229.333333zM673.066667 517.76c0 40.32-13.653333 77.226667-36.266667 107.093333 0 0 64.426667 49.493333 67.626667 45.013334 31.146667-42.666667 49.493333-95.146667 49.493333-152.106667 0-58.026667-19.2-111.573333-51.413333-154.666667-2.56-3.626667-65.706667 47.573333-65.706667 47.573334a176.64 176.64 0 0 1 36.266667 107.093333z" p-id="9745"></path><path d="M672 389.546667m-40.96 0a40.96 40.96 0 1 0 81.92 0 40.96 40.96 0 1 0-81.92 0Z" p-id="9746"></path><path d="M672 645.973333m-40.96 0a40.96 40.96 0 1 0 81.92 0 40.96 40.96 0 1 0-81.92 0Z" p-id="9747"></path><path d="M809.813333 771.626667m-41.813333 0a41.813333 41.813333 0 1 0 83.626667 0 41.813333 41.813333 0 1 0-83.626667 0Z" p-id="9748"></path><path d="M809.813333 263.893333m-41.813333 0a41.813333 41.813333 0 1 0 83.626667 0 41.813333 41.813333 0 1 0-83.626667 0Z" p-id="9749"></path></svg>
+            <div>${this._localize.term('readAloud')}</div>
           </hyosan-chat-text-button>
         </div>
         <div class="footer-right">
@@ -449,11 +463,11 @@ export class HyosanChatBubbleList extends ShoelaceElement {
               ${
                 message.role === 'assistant' && message.$loading
                   ? html`
-                    <div slot="content" class="markdown-container markdown-container-content" .hyosanChatHtml=${item.content}>
+                    <div slot="content" class="markdown-container markdown-container-content read-element" .hyosanChatHtml=${item.content}>
                       <div class="markdown-container-inner"></div>
                     </div>
                   `
-                  : html`<div slot="content" .innerHTML=${item.content}></div>`
+                  : html`<div slot="content" class="read-element" .innerHTML=${item.content}></div>`
               }
               ${message.$error ? html`<hyosan-chat-bubble-error-block .error=${message.$error}></hyosan-chat-bubble-error-block>` : ''}
               ${this._bubbleItemFooter(message, item, index >= assistantIndex)}
@@ -502,6 +516,13 @@ declare global {
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
       item: BaseServiceMessageNode
+    }>
+    /** 朗读消息 */
+    'hyosan-chat-read': CustomEvent<{
+      messages: BaseServiceMessages
+      message: BaseServiceMessageItem
+      item: BaseServiceMessageNode
+      target: HTMLElement
     }>
     /** 点击 Like 按钮(点赞) */
     'hyosan-chat-click-like-button': CustomEvent<{

@@ -36,4 +36,5 @@ export interface Translation extends DefaultTranslation {
   language: string
   en: string
   zhCn: string
+  readAloud: string
 }
