@@ -295,7 +295,6 @@ export class HyosanChat extends ShoelaceElement {
       target: HTMLElement
     }>,
   ) {
-    console.log('read', event)
     const messageElement = event.detail.target.closest('.bubble')
     if (!messageElement)
       throw new Error('Internal Error: Missing message element')

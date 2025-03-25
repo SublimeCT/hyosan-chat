@@ -146,6 +146,7 @@ export class HyosanChatSpeech {
       speechData.currentUtterance = null
       HyosanChatSpeech.startSpeakingQueue(element, options)
     }
+    ;(utterance as any).endHandler = endHandler
     utterance.addEventListener('end', endHandler)
 
     const errorHandler = (event: Event) => {
@@ -154,6 +155,7 @@ export class HyosanChatSpeech {
       speechData.currentUtterance = null
       HyosanChatSpeech.startSpeakingQueue(element, options)
     }
+    ;(utterance as any).errorHandler = errorHandler
     utterance.addEventListener('error', errorHandler)
 
     window.speechSynthesis.speak(utterance)
@@ -180,13 +182,12 @@ export class HyosanChatSpeech {
   }
 
   /**
-   * 内部方法：获取元素的内容，排除指定的选择器
+   * 内部方法：获取元素的内容
    * @param element 目标 DOM 元素
    * @param options 语音合成选项
    * @returns 过滤后的文本内容
    */
   private static getTextContent(element: HTMLElementWithSpeech): string {
-    console.log(element)
     let text = element.textContent || ''
     text = text.replace(/\s+/g, '')
     return text
@@ -209,6 +210,5 @@ export class HyosanChatSpeech {
     speechData.observer.disconnect()
     window.speechSynthesis.cancel()
     Reflect.deleteProperty(element, '__hyosanChatSpeechData')
-    console.log('stop ...')
   }
 }
