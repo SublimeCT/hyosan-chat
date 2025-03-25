@@ -33,7 +33,9 @@ class DatabaseManager {
         (event: IDBVersionChangeEvent) => {
           const db = (event.target as IDBOpenDBRequest).result
           if (!db.objectStoreNames.contains('conversations')) {
-            const store = db.createObjectStore('conversations', { keyPath: 'key' })
+            const store = db.createObjectStore('conversations', {
+              keyPath: 'key',
+            })
             store.createIndex('createTime', 'createTime', { unique: false })
           }
           if (!db.objectStoreNames.contains('messages')) {
@@ -68,7 +70,9 @@ class DatabaseManager {
     if (!DatabaseManager.db) {
       throw new Error('Database not initialized')
     }
-    return DatabaseManager.db.transaction(storeName, mode).objectStore(storeName)
+    return DatabaseManager.db
+      .transaction(storeName, mode)
+      .objectStore(storeName)
   }
 
   /**
@@ -83,7 +87,9 @@ class DatabaseManager {
     storeName: string,
     method: 'put' | 'get' | 'delete' | 'getAll' | 'openCursor',
     data?: any,
-    mode: IDBTransactionMode = method === 'put' || method === 'delete' ? 'readwrite' : 'readonly',
+    mode: IDBTransactionMode = method === 'put' || method === 'delete'
+      ? 'readwrite'
+      : 'readonly',
   ): Promise<T> {
     return new Promise((resolve, reject) => {
       const store = DatabaseManager.getStore(storeName, mode)
@@ -104,13 +110,19 @@ export class LocalConversations {
    * @param conversation 会话对象
    * @returns 保存操作的 Promise
    */
-  public static async saveConversation(conversation: Conversation): Promise<void> {
+  public static async saveConversation(
+    conversation: Conversation,
+  ): Promise<void> {
     await DatabaseManager.initDB()
     const conversationWithTime = {
       ...conversation,
       createTime: Date.now(), // 添加时间戳字段
     }
-    return DatabaseManager.executeStoreRequest<void>('conversations', 'put', conversationWithTime)
+    return DatabaseManager.executeStoreRequest<void>(
+      'conversations',
+      'put',
+      conversationWithTime,
+    )
   }
 
   /**
@@ -145,9 +157,15 @@ export class LocalConversations {
    * @param key 会话的 key
    * @returns 会话对象的 Promise
    */
-  public static async getConversationById(key: string): Promise<Conversation | null> {
+  public static async getConversationById(
+    key: string,
+  ): Promise<Conversation | null> {
     await DatabaseManager.initDB()
-    const result = await DatabaseManager.executeStoreRequest<any>('conversations', 'get', key)
+    const result = await DatabaseManager.executeStoreRequest<any>(
+      'conversations',
+      'get',
+      key,
+    )
     return result || null
   }
 
@@ -156,7 +174,9 @@ export class LocalConversations {
    * @param conversation 会话对象
    * @returns 更新操作的 Promise
    */
-  public static async updateConversation(conversation: Conversation): Promise<void> {
+  public static async updateConversation(
+    conversation: Conversation,
+  ): Promise<void> {
     return this.saveConversation(conversation)
   }
 
@@ -169,7 +189,11 @@ export class LocalConversations {
     await DatabaseManager.initDB()
     // 同步删除该 conversation 下的所有 messages
     await this.deleteMessages(key)
-    return DatabaseManager.executeStoreRequest<void>('conversations', 'delete', key)
+    return DatabaseManager.executeStoreRequest<void>(
+      'conversations',
+      'delete',
+      key,
+    )
   }
 
   /**
@@ -183,7 +207,10 @@ export class LocalConversations {
     messages: BaseServiceMessages,
   ): Promise<void> {
     await DatabaseManager.initDB()
-    return DatabaseManager.executeStoreRequest<void>('messages', 'put', { conversationId, messages })
+    return DatabaseManager.executeStoreRequest<void>('messages', 'put', {
+      conversationId,
+      messages,
+    })
   }
 
   /**
@@ -195,7 +222,11 @@ export class LocalConversations {
     conversationId: string,
   ): Promise<BaseServiceMessages | null> {
     await DatabaseManager.initDB()
-    const result = await DatabaseManager.executeStoreRequest<any>('messages', 'get', conversationId)
+    const result = await DatabaseManager.executeStoreRequest<any>(
+      'messages',
+      'get',
+      conversationId,
+    )
     return result?.messages || null
   }
 
@@ -219,6 +250,10 @@ export class LocalConversations {
    */
   public static async deleteMessages(conversationId: string): Promise<void> {
     await DatabaseManager.initDB()
-    return DatabaseManager.executeStoreRequest<void>('messages', 'delete', conversationId)
+    return DatabaseManager.executeStoreRequest<void>(
+      'messages',
+      'delete',
+      conversationId,
+    )
   }
 }

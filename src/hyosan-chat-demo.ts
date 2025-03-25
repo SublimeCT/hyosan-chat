@@ -6,7 +6,6 @@ import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
 import type { Conversation } from './types/conversations'
-import { LocalConversations } from './utils/LocalConversations'
 
 export const tagName = 'hyosan-chat-demo'
 
@@ -105,7 +104,12 @@ export class HyosanChatDemo extends LitElement {
     this.requestUpdate()
     return key
   }
-  private _handleClickConversation(event: CustomEvent<{ item: Conversation, localMessages: BaseServiceMessages | null }>) {
+  private _handleClickConversation(
+    event: CustomEvent<{
+      item: Conversation
+      localMessages: BaseServiceMessages | null
+    }>,
+  ) {
     const conversation = event.detail.item
     const localMessages = event.detail.localMessages
     // console.log('change', localMessages)
@@ -193,7 +197,9 @@ export class HyosanChatDemo extends LitElement {
       Reflect.deleteProperty(service.chat, 'enable_search')
     }
   }
-  private _handleLocalizeUpdateConversations(event: CustomEvent<{ conversations: Array<Conversation> }>) {
+  private _handleLocalizeUpdateConversations(
+    event: CustomEvent<{ conversations: Array<Conversation> }>,
+  ) {
     this.conversations = event.detail.conversations
   }
 

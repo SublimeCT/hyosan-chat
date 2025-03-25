@@ -207,7 +207,11 @@ export class HyosanChat extends ShoelaceElement {
   private async _initLocalizeData() {
     const chatSettings = ChatSettings.fromLocalStorage()
     if (chatSettings.localize !== 'true') return
-    console.log('%c<hyosan-chat>%c use localize data', 'color: teal; background: black; padding: 0 3px;', 'color: inhert')
+    console.log(
+      '%c<hyosan-chat>%c use localize data',
+      'color: teal; background: black; padding: 0 3px;',
+      'color: inhert',
+    )
     const conversations = await LocalConversations.getConversations()
     // 获取到本地的会话数据时, 追加到现有数据尾部, 并对外触发事件
     if (conversations) {
@@ -264,7 +268,9 @@ export class HyosanChat extends ShoelaceElement {
    * @returns 返回一个 `number | string` 值, 将作为消息内容(`content`)的最大截取长度并赋值给 `label` 或 直接作为 `label`
    */
   @property({ attribute: false })
-  onSendFirstMessage?: (content: string) => Promise<number | string | undefined> | number | string | undefined
+  onSendFirstMessage?: (
+    content: string,
+  ) => Promise<number | string | undefined> | number | string | undefined
 
   /**
    * 禁用的字段
@@ -276,7 +282,9 @@ export class HyosanChat extends ShoelaceElement {
   private async _handleSaveLocalConversation(conversationId: string) {
     const settings = ChatSettings.fromLocalStorage()
     if (conversationId && settings.localize) {
-      const conversation = this.conversations.find(c => c.key === conversationId)
+      const conversation = this.conversations.find(
+        (c) => c.key === conversationId,
+      )
       if (conversation) {
         // 将新会话存入本地
         await LocalConversations.saveConversation(conversation)
@@ -414,9 +422,15 @@ export class HyosanChat extends ShoelaceElement {
       this.currentConversationId !== event.detail.item.key
     this.currentConversationId = event.detail.item.key
     if (isDifferentConversation) {
-      const localMessages = await LocalConversations.getMessages(event.detail.item.key)
+      const localMessages = await LocalConversations.getMessages(
+        event.detail.item.key,
+      )
       this.emit('change-conversation', {
-        detail: { item: event.detail.item, service: this.service, localMessages },
+        detail: {
+          item: event.detail.item,
+          service: this.service,
+          localMessages,
+        },
       })
     }
     if (this.compact) this._handleDrawerClickClose()
@@ -460,18 +474,30 @@ export class HyosanChat extends ShoelaceElement {
     retryMessage?: BaseServiceMessageItem,
   ) {
     const { content } = event.detail
-    if (this.onSendFirstMessage && (!this.messages || this.messages.length === 0 || this.messages.every(v => v.role !== 'user'))) {
+    if (
+      this.onSendFirstMessage &&
+      (!this.messages ||
+        this.messages.length === 0 ||
+        this.messages.every((v) => v.role !== 'user'))
+    ) {
       const lengthOrContent = await this.onSendFirstMessage(content)
       if (lengthOrContent) {
-        const index = this.conversations.findIndex(c => c.key === this.currentConversationId)
+        const index = this.conversations.findIndex(
+          (c) => c.key === this.currentConversationId,
+        )
         if (index !== -1) {
-          const _content = typeof lengthOrContent === 'number'
-            ? content.substring(0, lengthOrContent)
-            : lengthOrContent
-          this.conversations.splice(index, 1, { ...this.conversations[index], label: _content })
+          const _content =
+            typeof lengthOrContent === 'number'
+              ? content.substring(0, lengthOrContent)
+              : lengthOrContent
+          this.conversations.splice(index, 1, {
+            ...this.conversations[index],
+            label: _content,
+          })
           this.conversations = [...this.conversations]
           const settings = ChatSettings.fromLocalStorage()
-          if (settings.localize) LocalConversations.updateConversation(this.conversations[index])
+          if (settings.localize)
+            LocalConversations.updateConversation(this.conversations[index])
           this.requestUpdate()
         }
       }
@@ -601,7 +627,9 @@ export class HyosanChat extends ShoelaceElement {
     LocalConversations.updateConversation(event.detail.item)
   }
 
-  private _handleDeleteConversation(event: CustomEvent<{ item: Conversation }>) {
+  private _handleDeleteConversation(
+    event: CustomEvent<{ item: Conversation }>,
+  ) {
     const settings = ChatSettings.fromLocalStorage()
     if (!settings.localize) return
     LocalConversations.deleteConversation(event.detail.item.key)
@@ -738,7 +766,9 @@ declare global {
      * 当启用本地存储时, 组件首次加载时获取 conversations 数据时触发
      * @since 0.4.1
      */
-    'localize-update-conversations': CustomEvent<{ conversations: Array<Conversation> }>
+    'localize-update-conversations': CustomEvent<{
+      conversations: Array<Conversation>
+    }>
   }
 }
 
