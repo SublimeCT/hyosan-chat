@@ -29,6 +29,9 @@ export default defineConfig({
       ],
     }),
   ],
+  define: {
+    VITE_DATA_LOCALIZE: 'false'
+  },
   build: {
     lib: {
       name: 'hyosan-chat',
