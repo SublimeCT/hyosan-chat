@@ -1,12 +1,12 @@
 import Emittery from 'emittery'
 import type {
   ChatCompletionAssistantMessageParam,
-  ChatCompletionContentPart,
+  // ChatCompletionContentPart,
   ChatCompletionContentPartImage,
   ChatCompletionContentPartRefusal,
   ChatCompletionContentPartText,
   ChatCompletionMessageParam,
-} from 'openai/resources/index.mjs'
+} from 'openai/resources/index'
 import type { ChatCompletionContentPartInputAudio } from 'openai/src/resources/index.js'
 
 /**

@@ -3,7 +3,6 @@ import {
   type BaseService,
   BaseServiceMessage,
   type BaseServiceMessageItem,
-  type BaseServiceMessageNode,
   type BaseServiceMessages,
   type HyosanChatMessageContentPart,
   HyosanChatMessageContentPartTypesType,
@@ -12,7 +11,6 @@ import {
 } from '@/service/BaseService'
 import { withResetSheets } from '@/sheets'
 import { LocalizeController } from '@/utils/localize'
-import { renderMarkdown } from '@/utils/markdown/markdown'
 import hljsGithubTheme from 'highlight.js/styles/github-dark.min.css?inline'
 import {
   type PropertyValues,

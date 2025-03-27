@@ -5,18 +5,16 @@ import {
 } from '@microsoft/fetch-event-source'
 // import OpenAI from 'openai'
 import type {
-  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
-} from 'openai/resources/index.mjs'
+} from 'openai/resources/index'
 import {
   BaseService,
   type BaseServiceMessageItem,
-  type BaseServiceMessageNode,
+  // type BaseServiceMessageNode,
   BaseServiceMessagePart,
   type BaseServiceMessages,
   type HyosanChatChatCompletionAssistantMessageParam,
-  type HyosanChatChatCompletionMessageParam,
   type HyosanChatMessageContentPart,
   HyosanChatMessageContentPartTypesType,
   MessageDataKey,
@@ -272,26 +270,26 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
     return data
   }
 
-  /**
-   * 从原始的流式请求中获取文本内容
-   * @param responseText 原始流式接口返回值
-   * @returns 本次返回的文本内容和推理内容
-   * @deprecated 从 `0.5.0` 起弃用
-   */
-  getContentByResponse(
-    responseText: string | ChatCompletionChunk,
-  ): BaseServiceMessageNode {
-    const data =
-      typeof responseText === 'string'
-        ? this.getChatCompletionByResponse(responseText)
-        : responseText
-    /** 消息内容 */
-    const content = data.choices[0]?.delta?.content || ''
-    const deltaObject = data.choices[0]?.delta as any
-    /** 推理内容 */
-    const reasoningContent = deltaObject.reasoning_content || '' // 暂不考虑 openai 的推理模型格式
-    return { content, reasoningContent }
-  }
+  // /**
+  //  * 从原始的流式请求中获取文本内容
+  //  * @param responseText 原始流式接口返回值
+  //  * @returns 本次返回的文本内容和推理内容
+  //  * @deprecated 从 `0.5.0` 起弃用
+  //  */
+  // getContentByResponse(
+  //   responseText: string | ChatCompletionChunk,
+  // ): BaseServiceMessageNode {
+  //   const data =
+  //     typeof responseText === 'string'
+  //       ? this.getChatCompletionByResponse(responseText)
+  //       : responseText
+  //   /** 消息内容 */
+  //   const content = data.choices[0]?.delta?.content || ''
+  //   const deltaObject = data.choices[0]?.delta as any
+  //   /** 推理内容 */
+  //   const reasoningContent = deltaObject.reasoning_content || '' // 暂不考虑 openai 的推理模型格式
+  //   return { content, reasoningContent }
+  // }
 
   /** 处理聊天消息 parts */
   async handleMessagePart(

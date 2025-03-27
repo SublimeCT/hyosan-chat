@@ -42,8 +42,8 @@
   "packageManager": "pnpm@10.4.1",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:lib": "tsc && vite build --config vite.config.lib.ts --mode lib && pnpm run cem",
+    "build": "vite build",
+    "build:lib": "vite build --config vite.config.lib.ts --mode lib && pnpm run cem",
     "cem": "cem analyze --litelement --outdir ./dist/cem-types",
     "build:pack": "pnpm run build:lib && pnpm pack",
     "preview": "vite preview",
@@ -63,8 +63,7 @@
     "markdown-it-highlightjs": "^4.2.0",
     "markdown-it-link-attributes": "^4.0.1",
     "markdown-it-mathjax3": "^4.3.2",
-    "morphdom": "^2.7.4",
-    "openai": "^4.86.1"
+    "morphdom": "^2.7.4"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -83,6 +82,7 @@
     "cz-git": "^1.11.0",
     "czg": "^1.11.0",
     "lint-staged": "^15.4.3",
+    "openai": "^4.67.3",
     "pascalcase": "^2.0.0",
     "rollup-plugin-copy": "^3.5.0",
     "simple-git-hooks": "^2.11.1",

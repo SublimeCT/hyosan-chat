@@ -1,5 +1,5 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import type { BaseServiceMessageItem } from '@/service/BaseService'
+import type { BaseServiceMessage } from '@/service/BaseService'
 // import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
@@ -25,7 +25,7 @@ export class HyosanChatBubbleErrorBlock extends ShoelaceElement {
   // private _localize = new LocalizeController(this)
 
   @property({ attribute: false })
-  error: BaseServiceMessageItem['$error'] = ''
+  error: BaseServiceMessage['error'] = ''
   get errorMessage() {
     if (this.error instanceof Error) {
       console.dir(this.error)

@@ -30,7 +30,7 @@ export default defineConfig({
     }),
   ],
   define: {
-    VITE_DATA_LOCALIZE: 'false'
+    VITE_DATA_LOCALIZE: 'false',
   },
   build: {
     lib: {

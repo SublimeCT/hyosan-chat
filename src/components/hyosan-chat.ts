@@ -49,8 +49,8 @@ import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawe
  * @event {{ settings: ChatSettings }} hyosan-chat-settings-save - 在设置弹窗中点击保存按钮
  * @event {{ item: Converastion }} edit-conversation - 在会话列表中点击编辑按钮, 并保存
  * @event {{ item: Converastion }} delete-conversation - 在会话列表中点击删除按钮
- * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-like-button - 点击 Like 按钮(点赞)
- * @event {{ message: BaseServiceMessageItem, item: BaseServiceMessageNode }} hyosan-chat-click-dislike-button - 点击 Dislike 按钮(点赞)
+ * @event {{ message: BaseServiceMessageItem }} hyosan-chat-click-like-button - 点击 Like 按钮(点赞)
+ * @event {{ message: BaseServiceMessageItem }} hyosan-chat-click-dislike-button - 点击 Dislike 按钮(点赞)
  * @event {{ messages: BaseServiceMessages }} messages-completions - 消息接收完毕(可能是成功或报错)
  * @event {{ service: BaseService }} first-updated - (since `0.4.0`) lit 原生的 first-updated hooks 触发时执行
  * @event {{ service: BaseService }} first-updated-complete - (since `0.4.0`) lit 原生的 first-updated hooks 触发后等待 updateComplete 后执行
