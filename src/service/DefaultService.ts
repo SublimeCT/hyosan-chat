@@ -1,9 +1,11 @@
+import { renderMarkdown } from '@/utils/markdown/markdown'
 import {
   EventStreamContentType,
   fetchEventSource,
 } from '@microsoft/fetch-event-source'
 // import OpenAI from 'openai'
 import type {
+  ChatCompletionAssistantMessageParam,
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
 } from 'openai/resources/index.mjs'
@@ -11,7 +13,14 @@ import {
   BaseService,
   type BaseServiceMessageItem,
   type BaseServiceMessageNode,
+  BaseServiceMessagePart,
   type BaseServiceMessages,
+  type HyosanChatChatCompletionAssistantMessageParam,
+  type HyosanChatChatCompletionMessageParam,
+  type HyosanChatMessageContentPart,
+  HyosanChatMessageContentPartTypesType,
+  MessageDataKey,
+  MessagePartDataKey,
 } from './BaseService'
 
 // const openai = new OpenAI()
@@ -102,7 +111,7 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
     const body: DefaultChatCompletionCreateParamsStreaming = {
       model: this.model,
       ...this.chat,
-      messages: this.handleRequestMessages(this.messages.slice(0, -1)),
+      messages: this.messages.slice(0, -1),
       stream: true,
     }
 
@@ -156,23 +165,27 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
 
           try {
             if (event.data === '[DONE]') {
-              assistantMessage.$loading = false
+              assistantMessage[MessageDataKey].loading = false
               this.emitter.emit('send-done')
               return resolve()
             }
             if (event.data === '') return
             const data = this.getChatCompletionByResponse(event.data)
-            const content = this.getContentByResponse(data)
-            // 加入思考内容
-            if (content.reasoningContent)
-              assistantMessage.$reasoningContent += content.reasoningContent
-            // 加入消息内容
-            if (content.content) assistantMessage.content += content.content
-            // console.warn(JSON.stringify(messages))
+            const updated = this.updateAssistantByResponse(
+              assistantMessage,
+              data,
+            )
+            // // const content = this.getContentByResponse(data)
+            // // 加入思考内容
+            // if (content.reasoningContent)
+            //   assistantMessage.content += content.reasoningContent
+            // // 加入消息内容
+            // if (content.content) assistantMessage.content += content.content
+            // // console.warn(JSON.stringify(messages))
             this.setChatCompletionParams(data.id, data.created)
             // 只有返回消息内容时才触发事件
-            if (content.content || content.reasoningContent) {
-              this.emitter.emit('data', data)
+            if (updated) {
+              this.emitter.emit('data')
             }
           } catch (e) {
             console.error('Data processing error:', e)
@@ -186,7 +199,7 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
         },
         onerror: (error) => {
           console.log('[DefaultService] catch error: ', error, error.message)
-          assistantMessage.$error = error
+          assistantMessage[MessageDataKey].error = error
           console.log(assistantMessage)
           if (error instanceof FatalError) {
             this.emitter.emit('error', error)
@@ -218,6 +231,36 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
   }
 
   /**
+   * 将当前返回的数据更新到助手消息中
+   * @description 暂不支持返回多条消息的情况
+   * @param axxistantMessage 当前请求对应的助手消息
+   * @param data 当前请求的返回值, 具体类型可参考 https://api-docs.deepseek.com/zh-cn/api/create-chat-completion#responses 或者 https://platform.openai.com/docs/api-reference/chat-streaming/streaming
+   */
+  updateAssistantByResponse(
+    assistantMessage: BaseServiceMessageItem<
+      true,
+      HyosanChatChatCompletionAssistantMessageParam
+    >,
+    data: ChatCompletionChunk,
+  ): boolean {
+    const firstMessage = data.choices[0] // 暂时只取第一条消息
+    let updated = false
+    // 加入消息内容
+    if (firstMessage.delta.content) {
+      assistantMessage.content += firstMessage.delta.content
+      updated = true
+    }
+    // 加入思考内容
+    if ((firstMessage.delta as any).reasoning_content) {
+      assistantMessage.reasoning_content =
+        (assistantMessage.reasoning_content || '') +
+        (firstMessage.delta as any).reasoning_content
+      updated = true
+    }
+    return updated
+  }
+
+  /**
    * 从原始的流式请求中获取流式请求的返回数据
    * @param responseText 原始流式接口返回值
    * @returns 本次返回的文本内容
@@ -233,6 +276,7 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
    * 从原始的流式请求中获取文本内容
    * @param responseText 原始流式接口返回值
    * @returns 本次返回的文本内容和推理内容
+   * @deprecated 从 `0.5.0` 起弃用
    */
   getContentByResponse(
     responseText: string | ChatCompletionChunk,
@@ -247,6 +291,47 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
     /** 推理内容 */
     const reasoningContent = deltaObject.reasoning_content || '' // 暂不考虑 openai 的推理模型格式
     return { content, reasoningContent }
+  }
+
+  /** 处理聊天消息 parts */
+  async handleMessagePart(
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem<true>,
+  ) {
+    if (!part[MessagePartDataKey])
+      part[MessagePartDataKey] = new BaseServiceMessagePart()
+    if (part.type === HyosanChatMessageContentPartTypesType.text) {
+      // 文本消息
+      part[MessagePartDataKey].htmlContent = await renderMarkdown(part.text)
+    } else if (part.type === HyosanChatMessageContentPartTypesType.image_url) {
+      // 图片消息
+      const img = document.createElement('img')
+      img.src = part.image_url.url
+      part[MessagePartDataKey].htmlContent = img
+    } else if (
+      part.type === HyosanChatMessageContentPartTypesType.input_audio
+    ) {
+      // 音频消息
+      const audio = document.createElement('audio')
+      audio.src = part.input_audio.data
+      part[MessagePartDataKey].htmlContent = audio
+    }
+    if (typeof message.content === 'string') {
+      message[MessageDataKey].onlyContent = part[MessagePartDataKey].htmlContent
+    }
+  }
+
+  /** 处理聊天消息中的推理内容 */
+  async handleMessageReasoningContent(
+    message: BaseServiceMessageItem<
+      true,
+      HyosanChatChatCompletionAssistantMessageParam
+    >,
+  ) {
+    message[MessageDataKey].reasoningContent = await renderMarkdown(
+      message.reasoning_content || '',
+    )
+    // console.log(message[MessageDataKey].reasoningContent)
   }
 
   static from(service: Partial<DefaultService>) {
@@ -274,9 +359,12 @@ export type DefaultServiceChat = Partial<ChatCompletionCreateParamsStreaming>
  * - [阿里云](https://help.aliyun.com/zh/model-studio/developer-reference/compatibility-of-openai-with-dashscope?spm=a2c4g.11186623.0.i4#d553cbbee6mxk)
  * - [腾讯云](https://cloud.tencent.com/document/product/1729/111007)
  */
-export type DefaultChatCompletionCreateParamsStreaming =
-  ChatCompletionCreateParamsStreaming &
-    DefaultAliyunChatCompletionCreateParamsStreaming
+export type DefaultChatCompletionCreateParamsStreaming = Omit<
+  ChatCompletionCreateParamsStreaming,
+  'messages'
+> & {
+  messages: BaseServiceMessages
+} & DefaultAliyunChatCompletionCreateParamsStreaming
 
 /**
  * 当前适配的大模型的请求参数类型(请求参数)

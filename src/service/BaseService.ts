@@ -1,5 +1,13 @@
 import Emittery from 'emittery'
-import type { ChatCompletionMessageParam } from 'openai/resources/index.mjs'
+import type {
+  ChatCompletionAssistantMessageParam,
+  ChatCompletionContentPart,
+  ChatCompletionContentPartImage,
+  ChatCompletionContentPartRefusal,
+  ChatCompletionContentPartText,
+  ChatCompletionMessageParam,
+} from 'openai/resources/index.mjs'
+import type { ChatCompletionContentPartInputAudio } from 'openai/src/resources/index.js'
 
 /**
  * 对话服务 基类
@@ -57,6 +65,20 @@ export abstract class BaseService<
   }
 
   /**
+   * 获取指定消息列表中是否有消息处于 `loading` 状态
+   * @param messages 消息列表
+   * @returns 当前是否有消息处于 `loading` 状态
+   */
+  static isMessagesLoading(messages: BaseServiceMessages) {
+    for (const message of messages) {
+      if (message[MessageDataKey]?.loading) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /**
    * 发送用户输入的内容
    * @param content 消息内容
    * @param conversationId 当前会话 ID
@@ -81,6 +103,20 @@ export abstract class BaseService<
   ): Promise<void>
   /** 发起聊天请求 */
   abstract fetchChatCompletion(): Promise<void>
+
+  /** 处理聊天消息中的推理内容 */
+  abstract handleMessageReasoningContent(
+    message: BaseServiceMessageItem<
+      true,
+      HyosanChatChatCompletionAssistantMessageParam
+    >,
+  ): Promise<void>
+
+  /** 处理聊天消息 parts */
+  abstract handleMessagePart(
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem<true>,
+  ): Promise<void>
   /**
    * 设置聊天流式请求接口的相关参数
    * @param chatCompletionId 当前聊天接口的唯一 `ID`
@@ -93,48 +129,187 @@ export abstract class BaseService<
     this.chatCompletionId = chatCompletionId || ''
     this.chatCompletionCreated = chatCompletionCreated || 0
   }
-  handleRequestMessages(messages: BaseServiceMessages) {
-    return messages.map((v) => {
-      const _message = { ...v }
-      Reflect.deleteProperty(_message, '$loading')
-      Reflect.deleteProperty(_message, '$reasoningContent')
-      Reflect.deleteProperty(_message, '$error')
-      return _message
-    })
-  }
   /**
    * 获取初始状态下的助手消息
    * @description 用于在发送消息时加入 messages
    */
-  getEmptyAssistantMessage(): BaseServiceMessageItem {
-    const message: BaseServiceMessageItem = {
+  getEmptyAssistantMessage(): BaseServiceMessageItem<
+    true,
+    HyosanChatChatCompletionAssistantMessageParam
+  > {
+    const message: BaseServiceMessageItem<true> = {
       role: 'assistant',
       content: '',
-      $loading: true,
-      $reasoningContent: '',
+      [MessageDataKey]: {
+        loading: true,
+      },
     }
     return message
   }
 }
 
-export interface BaseServiceMessage {
+/**
+ * 在消息(`message`) 中用于保存消息状态和数据的 `key`, `value` 类型为 {@link BaseServiceMessage}
+ * @description 如需访问在此属性上存储的数据, 必须引入此 `Symbol`, **此属性不可枚举**
+ * @example
+ * ```typescript
+ * import { MessageDataKey } from '@/service/BaseService'
+ *
+ * const messages: BaseServiceMessages = []
+ * // ...
+ * const messageData = messages[0][MessageDataKey]
+ * ```
+ * @since 0.5.0
+ */
+export const MessageDataKey = Symbol('HY_DATA')
+
+/**
+ * 在消息 parts (`message parts`) 中用于保存消息状态和数据的 `key`, `value` 类型为 {@link BaseServiceMessagePart}
+ * @description 如需访问在此属性上存储的数据, 必须引入此 `Symbol`, **此属性不可枚举**
+ * @example
+ * ```typescript
+ * import { MessagePartDataKey } from '@/service/BaseService'
+ *
+ * const messages: BaseServiceMessages = []
+ * // ...
+ * const messageData = messages[0].content[0][MessageDataKey]
+ * ```
+ * @since 0.5.0
+ */
+export const MessagePartDataKey = Symbol('HY_PART_DATA')
+
+/**
+ * 在消息(`message`) 中存储的消息状态及数据
+ * @description 此数据会作为内部组件(`<hyosan-chat-bubble-list>`) 渲染时使用的数据源, 在渲染时会在每个 `message` 中都会保存 `key` 为 {@link MessageDataKey} `value` 为 {@link BaseServiceMessage} 的数据
+ * @since 0.5.0
+ */
+export class BaseServiceMessage<T extends HTMLElement = HTMLElement> {
   /** 当前消息是否正在加载 */
-  $loading?: boolean
-  /** 思考阶段内容(在发起请求时会被删除) */
-  $reasoningContent?: string
+  loading?: boolean
+  /**
+   * `HTML` 格式的内容
+   * @description 只适用于只有一个 `content` 的类型为 `string` 的消息
+   */
+  onlyContent?: string | T
+  /**
+   * `HTML` 格式的思考推理内容
+   * @description 如果有内容, 则会被渲染为 `HTML` 元素
+   */
+  reasoningContent?: string
   /** 当前消息遇到的错误 */
-  $error?: string | Error
+  error?: string | Error
 }
-export type BaseServiceMessageItem = ChatCompletionMessageParam &
-  BaseServiceMessage
+
+/**
+ * 在消息 `parts` (`message parts`) 中存储的消息状态及数据
+ * @description 此数据会作为内部组件(`<hyosan-chat-bubble-list>`) 渲染时使用的数据源, 在渲染时会在每个 `message parts` 中都会保存 `key` 为 {@link MessagePartDataKey} `value` 为 {@link BaseServiceMessagePart} 的数据
+ * @since 0.5.0
+ */
+export class BaseServiceMessagePart<T extends HTMLElement = HTMLElement> {
+  /**
+   * `HTML` 格式的消息内容
+   * @description 如果有内容, 则会被渲染为 `HTML` 元素
+   */
+  htmlContent?: string | T
+}
+
+/** 组件可以自定义处理的消息 part 类型 */
+export enum HyosanChatMessageContentPartTypesType {
+  /** 文本消息 */
+  text = 'text',
+  /** 图片消息 */
+  image_url = 'image_url',
+  /** 语音消息 */
+  input_audio = 'input_audio',
+  /** refusal message */
+  refusal = 'refusal',
+}
+
+/**
+ * 包含所有消息中的所有类型的 parts 共有属性 interface
+ * @since 0.5.0
+ */
+export interface HyosanChatMessageContentPartType<
+  T extends HyosanChatMessageContentPartTypesType,
+  ET extends string = never,
+> {
+  /** 消息类型 */
+  type: T & ET
+}
+
+/**
+ * 消息中的所有 parts 类型
+ * @since 0.5.0
+ */
+export type HyosanChatMessageContentPart<K extends boolean = false> = (
+  | ChatCompletionContentPartText
+  | ChatCompletionContentPartImage
+  | ChatCompletionContentPartInputAudio
+  | ChatCompletionContentPartRefusal
+) &
+  (K extends true
+    ? { [MessagePartDataKey]: BaseServiceMessagePart }
+    : { [MessagePartDataKey]?: BaseServiceMessagePart })
+
+/**
+ * 助手消息类型
+ * @description 由于 `openai` 的助手消息中不包含思考内容, 所以只能声明一个新类型
+ * @since 0.5.0
+ */
+export type HyosanChatChatCompletionAssistantMessageParam = Omit<
+  ChatCompletionAssistantMessageParam,
+  'content'
+> & {
+  /**
+   * The contents of the assistant message. Required unless `tool_calls` or
+   * `function_call` is specified.
+   */
+  content?: string | Array<HyosanChatMessageContentPart> | null
+  /**
+   * 思考内容
+   * @since 0.5.0
+   */
+  reasoning_content?: string
+}
+
+/**
+ * 组件内部使用的原始消息类型
+ * @since 0.5.0
+ */
+export type HyosanChatChatCompletionMessageParam =
+  | Exclude<ChatCompletionMessageParam, ChatCompletionAssistantMessageParam>
+  | HyosanChatChatCompletionAssistantMessageParam
+
+/**
+ * 在组件中使用的消息类型, 包含了组件内部使用的状态(例如消息加载状态)或中间数据(例如 `markdown` 转为 `html string` 的数据)
+ *
+ * ## CHANGELOG
+ * - `0.5.0`: 修改数据结构, 将 {@link BaseServiceMessage} 移至 {@link MessageDataKey} 属性下
+ * @version 0.5.0
+ * @template K 是否存在 `MessageDataKey` 属性
+ */
+export type BaseServiceMessageItem<
+  K extends boolean = false,
+  C extends
+    HyosanChatChatCompletionMessageParam = HyosanChatChatCompletionMessageParam,
+> = C &
+  (K extends true
+    ? { [MessageDataKey]: BaseServiceMessage }
+    : { [MessageDataKey]?: BaseServiceMessage })
+
 /**
  * 会话消息列表
  * @description 用于发起 `/chat/completions` 请求的 `messages` 参数
+ * @template K 是否存在 `MessageDataKey` 属性
  * @see 详见 [Create chat completion - OpenAI Platform](https://platform.openai.com/docs/api-reference/chat/create)
  */
 export type BaseServiceMessages = Array<BaseServiceMessageItem>
 
-/** 在组件内部使用的基本的消息类型 */
+/**
+ * 在组件内部使用的基本的消息类型
+ * @deprecated `0.5.0` 起废弃, 应使用 {@link BaseServiceMessageItem}; 在 `0.5.0` 之前, (此类型)消息内容只支持单条纯文本或带有思考内容的纯文本数据, 不支持 `OpenAI` 格式的 `ChatCompletionMessageParam`(即多类型的数据)
+ * 从 `0.5.0` 起, 将不再使用此类型, 而是直接在 `messages props` 上进行数据处理
+ */
 export interface BaseServiceMessageNode {
   /** 消息内容 */
   content: string

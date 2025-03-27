@@ -206,6 +206,12 @@ export class HyosanChatDemo extends LitElement {
   private async _handleSendFirstMessage(content: string) {
     return content.substring(0, 20)
   }
+  private _handleDeleteConversation(
+    event: CustomEvent<{ item: Conversation }>,
+  ) {
+    if (this.currentConversationId === event.detail.item.key)
+      this.messages = undefined
+  }
 
   render() {
     return html`
@@ -223,6 +229,7 @@ export class HyosanChatDemo extends LitElement {
 					@messages-completions=${this._handleMessagesCompletions}
 					@change-conversation=${this._handleClickConversation}
           @localize-update-conversations=${this._handleLocalizeUpdateConversations}
+          @delete-conversation=${this._handleDeleteConversation}
 				>
 					<div slot="main-welcome" class="main-welcome">
 						<h2>Welcome To Hyosan Chat</h2>

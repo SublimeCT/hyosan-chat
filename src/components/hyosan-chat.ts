@@ -9,11 +9,13 @@ import '@shoelace-style/shoelace/dist/components/split-panel/split-panel.js'
 import '@shoelace-style/shoelace/dist/components/resize-observer/resize-observer.js'
 import '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { HasSlotController } from '@/internal/slot'
-import type {
-  BaseService,
-  BaseServiceMessageItem,
-  BaseServiceMessageNode,
-  BaseServiceMessages,
+import {
+  type BaseService,
+  type BaseServiceMessageItem,
+  type BaseServiceMessageNode,
+  type BaseServiceMessages,
+  type HyosanChatMessageContentPart,
+  MessageDataKey,
 } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
@@ -193,7 +195,7 @@ export class HyosanChat extends ShoelaceElement {
         !oldValue ||
         !value ||
         value.length !== oldValue.length ||
-        value.some((v) => v.$loading)
+        value.some((v) => v[MessageDataKey]?.loading)
       )
     },
   })
@@ -279,6 +281,14 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Array, attribute: false })
   disabledFields: Array<string> = []
 
+  /**
+   * 消息更新时间, 用于在组件内部重新渲染 message 列表
+   * @description 由于 `0.5.0` 起将数据直接保存到了 {@link messages} 上, 在更新渲染所需数据后, 如果直接 `requestUpdate()` 会导致死循环, 所以改为由外部调用者更新 {@link messagesUpdateKey} 时更新
+   * @since 0.5.0
+   */
+  @property({ type: Number })
+  messagesUpdateKey = 0
+
   private async _handleSaveLocalConversation(conversationId: string) {
     const settings = ChatSettings.fromLocalStorage()
     if (conversationId && settings.localize) {
@@ -309,17 +319,18 @@ export class HyosanChat extends ShoelaceElement {
   /** 当前 `messages` 中是否有消息处于 pending 状态 */
   get isLoading() {
     // console.log('isLoading', this.messages)
-    return this.messages ? this.messages.some((v) => v.$loading) : false
+    return this.messages
+      ? this.messages.some((v) => v[MessageDataKey]?.loading)
+      : false
   }
   private _handleStopOutput(
     event: CustomEvent<{
       messages: BaseServiceMessages
-      message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
+      message: BaseServiceMessageItem<true>
     }>,
   ) {
     const message = event.detail.message
-    message.$loading = false
+    message[MessageDataKey].loading = false
     if (this.service.abortController) {
       this.service.abortController.abort()
       this.requestUpdate()
@@ -403,7 +414,11 @@ export class HyosanChat extends ShoelaceElement {
 					@hyosan-chat-read=${this._handleRead}
 					@hyosan-chat-bubble-list-disconnected=${this._handleListDisconnected}
           ?showReadAloudButton=${this.showReadAloudButton}
+          messagesUpdateKey=${this.messagesUpdateKey}
+          .service=${this.service}
           .avatarGetter=${this.avatarGetter}
+          .onMessagePartsRender=${this.onMessagePartsRender}
+          .onAfterMessagePartsRender=${this.onAfterMessagePartsRender}
 					.messages=${_messages}>
 				</hyosan-chat-bubble-list>
 			`
@@ -432,6 +447,7 @@ export class HyosanChat extends ShoelaceElement {
           localMessages,
         },
       })
+      this.messagesUpdateKey++
     }
     if (this.compact) this._handleDrawerClickClose()
   }
@@ -449,6 +465,7 @@ export class HyosanChat extends ShoelaceElement {
     } else {
       this.messages = []
     }
+    this.messagesUpdateKey++
     this.requestUpdate('messages')
   }
   /** 从本地存储中更新服务配置 */
@@ -547,7 +564,8 @@ export class HyosanChat extends ShoelaceElement {
       console.log('end')
       this.service.emitter.clearListeners()
       for (const message of this.messages) {
-        if (Reflect.has(message, '$loading')) message.$loading = false
+        if (message[MessageDataKey]?.loading)
+          message[MessageDataKey].loading = false
       }
       // 将更新后的 messages 提交到本地存储
       const settings = ChatSettings.fromLocalStorage()
@@ -570,6 +588,26 @@ export class HyosanChat extends ShoelaceElement {
   /** 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 */
   @property({ attribute: false })
   onEnableSearch?: (open: boolean, service: BaseService) => void | Promise<void>
+
+  /**
+   * 消息部分渲染函数
+   * @since 0.5.0
+   */
+  @property({ attribute: false })
+  onMessagePartsRender?: (
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem,
+  ) => Promise<boolean>
+
+  /**
+   * 消息部分渲染函数(`after`)
+   * @since 0.5.0
+   */
+  @property({ attribute: false })
+  onAfterMessagePartsRender?: (
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem,
+  ) => Promise<void>
 
   /** 应用标题 */
   @property()

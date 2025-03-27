@@ -1,8 +1,14 @@
 import ShoelaceElement from '@/internal/shoelace-element'
-import type {
-  BaseServiceMessageItem,
-  BaseServiceMessageNode,
-  BaseServiceMessages,
+import {
+  type BaseService,
+  BaseServiceMessage,
+  type BaseServiceMessageItem,
+  type BaseServiceMessageNode,
+  type BaseServiceMessages,
+  type HyosanChatMessageContentPart,
+  HyosanChatMessageContentPartTypesType,
+  MessageDataKey,
+  MessagePartDataKey,
 } from '@/service/BaseService'
 import { withResetSheets } from '@/sheets'
 import { LocalizeController } from '@/utils/localize'
@@ -22,6 +28,11 @@ import morphdom from 'morphdom'
 
 /**
  * 对话气泡列表组件
+ * ## 介绍
+ * 组件用于将 `messages` 渲染为消息列表, 此组件中每个消息不使用单独的组件进行渲染, 这样可以防止样式隔离导致的问题
+ *
+ * ## 事件流
+ * 组件主要的作用是在 `messages` 数据发送变化时, 执行 {@link _onMessagesChange} 以选择性的重新渲染消息列表
  */
 @customElement('hyosan-chat-bubble-list')
 export class HyosanChatBubbleList extends ShoelaceElement {
@@ -205,99 +216,157 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   })
   messages!: BaseServiceMessages
 
-  /**
-   * 会话服务消息列表对应的使用 `markdown-it` 渲染后的 `HTML`
-   *
-   * 由于 `custom elements` 存在样式隔离的问题, 每个 bubble 都需要引入大量样式(代码高亮),
-   * 为了保证性能, 放弃使用子组件, 直接在 list 组件中进行渲染
-   */
-  @state()
-  messagesHtml: Array<BaseServiceMessageNode> = []
+  /** 会话服务配置参数 */
+  @property({ attribute: false })
+  service!: BaseService
 
   /**
-   * 获取消息列表中, 最后一部分 assistant 中的最开始的消息的索引
+   * 消息部分渲染函数
+   * @since 0.5.0
    */
-  private _getLastActiveAssistantIndex() {
-    if (!this.messages || this.messages.length === 0) return -1
-    /** 消息列表中, 最后一部分 assistant 中的最开始的消息的索引 */
-    let assistantIndex = 0
-    const isFirstRender = this.messagesHtml.length === 0
-    if (!isFirstRender) {
-      for (let messageIndex = this.messages.length; messageIndex--; ) {
-        if (this.messages[messageIndex].role === 'assistant') {
-          assistantIndex = messageIndex
-        } else {
-          assistantIndex = messageIndex
-          break
-        }
-      }
+  @property({ attribute: false })
+  onMessagePartsRender?: (
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem,
+  ) => Promise<boolean>
+
+  /**
+   * 消息部分渲染函数(`after`)
+   * @since 0.5.0
+   */
+  @property({ attribute: false })
+  onAfterMessagePartsRender?: (
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem,
+  ) => Promise<void>
+
+  /**
+   * 消息更新时间, 用于在组件内部重新渲染 message 列表
+   * @description 由于 `0.5.0` 起将数据直接保存到了 {@link messages} 上, 在更新渲染所需数据后, 如果直接 `requestUpdate()` 会导致死循环, 所以改为由外部调用者更新 {@link messagesUpdateKey} 时更新
+   * @since 0.5.0
+   */
+  @property({ type: Number })
+  messagesUpdateKey = 0
+
+  // /**
+  //  * 会话服务消息列表对应的使用 `markdown-it` 渲染后的 `HTML`
+  //  *
+  //  * 由于 `custom elements` 存在样式隔离的问题, 每个 bubble 都需要引入大量样式(代码高亮),
+  //  * 为了保证性能, 放弃使用子组件, 直接在 list 组件中进行渲染
+  //  */
+  // @state()
+  // messagesHtml: BaseServiceMessages = []
+
+  private async _handleMessagePartRender(
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem<true>,
+  ) {
+    // 执行自定义消息 parts 渲染逻辑
+    if (typeof this.onMessagePartsRender === 'function') {
+      const isEndRendering = await this.onMessagePartsRender(part, message)
+      if (isEndRendering) return
     }
-    return assistantIndex
+
+    // 执行组件内部默认的消息部分处理逻辑
+    await this.service.handleMessagePart(part, message)
+
+    // 执行自定义消息 parts 渲染逻辑(after)
+    if (typeof this.onAfterMessagePartsRender === 'function') {
+      await this.onAfterMessagePartsRender(part, message)
+    }
   }
 
-  private _onMessagesChange() {
-    if (!this.messages || this.messages.length === 0) return
-    const isFirstRender = this.messagesHtml.length === 0
-    /** 消息列表中, 最后一部分 assistant 中的最开始的消息的索引 */
-    const assistantIndex = this._getLastActiveAssistantIndex()
-    Promise.all(
-      this.messages.slice(assistantIndex).map((message, index) => {
-        const messagesHtmlItem = this.messagesHtml[assistantIndex + index]
-        const updateQueue: Array<Promise<void>> = []
-        const messageNode: BaseServiceMessageNode = {
-          content: '',
-          reasoningContent: '',
-        }
-        Object.assign(messageNode, messagesHtmlItem)
-        // 转换消息内容和思考内容
-        if (message.content)
-          updateQueue.push(
-            renderMarkdown((message.content || '')?.toString()).then((data) => {
-              messageNode.content = data
-            }),
-          )
-        if (isFirstRender || (!message.content && message.$reasoningContent)) {
-          // console.log(message.$reasoningContent)
-          updateQueue.push(
-            renderMarkdown((message.$reasoningContent || '')?.toString()).then(
-              (data) => {
-                messageNode.reasoningContent = data
-              },
-            ),
-          )
-        }
-        return Promise.all(updateQueue).then(() => messageNode)
-      }),
-    )
-      .then((markdownHtmlContents) => {
-        this.messagesHtml = this.messagesHtml
-          .slice(0, assistantIndex)
-          .concat(markdownHtmlContents)
-        // console.log('messagesHtml updated [end]', markdownHtmlContents)
-        this.requestUpdate('messagesHtml')
-        return this.updateComplete
-      })
-      .then(() => {
-        const markdownContainers = this.shadowRoot?.querySelectorAll(
-          '.bubble-item[data-loading] .markdown-container',
-        ) as NodeListOf<
-          HTMLElement & { hyosanChatHtml: string; hyosanChatLastHtml: string }
-        >
-        for (const container of markdownContainers) {
-          const innerContainer = container.querySelector(
-            '.markdown-container-inner',
-          )
-          if (!innerContainer) throw new Error('Missing Inner Element')
-          if (!container.hyosanChatHtml) continue
-          morphdom(
-            innerContainer,
-            `<div class="markdown-container-inner">${container.hyosanChatHtml}</div>`,
-          )
-        }
+  private async _handleMessageRender(message: BaseServiceMessageItem<true>) {
+    /** 消息内容 parts */
+    const contentParts: Array<HyosanChatMessageContentPart> =
+      typeof message.content === 'string'
+        ? [
+            {
+              type: HyosanChatMessageContentPartTypesType.text,
+              text: message.content,
+            },
+          ]
+        : message.content || []
+    if (contentParts.length === 0) return
 
-        // 滚动到最底部
-        this.scrollToBottom()
-      })
+    /** 消息内容 parts 渲染队列 */
+    const messagePartsRenderQueue: Array<Promise<void>> = []
+
+    // 将推理内容处理逻辑加入队列
+    if (message.role === 'assistant' && message.reasoning_content) {
+      // console.log('reasoning', message.reasoning_content)
+      messagePartsRenderQueue.push(
+        this.service.handleMessageReasoningContent(message),
+      )
+    }
+
+    // 消息部分内容
+    for (let contentPartIndex = contentParts.length; contentPartIndex--; ) {
+      const part = contentParts[contentPartIndex]
+      messagePartsRenderQueue.push(this._handleMessagePartRender(part, message))
+    }
+
+    return Promise.all(messagePartsRenderQueue)
+  }
+
+  /**
+   * 遍历所有消息并进行选择性的渲染或更新
+   * @version 0.5.0
+   */
+  private async _onMessagesChange() {
+    if (!this.messages || this.messages.length === 0) return
+
+    /** 消息内容渲染队列 */
+    const messagesRenderQueue: Array<Promise<void>> = []
+
+    for (let messageIndex = this.messages.length; messageIndex--; ) {
+      const message = this.messages[messageIndex]
+      // 忽略已渲染完毕的消息
+      if (message[MessageDataKey] && message[MessageDataKey].loading === false)
+        continue
+      if (!message[MessageDataKey]) {
+        // 初次渲染
+        message[MessageDataKey] = new BaseServiceMessage()
+        message[MessageDataKey].loading = false
+      }
+      messagesRenderQueue.push(
+        this._handleMessageRender(
+          message as BaseServiceMessageItem<true>,
+        ) as Promise<void>,
+      )
+    }
+
+    if (messagesRenderQueue.length === 0) return
+
+    // console.log('_onMessageChange() rendering...', messagesRenderQueue.length, this.messages)
+
+    await Promise.all(messagesRenderQueue)
+    this.requestUpdate('messages')
+    await this.updateComplete
+    await this._handleUpdateMarkdownContainers()
+  }
+
+  /** 使用 morphdom 增量更新消息内容对应的 DOM 元素 */
+  private _handleUpdateMarkdownContainers() {
+    const markdownContainers = this.shadowRoot?.querySelectorAll(
+      '.bubble-item[data-loading] .markdown-container',
+    ) as NodeListOf<
+      HTMLElement & { hyosanChatHtml: string; hyosanChatLastHtml: string }
+    >
+    for (const container of markdownContainers) {
+      const innerContainer = container.querySelector(
+        '.markdown-container-inner',
+      )
+      if (!innerContainer) throw new Error('Missing Inner Element')
+      if (!container.hyosanChatHtml) continue
+      morphdom(
+        innerContainer,
+        `<div class="markdown-container-inner">${container.hyosanChatHtml}</div>`,
+      )
+    }
+
+    // 滚动到最底部
+    this.scrollToBottom()
   }
 
   scrollToBottom() {
@@ -305,13 +374,15 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   }
 
   protected willUpdate(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has('currentConversationId')) {
-      this.messagesHtml = []
-      this.requestUpdate()
-    }
-    if (_changedProperties.has('messages')) {
+    if (_changedProperties.has('messagesUpdateKey')) {
+      // console.log('%c<hyosan-chat-bubble-list>%c render ....', 'color: #DDD; background: teal; padding: 0 3px;', this.messagesUpdateKey)
       this._onMessagesChange()
     }
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValues): void {
+    super.firstUpdated(_changedProperties)
+    this._onMessagesChange()
   }
 
   private _userAvatar(message: BaseServiceMessageItem) {
@@ -382,22 +453,20 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   /** 气泡框底部的底部内容 */
   private _bubbleItemFooter(
     message: BaseServiceMessageItem,
-    item: BaseServiceMessageNode,
     inLastAssistants: boolean,
   ) {
+    const loading = !!message[MessageDataKey]?.loading
     /** 是否显示 停止输出按钮 */
-    const showStopButton = message.$loading === true
+    const showStopButton = loading === true
     /** 是否显示重新生成按钮 */
     const showRetryButton =
       this.showRetryButton &&
       message.role !== 'user' &&
       inLastAssistants &&
-      message.$loading === false
+      loading === false
     /** 是否显示点赞和踩按钮 */
     const showLikeAndDislikeButton =
-      this.showLikeAndDislikeButton &&
-      message.role !== 'user' &&
-      !message.$loading
+      this.showLikeAndDislikeButton && message.role !== 'user' && !loading
     /** 是否显示朗读按钮 */
     const showReadAloudButton =
       this.showReadAloudButton && message.role !== 'user'
@@ -408,24 +477,24 @@ export class HyosanChatBubbleList extends ShoelaceElement {
             <svg slot="icon" class="icon" viewBox="0 0 1024 1024" width="1em" height="1em" fill="currentColor"><path d="M931.882 131.882l-103.764-103.764A96 96 0 0 0 760.236 0H416c-53.02 0-96 42.98-96 96v96H160c-53.02 0-96 42.98-96 96v640c0 53.02 42.98 96 96 96h448c53.02 0 96-42.98 96-96v-96h160c53.02 0 96-42.98 96-96V199.764a96 96 0 0 0-28.118-67.882zM596 928H172a12 12 0 0 1-12-12V300a12 12 0 0 1 12-12h148v448c0 53.02 42.98 96 96 96h192v84a12 12 0 0 1-12 12z m256-192H428a12 12 0 0 1-12-12V108a12 12 0 0 1 12-12h212v176c0 26.51 21.49 48 48 48h176v404a12 12 0 0 1-12 12z m12-512h-128V96h19.264c3.182 0 6.234 1.264 8.486 3.514l96.736 96.736a12 12 0 0 1 3.514 8.486V224z"></path></svg>           
             <div>${this._copyButtonContent}</div>
           </hyosan-chat-text-button>
-          <hyosan-chat-text-button class=${showStopButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-stop', { detail: { messages: this.messages, message, item } })}>
+          <hyosan-chat-text-button class=${showStopButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-stop', { detail: { messages: this.messages, message } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"><path d="M512 1024A512 512 0 1 1 512 0a512 512 0 0 1 0 1024z m3.008-92.992a416 416 0 1 0 0-832 416 416 0 0 0 0 832zM320 320h384v384H320V320z" fill="currentColor" p-id="6077"></path></svg>
             <div>${this._localize.term('stopOutput')}</div>
           </hyosan-chat-text-button>
-          <hyosan-chat-text-button class=${showRetryButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-retry', { detail: { messages: this.messages, message, item } })}>
+          <hyosan-chat-text-button class=${showRetryButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-retry', { detail: { messages: this.messages, message } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7060" width="1em" height="1em" fill="currentColor"><path d="M936.432 603.424q0 2.848-0.576 4-36.576 153.152-153.152 248.288t-273.152 95.136q-83.424 0-161.44-31.424t-139.136-89.728l-73.728 73.728q-10.848 10.848-25.728 10.848t-25.728-10.848-10.848-25.728l0-256q0-14.848 10.848-25.728t25.728-10.848l256 0q14.848 0 25.728 10.848t10.848 25.728-10.848 25.728l-78.272 78.272q40.576 37.728 92 58.272t106.848 20.576q76.576 0 142.848-37.152t106.272-102.272q6.272-9.728 30.272-66.848 4.576-13.152 17.152-13.152l109.728 0q7.424 0 12.864 5.44t5.44 12.864zM950.736 146.272l0 256q0 14.848-10.848 25.728t-25.728 10.848l-256 0q-14.848 0-25.728-10.848t-10.848-25.728 10.848-25.728l78.848-78.848q-84.576-78.272-199.424-78.272-76.576 0-142.848 37.152t-106.272 102.272q-6.272 9.728-30.272 66.848-4.576 13.152-17.152 13.152l-113.728 0q-7.424 0-12.864-5.44t-5.44-12.864l0-4q37.152-153.152 154.272-248.288t274.272-95.136q83.424 0 162.272 31.712t140 89.44l74.272-73.728q10.848-10.848 25.728-10.848t25.728 10.848 10.848 25.728z" p-id="7061"></path></svg>
             <div>${this._localize.term('retry')}</div>
           </hyosan-chat-text-button>
-          <hyosan-chat-text-button class=${showReadAloudButton ? '' : 'none'} @click=${(event: MouseEvent) => this.emit('hyosan-chat-read', { detail: { messages: this.messages, message, item, target: event.target as HTMLElement } })}>
+          <hyosan-chat-text-button class=${showReadAloudButton ? '' : 'none'} @click=${(event: MouseEvent) => this.emit('hyosan-chat-read', { detail: { messages: this.messages, message, target: event.target as HTMLElement } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="9743" width="1em" height="1em" fill="currentColor"><path d="M369.493333 718.08H159.146667c-35.413333 0-64-28.586667-64-64V394.24c0-35.413333 28.586667-64 64-64h210.346666v387.84z" p-id="9744"></path><path d="M212.266667 377.173333L480.426667 162.56c20.906667-16.853333 52.053333-1.92 52.053333 24.96v661.12c0 28.586667-33.066667 44.586667-55.466667 26.666667L208.426667 660.266667l3.84-283.093334zM854.4 517.76c0 85.12-28.8 163.626667-77.013333 226.346667l54.186666 50.56c6.186667-7.04 4.693333 10.666667 10.453334 3.2C902.4 720.64 938.666667 623.573333 938.666667 517.76c0-106.026667-36.48-203.093333-97.066667-280.533333-5.546667-7.253333-69.973333 46.933333-66.56 51.2 49.493333 63.146667 79.36 142.72 79.36 229.333333zM673.066667 517.76c0 40.32-13.653333 77.226667-36.266667 107.093333 0 0 64.426667 49.493333 67.626667 45.013334 31.146667-42.666667 49.493333-95.146667 49.493333-152.106667 0-58.026667-19.2-111.573333-51.413333-154.666667-2.56-3.626667-65.706667 47.573333-65.706667 47.573334a176.64 176.64 0 0 1 36.266667 107.093333z" p-id="9745"></path><path d="M672 389.546667m-40.96 0a40.96 40.96 0 1 0 81.92 0 40.96 40.96 0 1 0-81.92 0Z" p-id="9746"></path><path d="M672 645.973333m-40.96 0a40.96 40.96 0 1 0 81.92 0 40.96 40.96 0 1 0-81.92 0Z" p-id="9747"></path><path d="M809.813333 771.626667m-41.813333 0a41.813333 41.813333 0 1 0 83.626667 0 41.813333 41.813333 0 1 0-83.626667 0Z" p-id="9748"></path><path d="M809.813333 263.893333m-41.813333 0a41.813333 41.813333 0 1 0 83.626667 0 41.813333 41.813333 0 1 0-83.626667 0Z" p-id="9749"></path></svg>
             <div>${this._localize.term('readAloud')}</div>
           </hyosan-chat-text-button>
         </div>
         <div class="footer-right">
-          <hyosan-chat-text-button class=${showLikeAndDislikeButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-click-like-button', { detail: { message, item } })}>
+          <hyosan-chat-text-button class=${showLikeAndDislikeButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-click-like-button', { detail: { message } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" class="segment-actions-content-btn-like" width="1em" height="1em"><path fill="currentColor" d="m732.518 838.86 122.215-384H595.046L646.4 320.718a85.35 85.35 0 0 0-29.082-99.226l-37.273-27.494L379.392 454.86H337.05v384zm76.596 40.756a64 64 0 0 1-60.928 44.544H251.648V369.562h85.76l187.75-244.122a64 64 0 0 1 88.73-12.493l54.067 39.885a170.65 170.65 0 0 1 58.163 198.349l-7.065 18.33h135.68a85.35 85.35 0 0 1 81.305 111.206L809.062 879.565v.102zM102.4 924.16V369.51h85.35v554.65z"></path></svg>
           </hyosan-chat-text-button>
-          <hyosan-chat-text-button class=${showLikeAndDislikeButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-click-dislike-button', { detail: { message, item } })}>
+          <hyosan-chat-text-button class=${showLikeAndDislikeButton ? '' : 'none'} @click=${() => this.emit('hyosan-chat-click-dislike-button', { detail: { message } })}>
             <svg slot="icon" viewBox="0 0 1024 1024" class="segment-actions-content-btn-dislike" width="1em" height="1em"><path fill="currentColor" d="m732.518 838.86 122.215-384H595.046L646.4 320.718a85.35 85.35 0 0 0-29.082-99.226l-37.273-27.494L379.392 454.86H337.05v384zm76.596 40.756a64 64 0 0 1-60.928 44.544H251.648V369.562h85.76l187.75-244.122a64 64 0 0 1 88.73-12.493l54.067 39.885a170.65 170.65 0 0 1 58.163 198.349l-7.065 18.33h135.68a85.35 85.35 0 0 1 81.305 111.206L809.062 879.565v.102zM102.4 924.16V369.51h85.35v554.65z"></path></svg>
           </hyosan-chat-text-button>
         </div>
@@ -433,44 +502,79 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     `
   }
 
+  private _getMessagePart(
+    part: HyosanChatMessageContentPart,
+    message: BaseServiceMessageItem,
+    loading: boolean,
+  ) {
+    const htmlContent =
+      typeof message.content === 'string'
+        ? message[MessageDataKey]?.onlyContent || ''
+        : part[MessagePartDataKey]?.htmlContent || ''
+    // console.log('part', part, htmlContent, message)
+    if (message.role === 'assistant' && loading) {
+      return typeof htmlContent === 'string'
+        ? html`
+          <div slot="content" class="markdown-container markdown-container-content read-element" .hyosanChatHtml=${htmlContent}>
+            <div class="markdown-container-inner"></div>
+          </div>
+        `
+        : html`<div slot="content" class="read-element">${htmlContent}</div>`
+    } else {
+      return typeof htmlContent === 'string'
+        ? html`<div slot="content" class="read-element" .innerHTML=${htmlContent}></div>`
+        : html`<div slot="content" class="read-element">${htmlContent}</div>`
+    }
+  }
+
+  private _getMessageParts(message: BaseServiceMessageItem, loading: boolean) {
+    /** 消息内容 parts */
+    const contentParts: Array<HyosanChatMessageContentPart> =
+      typeof message.content === 'string'
+        ? [
+            {
+              type: HyosanChatMessageContentPartTypesType.text,
+              text: message.content,
+            },
+          ]
+        : message.content || []
+    return contentParts.map((part) =>
+      this._getMessagePart(part, message, loading),
+    )
+  }
+
   /** 气泡消息行 */
   private _renderMessages() {
-    /** 消息列表中, 最后一部分 assistant 中的最开始的消息的索引 */
-    const assistantIndex = this._getLastActiveAssistantIndex()
-    return this.messagesHtml.map(
-      (item: BaseServiceMessageNode, index: number) => {
-        const message = this.messages[index]
-        if (!message) return html``
+    return this.messages.map(
+      (message: BaseServiceMessageItem, index: number) => {
         if (message.role === 'system') return html`` // 系统消息
 
+        const loading = !!message[MessageDataKey]?.loading
+        const error = message[MessageDataKey]?.error
+        const reasoningContent = message[MessageDataKey]?.reasoningContent || ''
+        const isLastAssistants = index === this.messages.length - 1
+        const parts = this._getMessageParts(message, loading)
+
         return html`
-          <div class="bubble-item" ?data-loading=${message.$loading} ?show-avatar=${this.showAvatar} data-role=${message?.role}>
+          <div class="bubble-item" ?data-loading=${loading} ?show-avatar=${this.showAvatar} data-role=${message?.role}>
             ${message.role === 'user' ? '' : this._assistantAvatar(message)}
             <div class="bubble" part="hyosan-chat-bubble">
-              <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!item.reasoningContent}>
-                <!-- <div slot="content" .innerHTML=${item.reasoningContent}></div> -->
+              <hyosan-chat-reasoner-block class="content reasoning" ?has-content=${!!reasoningContent}>
                 ${
-                  message.role === 'assistant' && message.$loading
+                  message.role === 'assistant' && loading
                     ? html`
-                      <div slot="content" class="markdown-container markdown-container-reasoning" .hyosanChatHtml=${item.reasoningContent}>
+                      <div slot="content" class="markdown-container markdown-container-reasoning" .hyosanChatHtml=${reasoningContent}>
                         <div class="markdown-container-inner"></div>
                       </div>
                     `
-                    : html`<div slot="content" .innerHTML=${item.reasoningContent}></div>`
+                    : html`<div slot="content" .innerHTML=${reasoningContent}></div>`
                 }
               </hyosan-chat-reasoner-block>
-              <!-- <div class="content" .innerHTML=${item.content}></div> -->
-              ${
-                message.role === 'assistant' && message.$loading
-                  ? html`
-                    <div slot="content" class="markdown-container markdown-container-content read-element" .hyosanChatHtml=${item.content}>
-                      <div class="markdown-container-inner"></div>
-                    </div>
-                  `
-                  : html`<div slot="content" class="read-element" .innerHTML=${item.content}></div>`
-              }
-              ${message.$error ? html`<hyosan-chat-bubble-error-block .error=${message.$error}></hyosan-chat-bubble-error-block>` : ''}
-              ${this._bubbleItemFooter(message, item, index >= assistantIndex)}
+
+              ${parts}
+
+              ${error ? html`<hyosan-chat-bubble-error-block .error=${error}></hyosan-chat-bubble-error-block>` : ''}
+              ${this._bubbleItemFooter(message, isLastAssistants)}
             </div>
             ${message.role === 'user' ? this._userAvatar(message) : ''}
           </div>
@@ -509,30 +613,25 @@ declare global {
     'hyosan-chat-stop': CustomEvent<{
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
     }>
     /** 重试消息 */
     'hyosan-chat-retry': CustomEvent<{
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
     }>
     /** 朗读消息 */
     'hyosan-chat-read': CustomEvent<{
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
       target: HTMLElement
     }>
     /** 点击 Like 按钮(点赞) */
     'hyosan-chat-click-like-button': CustomEvent<{
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
     }>
     /** 点击 Dislike 按钮(点踩) */
     'hyosan-chat-click-dislike-button': CustomEvent<{
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
     }>
     /** bubble-list 组件被销毁, 此时应该调用 service.destroy 断开可能存在的流式请求 并 移除当前 service 的所有事件监听器 */
     'hyosan-chat-bubble-list-disconnected': CustomEvent<{
