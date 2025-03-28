@@ -166,7 +166,7 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `onSendFirstMessage`(`0.4.1`) | `Promise<number \| string \| undefined> \| number \| string \| undefined` | `Property` | `undefined` | 在当前会话中首次发送 `user` 消息时调用, 一般用于更新当前会话的 `label`; 返回一个 `number | string` 值, 将作为消息内容(`content`)的最大截取长度并赋值给 `label` 或 直接作为 `label` | |
 | `onMessagePartsRender`(`0.5.0`) | `(part: HyosanChatMessageContentPart, message: BaseServiceMessageItem) => Promise<boolean>` | `Property` | `undefined` | 消息部分渲染函数, 返回 `true` 则跳过组件内部的处理逻辑 | |
 | `onAfterMessagePartsRender`(`0.5.0`) | `(part: HyosanChatMessageContentPart, message: BaseServiceMessageItem) => Promise<void>` | `Property` | `undefined` | 消息部分渲染函数(`after`) | |
-
+| `uploadHandler`(`0.6.0`) | `HyosanChatUploadHandler` | `Property` | `undefined` | 上传附件的处理对象, 若值为空, 则不启用上传附件功能 | |
 
 ### Slots
 > [!TIP] 关于 插槽

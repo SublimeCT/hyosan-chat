@@ -3,8 +3,11 @@ import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
+import { MyUploadHandler } from './MyUploadHandler'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
+import type { HyosanChatUploadHandler } from './types/HyosanChatUplaodHandler'
+import type { HyosanChatUploadFile } from './types/HyosanChatUploadFile'
 import type { Conversation } from './types/conversations'
 
 export const tagName = 'hyosan-chat-demo'
@@ -212,6 +215,26 @@ export class HyosanChatDemo extends LitElement {
     if (this.currentConversationId === event.detail.item.key)
       this.messages = undefined
   }
+  private _uploadOnChange(
+    file: File,
+    files: Array<File>,
+    currentFile: HyosanChatUploadFile,
+    currentFiles: Array<HyosanChatUploadFile>,
+    onProgress: (progress: number) => void,
+    onSuccess: (url: string) => void,
+    onFailed: (message: string) => void,
+  ) {
+    console.log(
+      'change',
+      file,
+      files,
+      currentFile,
+      currentFiles,
+      onProgress,
+      onSuccess,
+      onFailed,
+    )
+  }
 
   render() {
     return html`
@@ -222,6 +245,8 @@ export class HyosanChatDemo extends LitElement {
 					.messages=${this.messages}
 					showRetryButton
           showReadAloudButton
+          enableUpload
+          .uploadOnChange=${this._uploadOnChange.bind(this)}
 					.onCreateMessage=${this._handleConversationsCreate.bind(this)}
           .onSendFirstMessage=${this._handleSendFirstMessage.bind(this)}
 					.onEnableSearch=${this._handleEnableSearch.bind(this)}

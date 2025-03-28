@@ -39,4 +39,5 @@ export interface Translation extends DefaultTranslation {
   readAloud: string
   localize: string
   localizeTips: string
+  uploadAttachment: string
 }

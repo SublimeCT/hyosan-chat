@@ -12,13 +12,13 @@ import { HasSlotController } from '@/internal/slot'
 import {
   type BaseService,
   type BaseServiceMessageItem,
-  type BaseServiceMessageNode,
   type BaseServiceMessages,
   type HyosanChatMessageContentPart,
   MessageDataKey,
 } from '@/service/BaseService'
 import { DefaultService } from '@/service/DefaultService'
 import { ChatSettings } from '@/types/ChatSettings'
+import type { HyosanChatUploadFile } from '@/types/HyosanChatUploadFile'
 import type { Conversation } from '@/types/conversations'
 import { HyosanChatSpeech } from '@/utils/HyosanChatSpeech'
 import {
@@ -27,6 +27,7 @@ import {
 } from '@/utils/HyosanChatTheme'
 import { LocalConversations } from '@/utils/LocalConversations'
 import type SlDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
+import { ifDefined } from 'lit/directives/if-defined.js'
 
 /**
  * HyosanChat 根组件
@@ -289,6 +290,53 @@ export class HyosanChat extends ShoelaceElement {
   @property({ type: Number })
   messagesUpdateKey = 0
 
+  /**
+   * 是否允许上传文件
+   * @since 0.6.0
+   */
+  @property({ type: Boolean })
+  enableUpload = false
+  /**
+   * 允许上传的文件类型
+   * @since 0.6.0
+   * @see https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input/file#%E9%99%90%E5%88%B6%E5%85%81%E8%AE%B8%E7%9A%84%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B
+   */
+  @property()
+  uploadAccept = 'image/*'
+  /**
+   * capture 属性是一个字符串，如果 accept 属性指出了 input 是图片或者视频类型，则它指定了使用哪个摄像头去获取这些数据。
+   * - `user` 表示应该使用前置摄像头和（或）麦克风。
+   * - `environment` 表示应该使用后置摄像头和（或）麦克风。
+   *
+   * 如果缺少此属性，则用户代理可以自由决定做什么。如果请求的前置模式不可用，则用户代理可能退回到其首选的默认模式。
+   * @since 0.6.0
+   * @see https://developer.mozilla.org/zh-CN/docs/Web/HTML/Attributes/capture
+   */
+  @property()
+  uploadCapture?: 'user' | 'environment'
+
+  /**
+   * 是否开启图片多选，部分安卓机型不支持
+   * @since 0.6.0
+   */
+  @property({ type: Boolean })
+  uploadMultiple = false
+
+  /**
+   * 上传文件时触发
+   * @since 0.6.0
+   */
+  @property({ attribute: false })
+  uploadOnChange?: (
+    file: File,
+    files: Array<File>,
+    currentFile: HyosanChatUploadFile,
+    currentFiles: Array<HyosanChatUploadFile>,
+    onProgress: (progress: number) => void,
+    onSuccess: (url: string) => void,
+    onFailed: (message: string) => void,
+  ) => Promise<void> | void
+
   private async _handleSaveLocalConversation(conversationId: string) {
     const settings = ChatSettings.fromLocalStorage()
     if (conversationId && settings.localize) {
@@ -351,7 +399,6 @@ export class HyosanChat extends ShoelaceElement {
     event: CustomEvent<{
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
     }>,
   ) {
     if (this.service.abortController) {
@@ -364,7 +411,6 @@ export class HyosanChat extends ShoelaceElement {
     event: CustomEvent<{
       messages: BaseServiceMessages
       message: BaseServiceMessageItem
-      item: BaseServiceMessageNode
       target: HTMLElement
     }>,
   ) {
@@ -760,6 +806,11 @@ export class HyosanChat extends ShoelaceElement {
 								<hyosan-chat-sender
 									?loading=${this.isLoading}
 									?enableSearch=${!!this.onEnableSearch}
+                  ?enableUpload=${this.enableUpload}
+                  uploadAccept=${this.uploadAccept}
+                  uploadCapture=${ifDefined(this.uploadCapture)}
+                  .uploadOnChange=${this.uploadOnChange}
+                  ?uploadMultiple=${this.uploadMultiple}
 									@open-search=${this._handleOpenSearch}
 									@send-message=${this._handleSendMessage}>
 								</hyosan-chat-sender>

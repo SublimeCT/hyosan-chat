@@ -1,10 +1,13 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 import { LocalizeController } from '@/utils/localize'
 import { css, html } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, property, query, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js'
 import '@shoelace-style/shoelace/dist/components/switch/switch.js'
+import type { HyosanChatUploadHandler } from '@/types/HyosanChatUplaodHandler'
+import { HyosanChatUploadFile } from '@/types/HyosanChatUploadFile'
+import { ifDefined } from 'lit/directives/if-defined.js'
 
 /** 发送 组件 */
 @customElement('hyosan-chat-sender')
@@ -53,6 +56,12 @@ export class HyosanChatSender extends ShoelaceElement {
       display: flex;
       align-items: center;
     }
+    .option-buttons > sl-button {
+      margin-right: var(--hy-container-padding);
+    }
+    .option-buttons > sl-button:last-of-type {
+      margin: 0;
+    }
   `
 
   /** 本地化控制器 */
@@ -70,8 +79,59 @@ export class HyosanChatSender extends ShoelaceElement {
   @property({ type: Boolean, reflect: true })
   openSearch = false
 
+  /**
+   * 是否允许上传文件
+   * @since 0.6.0
+   */
+  @property({ type: Boolean })
+  enableUpload = false
+  /**
+   * 允许上传的文件类型
+   * @since 0.6.0
+   * @see https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/input/file#%E9%99%90%E5%88%B6%E5%85%81%E8%AE%B8%E7%9A%84%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B
+   */
+  @property()
+  uploadAccept = 'image/*'
+  /**
+   * capture 属性是一个字符串，如果 accept 属性指出了 input 是图片或者视频类型，则它指定了使用哪个摄像头去获取这些数据。
+   * - `user` 表示应该使用前置摄像头和（或）麦克风。
+   * - `environment` 表示应该使用后置摄像头和（或）麦克风。
+   *
+   * 如果缺少此属性，则用户代理可以自由决定做什么。如果请求的前置模式不可用，则用户代理可能退回到其首选的默认模式。
+   * @since 0.6.0
+   * @see https://developer.mozilla.org/zh-CN/docs/Web/HTML/Attributes/capture
+   */
+  @property()
+  uploadCapture?: 'user' | 'environment'
+
+  /**
+   * 是否开启图片多选，部分安卓机型不支持
+   * @since 0.6.0
+   */
+  @property({ type: Boolean })
+  uploadMultiple = false
+
+  /**
+   * 上传文件时触发
+   * @since 0.6.0
+   */
+  @property({ attribute: false })
+  uploadOnChange?: (
+    file: File,
+    files: Array<File>,
+    currentFile: HyosanChatUploadFile,
+    currentFiles: Array<HyosanChatUploadFile>,
+    onProgress: (progress: number) => void,
+    onSuccess: (url: string) => void,
+    onFailed: (message: string) => void,
+  ) => Promise<void> | void
+
+  /** 输入框内容 */
   @state()
   content = ''
+
+  @state()
+  currentFiles: Array<HyosanChatUploadFile> = []
 
   private _handleInput(event: KeyboardEvent) {
     const textarea = event.target as HTMLTextAreaElement
@@ -96,6 +156,48 @@ export class HyosanChatSender extends ShoelaceElement {
     this.emit('open-search', { detail: { open: this.openSearch } })
   }
 
+  @query('.inner-file-input')
+  private _innerFileInput?: HTMLInputElement
+  private get _innerFileInputFiles(): Array<File> | undefined | null {
+    return this._innerFileInput?.files
+      ? Array.from(this._innerFileInput?.files)
+      : null
+  }
+  private _handleFileChange(event: Event) {
+    console.log(
+      !this._innerFileInput,
+      !this.uploadOnChange,
+      !this.enableUpload,
+      !this._innerFileInputFiles,
+    )
+    if (
+      !this._innerFileInput ||
+      !this.uploadOnChange ||
+      !this.enableUpload ||
+      !this._innerFileInputFiles
+    )
+      return
+    console.log('file change', event, this._innerFileInput.files)
+    for (const file of this._innerFileInputFiles) {
+      const _file = new HyosanChatUploadFile(file)
+      this.uploadOnChange(
+        file,
+        this._innerFileInputFiles,
+        _file,
+        this.currentFiles,
+        (progress) => {
+          console.log(progress)
+        },
+        (url) => console.log(url),
+        (message) => console.log(message),
+      )
+    }
+  }
+
+  private _handleClickUploadButton() {
+    this._innerFileInput?.click()
+  }
+
   render() {
     return html`
       <div class="container">
@@ -117,6 +219,28 @@ export class HyosanChatSender extends ShoelaceElement {
                       </hyosan-icon-wrapper>
                       ${this._localize.term('enableSearch')}
                   </sl-button>
+                `
+                : undefined
+            }
+            ${
+              this.enableUpload
+                ? html`
+                  <sl-button
+                    size="small"
+                    @click=${this._handleClickUploadButton}>
+                      <hyosan-icon-wrapper slot="prefix">
+                        <svg viewBox="0 0 1191 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"><path d="M778.128291 321.871127a57.9584 57.9584 0 0 1 80.039564 0 53.434182 53.434182 0 0 1 0 77.377164L498.371491 747.147636c-54.290618 52.503273-141.125818 67.677091-209.082182 1.973528-66.038691-63.860364-62.743273-165.664582-11.487418-215.2448L756.9408 70.581527c89.236945-86.295273 237.568-104.299055 353.261382 7.5776 115.674764 111.858036 98.080582 257.210182 9.327709 343.021382l-522.202764 504.925091c-116.661527 112.826182-322.746182 149.578473-484.258909-6.609455-161.233455-155.890036-132.747636-376.906473-22.565236-483.439709L505.986327 34.313309a57.9584 57.9584 0 0 1 80.020946 0 53.434182 53.434182 0 0 1 0 77.377164L170.542545 513.4336c-21.410909 20.703418-47.104 73.337018-53.992727 126.603636-9.309091 72.145455 13.069964 140.6976 76.557964 202.081746 109.605236 105.974691 246.765382 81.529018 324.217018 6.628073l522.202764-504.925091c48.146618-46.545455 57.474327-123.680582-9.309091-188.285673-66.466909-64.269964-144.402618-54.811927-193.256728-7.5776L357.841455 611.234909c-8.154764 7.894109-9.197382 40.475927 11.506036 60.471855 16.197818 15.676509 33.9968 12.585891 49.021673-1.954909l359.777745-347.880728z" fill="currentColor" p-id="7911"></path></svg>
+                      </hyosan-icon-wrapper>
+                      ${this._localize.term('uploadAttachment')}
+                  </sl-button>
+                  <input
+                    class="inner-file-input"
+                    type="file"
+                    accept=${this.uploadAccept}
+                    capture=${ifDefined(this.uploadCapture)}
+                    ?multiple=${this.uploadMultiple}
+                    @change=${this._handleFileChange}
+                    style="display: none;" />
                 `
                 : undefined
             }

@@ -18,7 +18,7 @@ const translation: Translation = {
   delete: 'Delete',
   stopOutput: 'Stop output',
   retry: 'Retry',
-  enableSearch: 'Enable search',
+  enableSearch: 'search',
   ariaSendInput: 'Send input',
   ariaConversationsList: 'Conversations list',
   settings: 'Settings',
@@ -40,6 +40,7 @@ const translation: Translation = {
   localize: 'Localized storage',
   localizeTips:
     'The conversation and message data will be saved in the browser (indexeddb).',
+  uploadAttachment: 'Upload',
 }
 
 registerTranslation(translation)

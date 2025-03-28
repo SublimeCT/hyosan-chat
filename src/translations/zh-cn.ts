@@ -39,6 +39,7 @@ const translation: Translation = {
   readAloud: '朗读',
   localize: '使用本地化数据',
   localizeTips: '会话和消息数据将保存至浏览器中(indexeddb)',
+  uploadAttachment: '上传附件',
 }
 
 registerTranslation(translation)
