@@ -1,13 +1,8 @@
 import Emittery from 'emittery'
 import type {
   ChatCompletionAssistantMessageParam,
-  // ChatCompletionContentPart,
-  ChatCompletionContentPartImage,
-  ChatCompletionContentPartRefusal,
-  ChatCompletionContentPartText,
   ChatCompletionMessageParam,
 } from 'openai/resources/index'
-import type { ChatCompletionContentPartInputAudio } from 'openai/src/resources/index.js'
 
 /**
  * 对话服务 基类
@@ -221,6 +216,8 @@ export enum HyosanChatMessageContentPartTypesType {
   image_url = 'image_url',
   /** 语音消息 */
   input_audio = 'input_audio',
+  /** file message(openai) */
+  file = 'file',
   /** refusal message */
   refusal = 'refusal',
 }
@@ -230,23 +227,40 @@ export enum HyosanChatMessageContentPartTypesType {
  * @since 0.5.0
  */
 export interface HyosanChatMessageContentPartType<
-  T extends HyosanChatMessageContentPartTypesType,
-  ET extends string = never,
+  T extends
+    keyof typeof HyosanChatMessageContentPartTypesType = keyof typeof HyosanChatMessageContentPartTypesType,
+  ET extends string | undefined = string,
 > {
   /** 消息类型 */
-  type: T & ET
+  type: ET extends undefined ? T : T & ET
 }
+
+/**
+ * openai 所有消息的 content parts 数据类型
+ * @description 应该始终保持与 {@link ChatCompletionMessageParam} 的 `content` 中的每一项的数据类型兼容
+ */
+export type HyosanChatOpenaiDefaultMessageContentPart = Exclude<
+  ChatCompletionMessageParam['content'],
+  undefined | null | string
+>
+
+/**
+ * 当前组件内部可以解析的 content parts 数据类型
+ * @description 兼容 OpenAI content parts, 并在此基础上扩展新类型
+ * @since 0.5.0
+ */
+export type HyosanChatDefaultMessageContentPart =
+  HyosanChatOpenaiDefaultMessageContentPart[number]
 
 /**
  * 消息中的所有 parts 类型
  * @since 0.5.0
  */
-export type HyosanChatMessageContentPart<K extends boolean = false> = (
-  | ChatCompletionContentPartText
-  | ChatCompletionContentPartImage
-  | ChatCompletionContentPartInputAudio
-  | ChatCompletionContentPartRefusal
-) &
+export type HyosanChatMessageContentPart<
+  K extends boolean = false,
+  P extends
+    HyosanChatMessageContentPartType = HyosanChatDefaultMessageContentPart,
+> = P &
   (K extends true
     ? { [MessagePartDataKey]: BaseServiceMessagePart }
     : { [MessagePartDataKey]?: BaseServiceMessagePart })

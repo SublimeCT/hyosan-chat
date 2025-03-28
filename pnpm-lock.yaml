@@ -86,8 +86,8 @@ devDependencies:
     specifier: ^15.4.3
     version: 15.4.3
   openai:
-    specifier: ^4.67.3
-    version: 4.67.3
+    specifier: ^4.89.1
+    version: 4.89.1
   pascalcase:
     specifier: ^2.0.0
     version: 2.0.0
@@ -2769,12 +2769,15 @@ packages:
       mimic-function: 5.0.1
     dev: true
 
-  /openai@4.67.3:
-    resolution: {integrity: sha512-HT2tZgjLgRqbLQNKmYtjdF/4TQuiBvg1oGvTDhwpSEQzxo6/oM1us8VQ53vBK2BiKvCxFuq6gKGG70qfwrNhKg==}
+  /openai@4.89.1:
+    resolution: {integrity: sha512-k6t7WfnodIctPo40/9sy7Ww4VypnfkKi/urO2VQx4trCIwgzeroO1jkaCL2f5MyTS1H3HT9X+M2qLsc7NSXwTw==}
     hasBin: true
     peerDependencies:
+      ws: ^8.18.0
       zod: ^3.23.8
     peerDependenciesMeta:
+      ws:
+        optional: true
       zod:
         optional: true
     dependencies:
