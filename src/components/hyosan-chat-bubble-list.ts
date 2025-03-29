@@ -548,12 +548,22 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     const target = event.composedPath()[0] as HTMLElement
     if (!target) return
     if (target.classList.contains('hyosan-chat-bubble-image')) { // 处理图片预览
+      event.stopPropagation()
       const container = this.shadowRoot?.querySelector('.container') as HTMLDivElement
+      function findInnerImage(img: HTMLImageElement) {
+        return img.complete && img.classList.contains('hyosan-chat-bubble-image')
+      }
+      const images = Array.from(container.querySelectorAll('.hyosan-chat-bubble-image') || []).filter(img => findInnerImage(img as HTMLImageElement)) as HTMLImageElement[]
+      const initialViewIndex = images.findIndex((image: HTMLImageElement) => image === target)
       const viewer = new Viewer(
         container,
         {
+          initialViewIndex,
           container,
-          filter: (image: HTMLImageElement) => image.complete && image.classList.contains('hyosan-chat-bubble-image'),
+          filter: (image: HTMLImageElement) => findInnerImage(image),
+          hidden() {
+            viewer.destroy()
+          }
         }
       )
       viewer.show()

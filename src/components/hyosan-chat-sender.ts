@@ -1,6 +1,6 @@
 import ShoelaceElement from '@/internal/shoelace-element'
 import { LocalizeController } from '@/utils/localize'
-import { css, html } from 'lit'
+import { css, html, unsafeCSS } from 'lit'
 import { customElement, property, query, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js'
@@ -10,10 +10,14 @@ import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js'
 import { HyosanChatUploadFile } from '@/types/HyosanChatUploadFile'
 import { ifDefined } from 'lit/directives/if-defined.js'
 
+import { withResetSheets } from '@/sheets'
+import Viewer from 'viewerjs'
+import viewerCss from 'viewerjs/dist/viewer.css?inline'
+
 /** 发送 组件 */
 @customElement('hyosan-chat-sender')
 export class HyosanChatSender extends ShoelaceElement {
-  static styles? = css`
+  static styles? = withResetSheets(css`
     :host {
       width: 100%;
       display: flex;
@@ -81,15 +85,36 @@ export class HyosanChatSender extends ShoelaceElement {
       border-radius: var(--hy-container-radius);
       flex-direction: column;
       position: relative;
-      .attachment-image {
-        height: 100%;
-        max-height: 100%;
-      }
-      .attachment-file {
-        height: 100%;
-        max-height: 100%;
-        display: flex;
-      }
+    }
+    .attachments .attachment-image {
+      height: 100%;
+      max-height: 100%;
+    }
+    .attachments .attachment-file {
+      height: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between
+    }
+    .attachments .attachment-file > aside {
+      height: 60%;
+      font-size: 2em;
+    }
+    .attachments .attachment-file > main {
+      height: 60%;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .attachments .attachment-file > main > .file-name {
+      font-size: 1em;
+    }
+    .attachments .attachment-file > main > .file-size {
+      font-size: 1em;
+      color: var(--sl-color-neutral-500);
     }
     .attachments .button-remove {
       position: absolute;
@@ -104,8 +129,9 @@ export class HyosanChatSender extends ShoelaceElement {
     .attachments:last-of-type {
       margin-right: 0;
     }
-  `
-
+  `,
+    unsafeCSS(viewerCss),
+  ) 
   /** 本地化控制器 */
   private _localize = new LocalizeController(this)
 
@@ -255,7 +281,7 @@ export class HyosanChatSender extends ShoelaceElement {
   private _imageAttachment(file: HyosanChatUploadFile) {
     return html`
       <div class="attachment-image">
-        <img style="height: 100%;" src=${file.url || ''}></img>
+        <img class="attachment-inner-image" style="height: 100%;" src=${file.url || ''}></img>
       </div>
     `
   }
@@ -268,8 +294,8 @@ export class HyosanChatSender extends ShoelaceElement {
           </hyosan-icon-wrapper>
         </aside>
         <main>
-          <div>${file.name}</div>
-          <div>${HyosanChatUploadFile.sizeLabel(file)}</div>
+          <div class="file-name">${file.name}</div>
+          <div class="file-size">${HyosanChatUploadFile.sizeLabel(file)}</div>
         </main>
       </div>
     `
@@ -300,12 +326,39 @@ export class HyosanChatSender extends ShoelaceElement {
       </section>
     `
   }
+
+  private _handleClickAttachments(event: MouseEvent) {
+    const target = event.composedPath()[0] as HTMLElement
+    if (!target) return
+    if (target.classList.contains('attachment-inner-image')) { // 处理图片预览
+      event.stopPropagation()
+      const container = this.shadowRoot?.querySelector('.attachments-container') as HTMLDivElement
+      function findInnerImage(img: HTMLImageElement) {
+        return img.complete && img.classList.contains('attachment-inner-image')
+      }
+      const images = Array.from(container.querySelectorAll('.attachment-inner-image') || []).filter(img => findInnerImage(img as HTMLImageElement)) as HTMLImageElement[]
+      const initialViewIndex = images.findIndex((image: HTMLImageElement) => image === target)
+      const viewer = new Viewer(
+        container,
+        {
+          initialViewIndex,
+          container,
+          filter: (image: HTMLImageElement) => findInnerImage(image),
+          hidden() {
+            viewer.destroy()
+          }
+        }
+      )
+      viewer.show()
+    }
+  }
+
   private _attachmentsContainer() {
     if (!this.enableUpload) return
     if (this.currentFiles.length === 0) return
     const attachments = this.currentFiles.map(file => this._attachments(file))
     return html`
-      <div class="attachments-container">
+      <div class="attachments-container" @click=${this._handleClickAttachments}>
         ${attachments}
       </div>
     `
