@@ -26,7 +26,11 @@
   },
   "license": "MIT",
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "./dist/hyosan-chat.umd.cjs",
   "module": "./dist/hyosan-chat.js",
   "types": "./dist/lib.d.ts",
@@ -63,7 +67,8 @@
     "markdown-it-highlightjs": "^4.2.0",
     "markdown-it-link-attributes": "^4.0.1",
     "markdown-it-mathjax3": "^4.3.2",
-    "morphdom": "^2.7.4"
+    "morphdom": "^2.7.4",
+    "viewerjs": "^1.11.7"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

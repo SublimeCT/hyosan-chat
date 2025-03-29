@@ -3,10 +3,8 @@ import { customElement, state } from 'lit/decorators.js'
 import { withResetSheets } from './sheets'
 import '@shoelace-style/shoelace/dist/components/card/card.js'
 import HyosanChatIcon from '@/assets/hyosan-chat-icon.png'
-import { MyUploadHandler } from './MyUploadHandler'
 import type { BaseService, BaseServiceMessages } from './service/BaseService'
 import type { DefaultChatCompletionCreateParamsStreamingOptions } from './service/DefaultService'
-import type { HyosanChatUploadHandler } from './types/HyosanChatUplaodHandler'
 import type { HyosanChatUploadFile } from './types/HyosanChatUploadFile'
 import type { Conversation } from './types/conversations'
 
@@ -234,6 +232,20 @@ export class HyosanChatDemo extends LitElement {
       onSuccess,
       onFailed,
     )
+    setTimeout(() => {
+      onProgress(0.3)
+    }, 800)
+    setTimeout(() => {
+      onProgress(0.6)
+    }, 1300)
+    setTimeout(() => {
+      onProgress(1)
+      onSuccess(
+        currentFiles.length === 1
+          ? 'https://img.alicdn.com/imgextra/i1/O1CN01gDEY8M1W114Hi3XcN_!!6000000002727-0-tps-1024-406.jpg'
+          : 'https://img.alicdn.com/imgextra/i1/O1CN01ukECva1cisjyK6ZDK_!!6000000003635-0-tps-1500-1734.jpg'
+      )
+    }, 1700)
   }
 
   render() {

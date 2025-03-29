@@ -1,7 +1,10 @@
+import type { HyosanChatUploadFile } from '@/types/HyosanChatUploadFile'
 import Emittery from 'emittery'
 import type {
   ChatCompletionAssistantMessageParam,
+  ChatCompletionContentPart,
   ChatCompletionMessageParam,
+  ChatCompletionUserMessageParam,
 } from 'openai/resources/index'
 
 /**
@@ -75,12 +78,12 @@ export abstract class BaseService<
 
   /**
    * 发送用户输入的内容
-   * @param content 消息内容
+   * @param contentOrMessage 消息内容 或 消息数据
    * @param conversationId 当前会话 ID
    * @param messages 聊天消息列表, 参考 https://platform.openai.com/docs/api-reference/chat/create
    */
   abstract send(
-    content: string,
+    contentOrMessage: string | BaseServiceMessageItem,
     conversationId: string,
     messages: BaseServiceMessages,
   ): Promise<void>
@@ -140,6 +143,40 @@ export abstract class BaseService<
       },
     }
     return message
+  }
+  /**
+   * 通过消息内容和附件创建 user message
+   * @param content 消息内容
+   * @param files 附件文件
+   * @since 0.6.0
+   * @returns user message
+   */
+  static generateUserMessage(content: string, files?: HyosanChatUploadFile[]): BaseServiceMessageItem {
+    if (files?.length) {
+      const userMessageContent: HyosanChatChatCompletionUserMessageParam['content'] = [{ type: 'text', text: content }]
+      for (const file of files) {
+        const filePart = BaseService.getFileMessageContentPart(file)
+        userMessageContent.push(filePart)
+      }
+      return { role: 'user', content: userMessageContent as ChatCompletionContentPart[] }
+    } else {
+      return { role: 'user', content }
+    }
+  }
+  /**
+   * 创建附件 message part
+   * @param file 附件
+   * @since 0.6.0
+   * @returns 附件 message part
+   */
+  static getFileMessageContentPart(file: HyosanChatUploadFile): HyosanChatMessageContentPart {
+    if (file.type.startsWith('audio')) {
+      return { type: 'input_audio', input_audio: { data: file.url || '', format: file.type.includes('wav') ? 'wav' : 'mp3' } }
+    } else if (file.type.startsWith('video')) {
+      return { type: 'video_url', video_url: { url: file.url || ''} }
+    } else {
+      return { type: 'image_url', image_url: { url: file.url || '' } }
+    }
   }
 }
 
@@ -220,6 +257,8 @@ export enum HyosanChatMessageContentPartTypesType {
   file = 'file',
   /** refusal message */
   refusal = 'refusal',
+  /** video message */
+  video_url = 'video_url',
 }
 
 /**
@@ -245,12 +284,22 @@ export type HyosanChatOpenaiDefaultMessageContentPart = Exclude<
 >
 
 /**
+ * 阿里云视频消息 part 类型
+ * @see https://help.aliyun.com/zh/model-studio/user-guide/qvq?spm=a2c4g.11186623.help-menu-2400256.d_1_0_1_0.67328b14YALGu1&scm=20140722.H_2877996._.OR_help-T_cn~zh-V_1#65e1aa85b4hjn
+ */
+export type HyosanChatAliyunVideoMessageContentPart = {
+  type: 'video_url',
+  video_url: { url: string }
+}
+
+/**
  * 当前组件内部可以解析的 content parts 数据类型
  * @description 兼容 OpenAI content parts, 并在此基础上扩展新类型
  * @since 0.5.0
  */
 export type HyosanChatDefaultMessageContentPart =
-  HyosanChatOpenaiDefaultMessageContentPart[number]
+  HyosanChatOpenaiDefaultMessageContentPart[number] |
+  HyosanChatAliyunVideoMessageContentPart
 
 /**
  * 消息中的所有 parts 类型
@@ -264,6 +313,22 @@ export type HyosanChatMessageContentPart<
   (K extends true
     ? { [MessagePartDataKey]: BaseServiceMessagePart }
     : { [MessagePartDataKey]?: BaseServiceMessagePart })
+
+/**
+ * 用户消息类型
+ * @description 由于 `openai` 的助手消息中不包含思考内容, 所以只能声明一个新类型
+ * @since 0.6.0
+ */
+export type HyosanChatChatCompletionUserMessageParam = Omit<
+  ChatCompletionUserMessageParam,
+  'content'
+> & {
+  /**
+   * The contents of the assistant message. Required unless `tool_calls` or
+   * `function_call` is specified.
+   */
+  content?: string | Array<HyosanChatMessageContentPart> | null
+}
 
 /**
  * 助手消息类型
@@ -291,8 +356,9 @@ export type HyosanChatChatCompletionAssistantMessageParam = Omit<
  * @since 0.5.0
  */
 export type HyosanChatChatCompletionMessageParam =
-  | Exclude<ChatCompletionMessageParam, ChatCompletionAssistantMessageParam>
+  | Exclude<ChatCompletionMessageParam, ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam>
   | HyosanChatChatCompletionAssistantMessageParam
+  | HyosanChatChatCompletionUserMessageParam
 
 /**
  * 在组件中使用的消息类型, 包含了组件内部使用的状态(例如消息加载状态)或中间数据(例如 `markdown` 转为 `html string` 的数据)

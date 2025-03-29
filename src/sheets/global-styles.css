@@ -25,4 +25,6 @@
   --hy-code-tag-color: var(--sl-color-primary-800);
   /* 消息气泡中的代码块的字体颜色(用户消息) */
   --hy-code-tag-color-user: var(--sl-color-neutral-600);
+  /* 附件列表的高度 */
+  --hy-attachments-height: calc(var(--hy-container-padding) * 15);
 }

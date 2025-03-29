@@ -24,6 +24,9 @@ import { customElement, property, state } from 'lit/decorators.js'
 import '@shoelace-style/shoelace/dist/components/copy-button/copy-button.js'
 import morphdom from 'morphdom'
 
+import Viewer from 'viewerjs'
+import viewerCss from 'viewerjs/dist/viewer.css?inline'
+
 /**
  * 对话气泡列表组件
  * ## 介绍
@@ -182,6 +185,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
     }
   `,
     unsafeCSS(hljsGithubTheme),
+    unsafeCSS(viewerCss),
   )
 
   /** 当前会话 ID */
@@ -540,6 +544,21 @@ export class HyosanChatBubbleList extends ShoelaceElement {
       this._getMessagePart(part, message, loading),
     )
   }
+  private _handleClickContainer(event: MouseEvent) {
+    const target = event.composedPath()[0] as HTMLElement
+    if (!target) return
+    if (target.classList.contains('hyosan-chat-bubble-image')) { // 处理图片预览
+      const container = this.shadowRoot?.querySelector('.container') as HTMLDivElement
+      const viewer = new Viewer(
+        container,
+        {
+          container,
+          filter: (image: HTMLImageElement) => image.complete && image.classList.contains('hyosan-chat-bubble-image'),
+        }
+      )
+      viewer.show()
+    }
+  }
 
   /** 气泡消息行 */
   private _renderMessages() {
@@ -595,7 +614,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   }
   render() {
     return html`
-      <div class="container">
+      <div class="container" @click=${this._handleClickContainer}>
         ${this._renderMessages()}
       </div>
     `

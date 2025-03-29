@@ -60,17 +60,23 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
   chat: DefaultChatCompletionCreateParamsStreamingOptions = {}
 
   async send(
-    content: string,
+    contentOrMessage: string | BaseServiceMessageItem,
     conversationId: string,
     messages: BaseServiceMessages,
   ) {
-    if (!content) return // 忽略空消息
+    if (!contentOrMessage) return // 忽略空消息
     if (!this.apiKey) throw new Error('Missing API Key')
     this.conversationId = conversationId
     if (messages.length === 0) {
       messages.push({ role: 'system', content: this.systemPrompt })
     }
-    messages.push({ role: 'user', content }) // 加入用户消息
+
+    if (typeof contentOrMessage === 'string') {
+      messages.push({ role: 'user', content: contentOrMessage }) // 加入用户消息
+    } else {
+      messages.push(contentOrMessage)
+    }
+
     this.setChatCompletionParams()
     this.messages = messages
     this.emitter.emit('before-send')
@@ -305,6 +311,8 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
       // 图片消息
       const img = document.createElement('img')
       img.src = part.image_url.url
+      img.classList.add('hyosan-chat-bubble-image')
+      img.style.width = '100%'
       part[MessagePartDataKey].htmlContent = img
     } else if (
       part.type === HyosanChatMessageContentPartTypesType.input_audio

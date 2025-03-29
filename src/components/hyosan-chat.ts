@@ -10,7 +10,7 @@ import '@shoelace-style/shoelace/dist/components/resize-observer/resize-observer
 import '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { HasSlotController } from '@/internal/slot'
 import {
-  type BaseService,
+  BaseService,
   type BaseServiceMessageItem,
   type BaseServiceMessages,
   type HyosanChatMessageContentPart,
@@ -536,13 +536,14 @@ export class HyosanChat extends ShoelaceElement {
     event: GlobalEventHandlersEventMap['send-message'],
     retryMessage?: BaseServiceMessageItem,
   ) {
-    const { content } = event.detail
+    const { content, attachments } = event.detail
     if (
       this.onSendFirstMessage &&
       (!this.messages ||
         this.messages.length === 0 ||
         this.messages.every((v) => v.role !== 'user'))
     ) {
+      // 1. 在未创建会话或会话首次发送消息时, 执行 onSendFirstMessage, 并更新会话 label
       const lengthOrContent = await this.onSendFirstMessage(content)
       if (lengthOrContent) {
         const index = this.conversations.findIndex(
@@ -599,7 +600,7 @@ export class HyosanChat extends ShoelaceElement {
       } else {
         // 发起流式请求
         await this.service.send(
-          content,
+          BaseService.generateUserMessage(content, attachments),
           this.currentConversationId,
           this.messages,
         )
@@ -804,6 +805,7 @@ export class HyosanChat extends ShoelaceElement {
 							</main>
 							<footer>
 								<hyosan-chat-sender
+                  ?compact=${this.compact}
 									?loading=${this.isLoading}
 									?enableSearch=${!!this.onEnableSearch}
                   ?enableUpload=${this.enableUpload}

@@ -5,7 +5,8 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js'
 import '@shoelace-style/shoelace/dist/components/switch/switch.js'
-import type { HyosanChatUploadHandler } from '@/types/HyosanChatUplaodHandler'
+import '@shoelace-style/shoelace/dist/components/animated-image/animated-image.js'
+import '@shoelace-style/shoelace/dist/components/progress-bar/progress-bar.js'
 import { HyosanChatUploadFile } from '@/types/HyosanChatUploadFile'
 import { ifDefined } from 'lit/directives/if-defined.js'
 
@@ -61,6 +62,47 @@ export class HyosanChatSender extends ShoelaceElement {
     }
     .option-buttons > sl-button:last-of-type {
       margin: 0;
+    }
+    .attachments-container {
+      width: 100%;
+      display: flex;
+      overflow-x: auto;
+      padding-bottom: var(--hy-container-padding);
+    }
+    .attachments {
+      display: flex;
+      flex-shrink: 0;
+      height: var(--hy-attachments-height);
+      max-height: var(--hy-attachments-height);
+      min-width: var(--hy-attachments-height);
+      padding: var(--hy-container-padding);
+      margin-right: var(--hy-container-padding);
+      background-color: var(--sl-color-primary-200);
+      border-radius: var(--hy-container-radius);
+      flex-direction: column;
+      position: relative;
+      .attachment-image {
+        height: 100%;
+        max-height: 100%;
+      }
+      .attachment-file {
+        height: 100%;
+        max-height: 100%;
+        display: flex;
+      }
+    }
+    .attachments .button-remove {
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+    }
+    .attachments .button-remove:hover {
+      transform: scale(1.2);
+    }
+    .attachments:last-of-type {
+      margin-right: 0;
     }
   `
 
@@ -126,12 +168,20 @@ export class HyosanChatSender extends ShoelaceElement {
     onFailed: (message: string) => void,
   ) => Promise<void> | void
 
+  /** 是否处于紧凑模式 */
+  @property({ type: Boolean })
+  compact?: boolean
+
   /** 输入框内容 */
   @state()
   content = ''
 
   @state()
   currentFiles: Array<HyosanChatUploadFile> = []
+  /** 当前是否有文件正在上传 */
+  get currentFilesUploading() {
+    return this.currentFiles.length > 0 && this.currentFiles.every(file => file.progress < 1)
+  }
 
   private _handleInput(event: KeyboardEvent) {
     const textarea = event.target as HTMLTextAreaElement
@@ -146,8 +196,9 @@ export class HyosanChatSender extends ShoelaceElement {
     }
   }
   private _handleEmitSendMessage() {
-    this.emit('send-message', { detail: { content: this.content } })
+    this.emit('send-message', { detail: { content: this.content, attachments: this.currentFiles } })
     this.content = '' // 清空内容
+    this.currentFiles = []
     this.requestUpdate()
   }
 
@@ -163,13 +214,7 @@ export class HyosanChatSender extends ShoelaceElement {
       ? Array.from(this._innerFileInput?.files)
       : null
   }
-  private _handleFileChange(event: Event) {
-    console.log(
-      !this._innerFileInput,
-      !this.uploadOnChange,
-      !this.enableUpload,
-      !this._innerFileInputFiles,
-    )
+  private _handleFileChange() {
     if (
       !this._innerFileInput ||
       !this.uploadOnChange ||
@@ -177,19 +222,28 @@ export class HyosanChatSender extends ShoelaceElement {
       !this._innerFileInputFiles
     )
       return
-    console.log('file change', event, this._innerFileInput.files)
-    for (const file of this._innerFileInputFiles) {
+    // console.log('file change', event, this._innerFileInput.files)
+    const _innerFileInputFiles = this._innerFileInputFiles
+    if (this._innerFileInput.files) this._innerFileInput.files = new DataTransfer().files
+    for (const file of _innerFileInputFiles) {
       const _file = new HyosanChatUploadFile(file)
+      this.currentFiles.push(_file)
+      this.currentFiles = [...this.currentFiles]
       this.uploadOnChange(
         file,
-        this._innerFileInputFiles,
+        _innerFileInputFiles,
         _file,
         this.currentFiles,
         (progress) => {
-          console.log(progress)
+          _file.progress = progress
+          this.currentFiles = [...this.currentFiles]
         },
-        (url) => console.log(url),
-        (message) => console.log(message),
+        (url) => {
+          _file.url = url
+          _file.progress = 1
+          this.currentFiles = [...this.currentFiles]
+        },
+        (message) => _file.error = message,
       )
     }
   }
@@ -198,9 +252,69 @@ export class HyosanChatSender extends ShoelaceElement {
     this._innerFileInput?.click()
   }
 
+  private _imageAttachment(file: HyosanChatUploadFile) {
+    return html`
+      <div class="attachment-image">
+        <img style="height: 100%;" src=${file.url || ''}></img>
+      </div>
+    `
+  }
+  private _fileAttachment(file: HyosanChatUploadFile) {
+    return html`
+      <div class="attachment-file">
+        <aside>
+          <hyosan-icon-wrapper slot="prefix">
+            <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"><path d="M701.44 25.6V256h230.4z"></path><path d="M614.4 343.04V0H143.36c-20.48 0-40.96 20.48-40.96 40.96v936.96c0 25.6 20.48 46.08 40.96 46.08h768c25.6 0 40.96-20.48 40.96-40.96V343.04H614.4z m-343.04-46.08h256v87.04h-256V296.96z m512 512h-512v-87.04h512v87.04z m0-209.92h-512V512h512v87.04z" p-id="2657"></path></svg>
+          </hyosan-icon-wrapper>
+        </aside>
+        <main>
+          <div>${file.name}</div>
+          <div>${HyosanChatUploadFile.sizeLabel(file)}</div>
+        </main>
+      </div>
+    `
+  }
+
+  private _handleRemoveFile(file: HyosanChatUploadFile) {
+    this.currentFiles = this.currentFiles.filter((f) => f.uid !== file.uid)
+  }
+
+  private _attachments(file: HyosanChatUploadFile) {
+    const progress = Math.floor(file.progress)
+    const progressHegiht = this.compact ? '2px' : '6px'
+    return html`
+      <section class="attachments">
+        ${HyosanChatUploadFile.isImage(file) ? this._imageAttachment(file) : this._fileAttachment(file)}
+        <footer>
+          ${
+            file.progress !== 1
+              ? html`<sl-progress-bar valur=${progress} ?indeterminate=${file.progress === 0} style="--height: ${progressHegiht}"></sl-progress-bar>`
+              : undefined
+          }
+        </footer>
+        <div class="button-remove" @click=${() => this._handleRemoveFile(file)}>
+          <hyosan-icon-wrapper slot="prefix">
+            <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><path d="M512 896.211c-212.116 0-384.211-172.095-384.211-384.211S299.884 127.789 512 127.789 896.211 299.884 896.211 512 724.116 896.211 512 896.211zM693.1 602.55 602.55 512l90.55-90.55c6.003-6.003 9.505-14.008 9.505-22.512 0-8.505-3.502-17.009-9.505-23.013L648.074 330.9c-6.003-6.003-14.508-9.505-23.012-9.505-8.505 0-16.51 3.502-22.513 9.505L512 421.45l-90.55-90.55c-6.003-6.003-14.008-9.505-22.512-9.505-8.505 0-17.009 3.502-23.013 9.505L330.9 375.925c-6.003 6.003-9.505 14.508-9.505 23.013 0 8.504 3.502 16.509 9.505 22.512L421.45 512l-90.55 90.55c-6.003 6.003-9.505 14.008-9.505 22.513 0 8.504 3.502 17.009 9.505 23.012l45.025 45.025c6.003 6.003 14.508 9.505 23.013 9.505 8.504 0 16.509-3.502 22.512-9.505L512 602.55l90.55 90.55c6.003 6.003 14.008 9.505 22.513 9.505 8.504 0 17.009-3.502 23.012-9.505l45.025-45.025c6.003-6.003 9.505-14.508 9.505-23.012C702.604 616.558 699.103 608.553 693.1 602.55z" p-id="5422"></path></svg>
+          </hyosan-icon-wrapper>
+        </div>
+      </section>
+    `
+  }
+  private _attachmentsContainer() {
+    if (!this.enableUpload) return
+    if (this.currentFiles.length === 0) return
+    const attachments = this.currentFiles.map(file => this._attachments(file))
+    return html`
+      <div class="attachments-container">
+        ${attachments}
+      </div>
+    `
+  }
+
   render() {
     return html`
       <div class="container">
+        ${this._attachmentsContainer()}
         <main>
           <sl-textarea aria-label=${this._localize.term('ariaSendInput')} placeholder=${this._localize.term('sendTips')} value=${this.content} rows="2" resize="none" @sl-input=${this._handleInput} @keydown=${this._handleTextareaKeyDown}></sl-textarea>
         </main>
@@ -246,7 +360,7 @@ export class HyosanChatSender extends ShoelaceElement {
             }
           </div>
           <div class="action-buttons">
-            <sl-button variant="primary" ?loading=${this.loading} ?disabled=${!this.content || this.loading} circle @click=${this._handleEmitSendMessage}>
+            <sl-button variant="primary" ?loading=${this.loading || this.currentFilesUploading} ?disabled=${!this.content || this.loading} circle @click=${this._handleEmitSendMessage}>
               <hyosan-icon-wrapper>
                 <svg t="1741252222107" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5069" width="1em" height="1em" fill="currentColor"><path d="M133.8 579l-44.4-44.4c-18.8-18.8-18.8-49.2 0-67.8L478 78c18.8-18.8 49.2-18.8 67.8 0l388.6 388.6c18.8 18.8 18.8 49.2 0 67.8L890 578.8c-19 19-50 18.6-68.6-0.8L592 337.2V912c0 26.6-21.4 48-48 48h-64c-26.6 0-48-21.4-48-48V337.2L202.4 578.2c-18.6 19.6-49.6 20-68.6 0.8z" p-id="5070"></path></svg>
               </hyosan-icon-wrapper>
@@ -263,7 +377,8 @@ declare global {
     'hyosan-chat-sender': HyosanChatSender
   }
   interface GlobalEventHandlersEventMap {
-    'send-message': CustomEvent<{ content: string }>
+    /** 用户点击发送按钮 */
+    'send-message': CustomEvent<{ content: string, attachments: HyosanChatUploadFile[] }>
     /** 用户点击 搜索开关 按钮时触发 */
     'open-search': CustomEvent<{ open: boolean }>
   }
