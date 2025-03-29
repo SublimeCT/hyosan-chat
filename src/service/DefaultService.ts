@@ -313,6 +313,7 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
       img.src = part.image_url.url
       img.classList.add('hyosan-chat-bubble-image')
       img.style.width = '100%'
+      img.style.cursor = 'pointer'
       part[MessagePartDataKey].htmlContent = img
     } else if (
       part.type === HyosanChatMessageContentPartTypesType.input_audio

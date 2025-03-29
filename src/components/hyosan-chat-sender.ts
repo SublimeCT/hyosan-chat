@@ -129,6 +129,9 @@ export class HyosanChatSender extends ShoelaceElement {
     .attachments:last-of-type {
       margin-right: 0;
     }
+    .attachment-inner-image {
+      cursor: pointer;
+    }
   `,
     unsafeCSS(viewerCss),
   ) 
