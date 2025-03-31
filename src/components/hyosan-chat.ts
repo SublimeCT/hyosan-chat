@@ -226,7 +226,7 @@ export class HyosanChat extends ShoelaceElement {
 
   /** 是否显示头像 */
   @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
-  showAvatar = false
+  showAvatar = true
 
   /**
    * 消息列表中的头像获取函数
@@ -245,7 +245,7 @@ export class HyosanChat extends ShoelaceElement {
    * @since 0.4.0
    */
   @property({ type: Boolean })
-  showReadAloudButton = true
+  showReadAloudButton = false
 
   /** 是否显示点赞和踩按钮 */
   @property({ type: Boolean })
@@ -570,6 +570,7 @@ export class HyosanChat extends ShoelaceElement {
     this.updateServiceSettingsFromLocalStorage()
     // 监听流式请求响应
     this.service.emitter.on('before-send', this._onData.bind(this))
+    // 如果当前没有选中会话, 则调用 onCreateMessage 创建新会话并更新消息
     if (!this.currentConversationId && this.onCreateMessage) {
       const conversationId = await this.onCreateMessage(content)
 

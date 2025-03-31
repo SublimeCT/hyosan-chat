@@ -26,11 +26,7 @@
   },
   "license": "MIT",
   "type": "module",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
   "main": "./dist/hyosan-chat.umd.cjs",
   "module": "./dist/hyosan-chat.js",
   "types": "./dist/lib.d.ts",

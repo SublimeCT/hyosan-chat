@@ -78,6 +78,7 @@ export abstract class BaseService<
 
   /**
    * 发送用户输入的内容
+   * @description 在 `messages` 中加入系统消息和用户消息并发起流式请求
    * @param contentOrMessage 消息内容 或 消息数据
    * @param conversationId 当前会话 ID
    * @param messages 聊天消息列表, 参考 https://platform.openai.com/docs/api-reference/chat/create
@@ -151,14 +152,21 @@ export abstract class BaseService<
    * @since 0.6.0
    * @returns user message
    */
-  static generateUserMessage(content: string, files?: HyosanChatUploadFile[]): BaseServiceMessageItem {
+  static generateUserMessage(
+    content: string,
+    files?: HyosanChatUploadFile[],
+  ): BaseServiceMessageItem {
     if (files?.length) {
-      const userMessageContent: HyosanChatChatCompletionUserMessageParam['content'] = [{ type: 'text', text: content }]
+      const userMessageContent: HyosanChatChatCompletionUserMessageParam['content'] =
+        [{ type: 'text', text: content }]
       for (const file of files) {
         const filePart = BaseService.getFileMessageContentPart(file)
         userMessageContent.push(filePart)
       }
-      return { role: 'user', content: userMessageContent as ChatCompletionContentPart[] }
+      return {
+        role: 'user',
+        content: userMessageContent as ChatCompletionContentPart[],
+      }
     } else {
       return { role: 'user', content }
     }
@@ -169,11 +177,19 @@ export abstract class BaseService<
    * @since 0.6.0
    * @returns 附件 message part
    */
-  static getFileMessageContentPart(file: HyosanChatUploadFile): HyosanChatMessageContentPart {
+  static getFileMessageContentPart(
+    file: HyosanChatUploadFile,
+  ): HyosanChatMessageContentPart {
     if (file.type.startsWith('audio')) {
-      return { type: 'input_audio', input_audio: { data: file.url || '', format: file.type.includes('wav') ? 'wav' : 'mp3' } }
+      return {
+        type: 'input_audio',
+        input_audio: {
+          data: file.url || '',
+          format: file.type.includes('wav') ? 'wav' : 'mp3',
+        },
+      }
     } else if (file.type.startsWith('video')) {
-      return { type: 'video_url', video_url: { url: file.url || ''} }
+      return { type: 'video_url', video_url: { url: file.url || '' } }
     } else {
       return { type: 'image_url', image_url: { url: file.url || '' } }
     }
@@ -288,7 +304,7 @@ export type HyosanChatOpenaiDefaultMessageContentPart = Exclude<
  * @see https://help.aliyun.com/zh/model-studio/user-guide/qvq?spm=a2c4g.11186623.help-menu-2400256.d_1_0_1_0.67328b14YALGu1&scm=20140722.H_2877996._.OR_help-T_cn~zh-V_1#65e1aa85b4hjn
  */
 export type HyosanChatAliyunVideoMessageContentPart = {
-  type: 'video_url',
+  type: 'video_url'
   video_url: { url: string }
 }
 
@@ -298,8 +314,8 @@ export type HyosanChatAliyunVideoMessageContentPart = {
  * @since 0.5.0
  */
 export type HyosanChatDefaultMessageContentPart =
-  HyosanChatOpenaiDefaultMessageContentPart[number] |
-  HyosanChatAliyunVideoMessageContentPart
+  | HyosanChatOpenaiDefaultMessageContentPart[number]
+  | HyosanChatAliyunVideoMessageContentPart
 
 /**
  * 消息中的所有 parts 类型
@@ -356,7 +372,10 @@ export type HyosanChatChatCompletionAssistantMessageParam = Omit<
  * @since 0.5.0
  */
 export type HyosanChatChatCompletionMessageParam =
-  | Exclude<ChatCompletionMessageParam, ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam>
+  | Exclude<
+      ChatCompletionMessageParam,
+      ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam
+    >
   | HyosanChatChatCompletionAssistantMessageParam
   | HyosanChatChatCompletionUserMessageParam
 

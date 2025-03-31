@@ -321,7 +321,15 @@ export class DefaultService extends BaseService<DefaultChatCompletionCreateParam
       // 音频消息
       const audio = document.createElement('audio')
       audio.src = part.input_audio.data
+      audio.controls = true
       part[MessagePartDataKey].htmlContent = audio
+    } else if (part.type === HyosanChatMessageContentPartTypesType.video_url) {
+      // 音频消息
+      const video = document.createElement('video')
+      video.src = part.video_url.url
+      video.controls = true
+      video.style.width = '100%'
+      part[MessagePartDataKey].htmlContent = video
     }
     if (typeof message.content === 'string') {
       message[MessageDataKey].onlyContent = part[MessagePartDataKey].htmlContent

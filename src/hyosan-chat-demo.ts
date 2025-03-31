@@ -180,6 +180,21 @@ export class HyosanChatDemo extends LitElement {
       // $reasoningContent:
       // '嗯，用户现在想对比一下Lit和Omi这两个Web Components库。我需要先了解这两个库的基本情况，然后从不同的方面进行比较。首先，Lit是Google维护的一个轻量级库，专注于提供高效的Web Components开发体验。而Omi是腾讯团队开发的，同样基于Web Components，但可能更偏向于与前端框架的集成，比如支持响应式数据绑定和更丰富的功能。\n\n用户可能是一个前端开发者，正在选型，想要知道哪个库更适合他们的项目。我需要考虑他们的使用场景，比如是否需要轻量级、性能、生态系统、语法偏好等。另外，用户可能对中文文档的支持比较在意，因为Omi是腾讯开发的，可能有更好的中文资源。\n\n首先，我应该比较两者的核心特性。Lit的模板系统基于Tagged Template Literals，而Omi支持JSX，这对于习惯React的开发者来说可能更容易上手。然后看响应式数据，Lit使用装饰器和属性显式声明，而Omi使用类似Vue的响应式系统，这可能影响开发体验。\n\n性能方面，两者都基于Web Components，理论上性能接近，但Lit更轻量，可能在某些场景下更快。生态系统方面，Lit作为Google维护的项目，可能有更活跃的社区和更多的第三方工具，而Omi可能更适合国内开发者，特别是腾讯系的项目。\n\n还有语法偏好，如果团队熟悉React，Omi的JSX可能更合适；如果倾向于原生Web Components，Lit更接近标准。另外，中文支持方面，Omi可能有优势，而Lit的文档虽然全面，但主要是英文。\n\n用户可能没有明确提到的深层需求，比如项目规模、团队熟悉的技术栈、是否需要与其他框架集成，或者是否有特定的性能要求。比如，如果项目需要高度定制化的组件，并且希望减少框架依赖，Lit可能更合适。而如果需要快速开发，并且希望利用类似Vue的响应式系统，Omi可能更适合。\n\n另外，考虑到Web Components的浏览器兼容性，两者都需要polyfill支持旧浏览器，但Lit可能在这方面有更多的优化和最佳实践。而Omi可能在集成到现有Vue或React项目中更容易，特别是如果项目已经在使用腾讯的其他技术栈。\n\n最后，总结两者的适用场景，帮助用户根据具体需求做出选择。可能需要提醒用户考虑团队熟悉度、项目需求以及长期维护的支持等因素。',
     },
+    {
+      role: 'user',
+      content: 'video demo',
+    },
+    {
+      role: 'assistant',
+      content: [
+        {
+          type: 'video_url',
+          video_url: {
+            url: 'https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250225/glrqyl/29a2e615-6443-4647-bbe2-e26f345a3b26.mp4',
+          },
+        },
+      ],
+    },
   ]
 
   /** 已保存的消息 Map 数据 */
@@ -249,7 +264,7 @@ export class HyosanChatDemo extends LitElement {
       onSuccess(
         currentFiles.length === 1
           ? 'https://img.alicdn.com/imgextra/i1/O1CN01gDEY8M1W114Hi3XcN_!!6000000002727-0-tps-1024-406.jpg'
-          : 'https://img.alicdn.com/imgextra/i1/O1CN01ukECva1cisjyK6ZDK_!!6000000003635-0-tps-1500-1734.jpg'
+          : 'https://img.alicdn.com/imgextra/i1/O1CN01ukECva1cisjyK6ZDK_!!6000000003635-0-tps-1500-1734.jpg',
       )
     }, 1700)
   }
@@ -258,10 +273,8 @@ export class HyosanChatDemo extends LitElement {
     return html`
 			<div class="demo-container">
 				<hyosan-chat
-					show-avatar
 					.conversations=${this.conversations}
 					.messages=${this.messages}
-					showRetryButton
           showReadAloudButton
           enableUpload
           .uploadOnChange=${this._uploadOnChange.bind(this)}

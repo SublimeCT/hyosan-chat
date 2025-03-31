@@ -8,7 +8,10 @@ export class ChatSettings {
    * 默认的系统提示词
    * @since 0.3.1
    */
-  systemPrompts = import.meta.env.VITE_SYSTEM_PROMPTS || ''
+  systemPrompts =
+    import.meta.env.VITE_SYSTEM_PROMPTS ||
+    DefaultService.defaultSystemPrompt ||
+    ''
   /**
    * 是否将所有会话 / 消息数据保存到本地(`indexeddb`)
    * @description 值为 `'true'` 时为启用

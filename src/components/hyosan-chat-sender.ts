@@ -17,7 +17,8 @@ import viewerCss from 'viewerjs/dist/viewer.css?inline'
 /** 发送 组件 */
 @customElement('hyosan-chat-sender')
 export class HyosanChatSender extends ShoelaceElement {
-  static styles? = withResetSheets(css`
+  static styles? = withResetSheets(
+    css`
     :host {
       width: 100%;
       display: flex;
@@ -134,7 +135,7 @@ export class HyosanChatSender extends ShoelaceElement {
     }
   `,
     unsafeCSS(viewerCss),
-  ) 
+  )
   /** 本地化控制器 */
   private _localize = new LocalizeController(this)
 
@@ -209,7 +210,10 @@ export class HyosanChatSender extends ShoelaceElement {
   currentFiles: Array<HyosanChatUploadFile> = []
   /** 当前是否有文件正在上传 */
   get currentFilesUploading() {
-    return this.currentFiles.length > 0 && this.currentFiles.every(file => file.progress < 1)
+    return (
+      this.currentFiles.length > 0 &&
+      this.currentFiles.every((file) => file.progress < 1)
+    )
   }
 
   private _handleInput(event: KeyboardEvent) {
@@ -225,7 +229,9 @@ export class HyosanChatSender extends ShoelaceElement {
     }
   }
   private _handleEmitSendMessage() {
-    this.emit('send-message', { detail: { content: this.content, attachments: this.currentFiles } })
+    this.emit('send-message', {
+      detail: { content: this.content, attachments: this.currentFiles },
+    })
     this.content = '' // 清空内容
     this.currentFiles = []
     this.requestUpdate()
@@ -253,7 +259,8 @@ export class HyosanChatSender extends ShoelaceElement {
       return
     // console.log('file change', event, this._innerFileInput.files)
     const _innerFileInputFiles = this._innerFileInputFiles
-    if (this._innerFileInput.files) this._innerFileInput.files = new DataTransfer().files
+    if (this._innerFileInput.files)
+      this._innerFileInput.files = new DataTransfer().files
     for (const file of _innerFileInputFiles) {
       const _file = new HyosanChatUploadFile(file)
       this.currentFiles.push(_file)
@@ -272,7 +279,7 @@ export class HyosanChatSender extends ShoelaceElement {
           _file.progress = 1
           this.currentFiles = [...this.currentFiles]
         },
-        (message) => _file.error = message,
+        (message) => (_file.error = message),
       )
     }
   }
@@ -333,25 +340,31 @@ export class HyosanChatSender extends ShoelaceElement {
   private _handleClickAttachments(event: MouseEvent) {
     const target = event.composedPath()[0] as HTMLElement
     if (!target) return
-    if (target.classList.contains('attachment-inner-image')) { // 处理图片预览
+    if (target.classList.contains('attachment-inner-image')) {
+      // 处理图片预览
       event.stopPropagation()
-      const container = this.shadowRoot?.querySelector('.attachments-container') as HTMLDivElement
+      const container = this.shadowRoot?.querySelector(
+        '.attachments-container',
+      ) as HTMLDivElement
       function findInnerImage(img: HTMLImageElement) {
         return img.complete && img.classList.contains('attachment-inner-image')
       }
-      const images = Array.from(container.querySelectorAll('.attachment-inner-image') || []).filter(img => findInnerImage(img as HTMLImageElement)) as HTMLImageElement[]
-      const initialViewIndex = images.findIndex((image: HTMLImageElement) => image === target)
-      const viewer = new Viewer(
-        container,
-        {
-          initialViewIndex,
-          container,
-          filter: (image: HTMLImageElement) => findInnerImage(image),
-          hidden() {
-            viewer.destroy()
-          }
-        }
+      const images = Array.from(
+        container.querySelectorAll('.attachment-inner-image') || [],
+      ).filter((img) =>
+        findInnerImage(img as HTMLImageElement),
+      ) as HTMLImageElement[]
+      const initialViewIndex = images.findIndex(
+        (image: HTMLImageElement) => image === target,
       )
+      const viewer = new Viewer(container, {
+        initialViewIndex,
+        container,
+        filter: (image: HTMLImageElement) => findInnerImage(image),
+        hidden() {
+          viewer.destroy()
+        },
+      })
       viewer.show()
     }
   }
@@ -359,7 +372,7 @@ export class HyosanChatSender extends ShoelaceElement {
   private _attachmentsContainer() {
     if (!this.enableUpload) return
     if (this.currentFiles.length === 0) return
-    const attachments = this.currentFiles.map(file => this._attachments(file))
+    const attachments = this.currentFiles.map((file) => this._attachments(file))
     return html`
       <div class="attachments-container" @click=${this._handleClickAttachments}>
         ${attachments}
@@ -434,7 +447,10 @@ declare global {
   }
   interface GlobalEventHandlersEventMap {
     /** 用户点击发送按钮 */
-    'send-message': CustomEvent<{ content: string, attachments: HyosanChatUploadFile[] }>
+    'send-message': CustomEvent<{
+      content: string
+      attachments: HyosanChatUploadFile[]
+    }>
     /** 用户点击 搜索开关 按钮时触发 */
     'open-search': CustomEvent<{ open: boolean }>
   }

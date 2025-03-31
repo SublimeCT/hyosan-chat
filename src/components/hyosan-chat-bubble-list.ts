@@ -194,7 +194,7 @@ export class HyosanChatBubbleList extends ShoelaceElement {
 
   /** 是否显示头像 */
   @property({ type: Boolean, attribute: 'show-avatar', reflect: true })
-  showAvatar = false
+  showAvatar = true
 
   /**
    * 消息列表中的头像获取函数
@@ -547,25 +547,33 @@ export class HyosanChatBubbleList extends ShoelaceElement {
   private _handleClickContainer(event: MouseEvent) {
     const target = event.composedPath()[0] as HTMLElement
     if (!target) return
-    if (target.classList.contains('hyosan-chat-bubble-image')) { // 处理图片预览
+    if (target.classList.contains('hyosan-chat-bubble-image')) {
+      // 处理图片预览
       event.stopPropagation()
-      const container = this.shadowRoot?.querySelector('.container') as HTMLDivElement
+      const container = this.shadowRoot?.querySelector(
+        '.container',
+      ) as HTMLDivElement
       function findInnerImage(img: HTMLImageElement) {
-        return img.complete && img.classList.contains('hyosan-chat-bubble-image')
+        return (
+          img.complete && img.classList.contains('hyosan-chat-bubble-image')
+        )
       }
-      const images = Array.from(container.querySelectorAll('.hyosan-chat-bubble-image') || []).filter(img => findInnerImage(img as HTMLImageElement)) as HTMLImageElement[]
-      const initialViewIndex = images.findIndex((image: HTMLImageElement) => image === target)
-      const viewer = new Viewer(
-        container,
-        {
-          initialViewIndex,
-          container,
-          filter: (image: HTMLImageElement) => findInnerImage(image),
-          hidden() {
-            viewer.destroy()
-          }
-        }
+      const images = Array.from(
+        container.querySelectorAll('.hyosan-chat-bubble-image') || [],
+      ).filter((img) =>
+        findInnerImage(img as HTMLImageElement),
+      ) as HTMLImageElement[]
+      const initialViewIndex = images.findIndex(
+        (image: HTMLImageElement) => image === target,
       )
+      const viewer = new Viewer(container, {
+        initialViewIndex,
+        container,
+        filter: (image: HTMLImageElement) => findInnerImage(image),
+        hidden() {
+          viewer.destroy()
+        },
+      })
       viewer.show()
     }
   }

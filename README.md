@@ -154,19 +154,19 @@ vue 对于 `Property` 参数(在 [Properties](#properties) 中标注了哪些属
 | `currentConversationId` | `BaseService` | `Attribute` | `''` | 当前会话 ID | ✅ |
 | 💡 `service` | `BaseService` | `Property` | `new DefaultService()` | 会话服务配置参数 | |
 | 💡 `messages` | `BaseServiceMessages` | `Property` | `undefined` | 会话服务消息列表 | ✅ |
-| `showAvatar` | `boolean` | `Attribute` | `undefined` | 是否显示头像 | ✅ |
+| `showAvatar` | `boolean` | `Attribute` | `true` | 是否显示头像 | ✅ |
 | `showRetryButton` | `boolean` | `Attribute` | `true` | 是否显示 重新生成 按钮 | |
 | `showLikeAndDislikeButton` | `boolean` | `Attribute` | `true` | 是否显示 👍 和 👎 按钮 | |
-| `onCreateMessage` | `(content?: string) => string \| Promise<string>` | `Property` | `undefined` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 组件会等待函数返回一个 conversationId, 然后再发送消息; 如果不返回 conversationId, 则不会在组件内部改变 conversationId, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
+| 💡 `onCreateMessage` | `(content?: string) => string \| Promise<string>` | `Property` | `undefined` | 创建消息的回调函数, 当 **没有选中会话** 或 **点击开始新聊天按钮** 时, 如果直接开始发送消息, 会调用此函数, 此回调函数中应该创建新的 `conversation` 并更新 `messages`, 组件会等待函数返回一个 `conversationId`, 然后再发送消息; 如果不返回 `conversationId`, 则不会在组件内部改变 `conversationId`, 这就相当于创建了一个没有回话 ID 的临时聊天 | |
 | `onEnableSearch` | `(open: boolean) => void \| Promise<void>` | `Property` | `undefined` | 如果传入则显示联网搜索按钮, 用户点击搜索按钮时 调用此方法 | |
 | `shoelaceTheme` | `HyosanChatShoelaceTheme` | `Attribute` | `HyosanChatShoelaceTheme.shoelaceLight` | [shoelace 主题](https://shoelace.style/getting-started/themes#dark-theme), 可用于切换夜间模式 | |
 | `avatarGetter`(`0.3.1`) | `(message: BaseServiceMessageItem) => TemplateResult` | `Property` | `undefined` | 消息列表中的头像获取函数, 传入则显示此函数的返回值, 返回值必须是 html`<div>...</div>` 格式的 html, 详见 [lit html slot](#lit-html-slot) | |
 | `onBeforeSendMessage`(`0.3.2`) | `(service: BaseService, messages: BaseServiceMessages) => void \| Promise<void>` | `Property` | `undefined` | 在每次发送消息之前执行 | |
-| `showReadAloudButton`(`0.4.0`) | `boolean` | `Attribute` | `undefined` | 是否显示 朗读 按钮 | |
-| `onSendFirstMessage`(`0.4.1`) | `Promise<number \| string \| undefined> \| number \| string \| undefined` | `Property` | `undefined` | 在当前会话中首次发送 `user` 消息时调用, 一般用于更新当前会话的 `label`; 返回一个 `number | string` 值, 将作为消息内容(`content`)的最大截取长度并赋值给 `label` 或 直接作为 `label` | |
+| `showReadAloudButton`(`0.4.0`) | `boolean` | `Attribute` | `false` | 是否显示 朗读 按钮 | |
+| `onSendFirstMessage`(`0.4.1`) | `Promise<number \| string \| undefined> \| number \| string \| undefined` | `Property` | `undefined` | 在当前会话中首次发送 `user` 消息时调用, 一般用于更新当前会话的 `label`; 返回一个 `number \| string` 值, 将作为消息内容(`content`)或其最大截取长度(返回 `number` 时)并赋值给 `label` 或 直接作为 `label` | |
 | `onMessagePartsRender`(`0.5.0`) | `(part: HyosanChatMessageContentPart, message: BaseServiceMessageItem) => Promise<boolean>` | `Property` | `undefined` | 消息部分渲染函数, 返回 `true` 则跳过组件内部的处理逻辑 | |
 | `onAfterMessagePartsRender`(`0.5.0`) | `(part: HyosanChatMessageContentPart, message: BaseServiceMessageItem) => Promise<void>` | `Property` | `undefined` | 消息部分渲染函数(`after`) | |
-| `uploadHandler`(`0.6.0`) | `HyosanChatUploadHandler` | `Property` | `undefined` | 上传附件的处理对象, 若值为空, 则不启用上传附件功能 | |
+| `uploadHandler`(`0.6.0`) | `HyosanChatUploadHandler` | `Property` | `false` | 上传附件的处理对象, 若值为空, 则不启用上传附件功能 | |
 
 ### Slots
 > [!TIP] 关于 插槽
@@ -208,8 +208,10 @@ const avatar = html`<div>Hello Lit html</div>`
 | `hyosan-chat-click-like-button` | `CustomEvent<{ message: BaseServiceMessageItem }>` | 点击 Like 按钮(点赞) |
 | `hyosan-chat-click-dislike-button` | `CustomEvent<{ message: BaseServiceMessageItem }>` | 点击 Dislike 按钮(点踩) |
 | `first-updated` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发时执行 |
+| `messages-completions` | `CustomEvent<{ messages: BaseServiceMessages }>` | 消息接收完毕(可能是成功或报错) |
 | `first-updated-complete` | `CustomEvent<{ service: BaseService }>` | `lit` 原生的 `first-updated hooks` 触发后等待 `updateComplete` 后执行 |
 | `localize-update-conversations`(`0.4.1`) | `CustomEvent<{ conversations: Array<Conversation> }>` | 当启用本地存储时, 组件首次加载时获取 `conversations` 数据时触发 |
+
 
 ### CSS Parts
 可以使用 [::part()](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) 选择器修改组件的样式, 由于 `Web Components` 的样式隔离的特性, 组件外部想要修改组件内的样式只能通过 `::part()` 选择器或组件内部引用的 [css 变量](#css-variables) 来进行控制
