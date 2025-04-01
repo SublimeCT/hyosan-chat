@@ -41,7 +41,8 @@ import { ifDefined } from 'lit/directives/if-defined.js'
  * @slot conversations-footer - 左侧会话列表的 `footer` 部分
  * @slot main-welcome - 右侧消息列表的 `welcome` 界面
  * @slot main-header - 右侧消息列表的 `header` 界面
- * @slot settings-main - 设置弹窗中的表单项部分
+ * @slot settings-main-header - 设置弹窗中的表单项部分
+ * @slot settings-main-aside - 设置弹窗中的表单项部分
  *
  * @event {undefined} conversations-create - 点击创建新会话按钮
  * @event {{ item: Conversation }} click-conversation - 点击左侧会话列表中的会话
